@@ -1,0 +1,88 @@
+# RG Nano Installation Instructions
+
+## Requirements
+- Anbernic RG Nano (240x240 screen)
+- Custom firmware (GarlicOS, muOS, or similar)
+- SD card with enough space
+
+## Installation
+
+1. Copy lgpt executable to: `/mnt/sdcard/Apps/` or your firmware's apps directory
+
+2. Copy config.xml to the same directory as lgpt executable
+
+3. Create a folder for your projects (optional):
+   `/mnt/sdcard/lgpt-projects/`
+
+4. First run will create necessary directories
+
+## Controls
+
+### Display Modes
+- **L + SELECT**: Toggle between Split-Row and Paged modes
+  - **Split-Row** (default): See all 8 channels at once, 2 rows per song row
+  - **Paged**: Show 4 channels at a time with auto-paging
+
+### Paged Mode Navigation
+- **Auto-paging**: View automatically follows cursor
+  - Channels 0-3: Shows channels 1-4
+  - Channels 4-7: Shows channels 5-8
+- **L + Left**: Manually show channels 1-4
+- **L + Right**: Manually show channels 5-8
+
+### Standard Controls
+See main LGPT documentation for full control reference.
+Key mappings optimized for RG Nano button layout.
+
+## Configuration
+
+Edit `config.xml` to customize:
+- `CHANNELMODE`: Set to "SPLIT" or "PAGED" for default mode
+- `AUDIOBUFFERSIZE`: Adjust if audio glitches (512 is good default)
+- `FONTTYPE`: Choose font (0=original, 1=digital, 2=monster)
+
+## Troubleshooting
+
+### Screen is cropped or wrong size
+- Verify SCREENMULT is set to '1'
+- Check firmware display settings
+
+### Audio stuttering
+- Increase AUDIOBUFFERSIZE (try 1024)
+- Close other running applications
+
+### Can't see all channels
+- Press L + SELECT to toggle display mode
+- In Paged mode, use L + Left/Right to switch banks
+
+## Performance Notes
+
+RG Nano specifications:
+- CPU: ARM Cortex-A7 @ 1.2GHz
+- RAM: 64MB
+- Screen: 240×240 (1.54" square IPS)
+
+This is plenty for LGPT! Expect smooth performance with:
+- All 8 channels active
+- Complex patterns and tables
+- Real-time effects and filters
+- Sample playback
+
+## Tips
+
+1. **Split-Row Mode** is best for:
+   - Composition (see all channels)
+   - Live performance (mute visibility)
+   - Complex arrangements
+
+2. **Paged Mode** is best for:
+   - Simple songs (4 channels or less)
+   - When you want more visible rows
+   - Traditional tracker feel
+
+3. Use L + SELECT to quickly switch modes based on what you're working on!
+
+## Credits
+
+RG Nano adaptation by the LGPT community
+Original tracker by Marc Nostromo

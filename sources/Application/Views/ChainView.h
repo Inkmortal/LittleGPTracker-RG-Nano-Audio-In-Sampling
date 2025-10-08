@@ -39,6 +39,9 @@ class ChainView : public View {
     void processSelectionButtonMask(unsigned short mask);
     void setTextProps(GUITextProperties &props, int row, int col, bool restore);
 
+    // RG Nano: Channel meters in sidebar
+    void drawChannelMeters(int x, int y);
+
   private:
     bool updatingPhrase_;      // .Tells if we're in the middle
                                //  of updating a phrase to avoid

@@ -1115,6 +1115,11 @@ void PhraseView::DrawView() {
 
     GUIPoint anchor = GetAnchor();
 
+#ifdef PLATFORM_RGNANO
+    // Shift entire phrase view left by 1 to prevent rightmost column cutoff
+    anchor._x -= 1;
+#endif
+
     // Display row numbers
 
     char buffer[6];

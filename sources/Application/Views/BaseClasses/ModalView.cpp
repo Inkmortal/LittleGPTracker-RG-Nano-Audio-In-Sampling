@@ -24,15 +24,23 @@ void ModalView::DrawString(int x, int y, const char *txt,
 
 void ModalView::SetWindow(int width, int height) {
 
-    if (width > 36) {
-        width = 36;
+    // Get screen dimensions dynamically
+    GUIRect rect = w_.GetRect();
+    int screenWidth = rect.Width() / 8;   // chars
+    int screenHeight = rect.Height() / 8;  // chars
+
+    int maxWidth = screenWidth - 4;  // Leave 2 char margin on each side
+    int maxHeight = screenHeight - 4;
+
+    if (width > maxWidth) {
+        width = maxWidth;
     };
-    if (height > 26) {
-        height = 26;
+    if (height > maxHeight) {
+        height = maxHeight;
     };
 
-    left_ = 20 - width / 2;
-    top_ = 10 - height / 2;
+    left_ = screenWidth / 2 - width / 2;
+    top_ = screenHeight / 2 - height / 2;
     if (top_ < 2) {
         top_ = 2;
     }

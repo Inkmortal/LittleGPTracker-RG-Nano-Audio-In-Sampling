@@ -46,9 +46,13 @@ int gp2xAnchorY=90 ;
 
 #endif
 
-unsigned short appWidth=320 ;
-unsigned short appHeight=240 ;
-
+#ifdef PLATFORM_RGNANO
+unsigned short appWidth = 240;
+unsigned short appHeight = 240;
+#else
+unsigned short appWidth = 320;
+unsigned short appHeight = 240;
+#endif
 
 SDLGUIWindowImp::SDLGUIWindowImp(GUICreateWindowParams &p) 
 {
@@ -73,7 +77,11 @@ SDLGUIWindowImp::SDLGUIWindowImp(GUICreateWindowParams &p)
   int screenHeight = 272;
   windowed_ = false;
  #elif defined(RS97)
-  int screenWidth = 320; 
+  int screenWidth = 320;
+  int screenHeight = 240;
+  windowed_ = false;
+ #elif defined(PLATFORM_RGNANO)
+  int screenWidth = 240;
   int screenHeight = 240;
   windowed_ = false;
  #else

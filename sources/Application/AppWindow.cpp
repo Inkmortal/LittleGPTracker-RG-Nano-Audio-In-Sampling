@@ -605,8 +605,13 @@ void AppWindow::Print(char *line) {
     //	GUIWindow::Clear(View::backgroundColor_,true) ;
     Clear();
     strcpy(_statusLine, line);
-    // unwrapped for gcc
-    int position = 40;
+
+    // Calculate screen dimensions dynamically (30x30 chars for RG Nano, 40x30 for standard)
+    GUIRect rect = GetRect();
+    int screenWidth = rect.Width() / 8;
+    int screenHeight = rect.Height() / 8;
+
+    int position = screenWidth;
     position -= strlen(_statusLine);
     position /= 2;
     GUIPoint pos(position, 12);
@@ -617,8 +622,8 @@ void AppWindow::Print(char *line) {
     char buildString[80];
     sprintf(buildString, "Piggy build %s.%s.%s", PROJECT_NUMBER,
             PROJECT_RELEASE, BUILD_COUNT);
-    pos._y = 28;
-    pos._x = (40 - strlen(buildString)) / 2;
+    pos._y = screenHeight - 2;  // Position 2 rows from bottom
+    pos._x = (screenWidth - strlen(buildString)) / 2;
     DrawString(buildString, pos, props);
     Flush();
 };

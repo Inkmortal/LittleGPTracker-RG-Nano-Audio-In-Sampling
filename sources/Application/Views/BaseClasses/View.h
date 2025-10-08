@@ -98,7 +98,7 @@ class View : public Observable {
     // Override in subclasses
 
     virtual void DrawView() = 0;
-    virtual void OnPlayerUpdate(PlayerEventType, unsigned int currentTick) = 0;
+    virtual void OnPlayerUpdate(PlayerEventType, unsigned int currentTick);
     virtual void OnFocus() = 0;
 
     void SetDirty(bool dirty);
@@ -170,7 +170,9 @@ class View : public Observable {
     static int margin_;
     static int songRowCount_;
     static bool miniLayout_;
+    static bool ultraCompactLayout_;  // For RG Nano 240x240
     static int altRowNumber_;
+    static int cursorAnimFrame_;  // For cursor pulse animation
 };
 
 #endif

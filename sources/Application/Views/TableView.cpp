@@ -23,6 +23,10 @@ TableView::TableView(GUIWindow &w, ViewData *viewData)
     clipboard_.active_ = false;
     clipboard_.width_ = 0;
     clipboard_.height_ = 0;
+
+#ifdef PLATFORM_RGNANO
+    horizontalScrollOffset_ = 0;
+#endif
 }
 
 TableView::~TableView() {}
@@ -31,6 +35,9 @@ void TableView::OnFocus() {
     clipboard_.active_ = false;
     viewMode_ = VM_NORMAL;
     lastPosition_[0] = lastPosition_[1] = lastPosition_[2] = 0;
+#ifdef PLATFORM_RGNANO
+    horizontalScrollOffset_ = 0;  // Reset scroll position when entering view
+#endif
     updateCursor(0, 0);
 };
 
@@ -294,6 +301,41 @@ void TableView::updateCursor(int dx, int dy) {
         cmdEdit_.SetInt(*(table.param3_ + row_));
         break;
     };
+
+#ifdef PLATFORM_RGNANO
+    // Auto-scroll horizontally - only scroll when reaching rightmost column
+    // Scroll by 1 column (4 chars) at a time
+    // Columns 0-3: offset 0 (show cmd1, param1, cmd2, param2, and start of cmd3)
+    // Columns 4-5: offset -4 (scroll left by 1 column to show cmd2, param2, cmd3, param3)
+    if (col_ >= 4) {
+        horizontalScrollOffset_ = -4;  // Scroll left by 1 column when reaching cmd3/param3
+    } else {
+        horizontalScrollOffset_ = 0;    // Don't scroll for columns 0-3
+    }
+
+    // Update cmdEditField position to account for scroll offset
+    if ((col_ == 1) || (col_ == 3) || (col_ == 5)) {
+        GUIPoint p = GetAnchor();
+        p._x += horizontalScrollOffset_;
+        switch (col_) {
+        case 1:
+            p._x += 5;
+            p._y += row_;
+            cmdEditField_->SetPosition(p);
+            break;
+        case 3:
+            p._x += 15;
+            p._y += row_;
+            cmdEditField_->SetPosition(p);
+            break;
+        case 5:
+            p._x += 25;
+            p._y += row_;
+            cmdEditField_->SetPosition(p);
+            break;
+        }
+    }
+#endif
 
     isDirty_ = true;
 };
@@ -588,8 +630,8 @@ void TableView::processNormalButtonMask(unsigned short mask) {
                 }
 
             } else {
-                // L MOdifier
-                if (mask & EPBM_R) {
+                // L Modifier
+                if (mask & EPBM_L) {
                 } else {
 
                     // No modifier
@@ -720,6 +762,11 @@ void TableView::DrawView() {
     // Compute song grid location
 
     GUIPoint anchor = GetAnchor();
+
+#ifdef PLATFORM_RGNANO
+    // Apply horizontal scroll offset for narrow screens
+    anchor._x += horizontalScrollOffset_;
+#endif
 
     // Display row numbers
 

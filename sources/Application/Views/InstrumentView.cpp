@@ -77,7 +77,17 @@ void InstrumentView::fillSampleParameters() {
 	I_Instrument *instr=bank->GetInstrument(i) ;
 	SampleInstrument *instrument=(SampleInstrument *)instr  ;
 	GUIPoint position=GetAnchor() ;
-	
+
+	// On mini layouts, left-align the instrument menu
+	if (miniLayout_) {
+		position._x = 1;
+	}
+
+#ifdef PLATFORM_RGNANO
+	// Shift menu up by 3 lines to fit more fields on screen
+	position._y -= 3;
+#endif
+
 //	position._y+=View::fieldSpaceHeight_;
 	Variable *v=instrument->FindVariable(SIP_SAMPLE) ;
 	SamplePool *sp=SamplePool::GetInstance() ;
@@ -288,6 +298,7 @@ void InstrumentView::ProcessButtonMask(unsigned short mask,bool pressed) {
 			switch(v.GetID()) {
 				case SIP_SAMPLE:
 				 {
+                    // Go to import sample as normal
                     // First check if the samplelib exists
 
 					 Path sampleLib(SamplePool::GetInstance()->GetSampleLib()) ;

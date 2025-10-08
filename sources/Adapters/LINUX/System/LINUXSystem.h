@@ -1,7 +1,11 @@
 #ifndef _LINUX_SYSTEM_H_
 #define _LINUX_SYSTEM_H_
 
-#include <SDL2/SDL.h>
+#ifdef SDL2
+#include <SDL.h>
+#else
+#include <SDL/SDL.h>
+#endif
 #include "System/System/System.h"
 #include "UIFramework/SimpleBaseClasses/EventManager.h"
 

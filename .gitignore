@@ -25,4 +25,12 @@ projects/lgpt-bittboy.elf
 projects/lgpt-garlic.elf
 projects/lgpt-garlicplus.elf
 projects/lgpt-rg35xxplus.elf
+projects/lgpt-rgnano.elf
 projects/LittleGPTracker.app
+
+# Object files
+*.o
+*.a
+
+# SDK (too large for git)
+sdk/

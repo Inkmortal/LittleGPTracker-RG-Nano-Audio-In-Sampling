@@ -3,11 +3,16 @@
 #include "NewProjectDialog.h"
 #include "System/Console/Trace.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
+#include "Application/Model/Project.h"
 
 #include <algorithm>
 
 #define LIST_SIZE 20
+#ifdef PLATFORM_RGNANO
+#define LIST_WIDTH 28  // 240px screen has 30 chars width, leave 1 char margin on each side
+#else
 #define LIST_WIDTH 32
+#endif
 
 static char *buttonText[3]= {
 	"Load",
@@ -104,16 +109,44 @@ void SelectProjectDialog::DrawView() {
 	} ;
 
 	y=LIST_SIZE+2 ;
+
+	// Calculate button positions for better centering
+	// Total button widths: "Load"(4) + "New"(3) + "Exit"(4) = 11 chars
+	// Distribute remaining space evenly
+#ifdef PLATFORM_RGNANO
+	// For narrower screen, use tighter spacing
+	int buttonPositions[3] = {3, 11, 20};  // Pre-calculated positions for better centering
+#else
 	int offset=LIST_WIDTH/4 ;
+	int buttonPositions[3] = {offset*1, offset*2, offset*3};
+#endif
 
 	SetColor(CD_NORMAL) ;
 
 	for (int i=0;i<3;i++) {
 		const char *text=buttonText[i] ;
-		x=offset*(i+1)-strlen(text)/2 ;
+#ifdef PLATFORM_RGNANO
+		x = buttonPositions[i];
+#else
+		x=buttonPositions[i]-strlen(text)/2 ;
+#endif
 		props.invert_=(i==selected_)?true:false ;
 		DrawString(x,y,text,props) ;
-	}	
+	}
+
+	// Draw version string below border
+	// Window is LIST_SIZE+3 (23 rows), border is at height+1 (24)
+	// So draw at LIST_SIZE+5 (25) to be below the border
+	y = LIST_SIZE + 5;
+	char buildString[80];
+	sprintf(buildString, "Piggy build %s.%s.%s", PROJECT_NUMBER, PROJECT_RELEASE, BUILD_COUNT);
+#ifdef PLATFORM_RGNANO
+	x = (LIST_WIDTH - strlen(buildString)) / 2;
+#else
+	x = (LIST_WIDTH - strlen(buildString)) / 2;
+#endif
+	props.invert_ = false;
+	DrawString(x, y, buildString, props);
 
 };
 

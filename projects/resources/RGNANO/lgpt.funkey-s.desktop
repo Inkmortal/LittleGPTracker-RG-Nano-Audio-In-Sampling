@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Little GP Tracker
+Comment=Music tracker for creating chiptune music
+Exec=lgpt-rgnano.elf
+Icon=lgpt
+Terminal=false
+Categories=applications;
+

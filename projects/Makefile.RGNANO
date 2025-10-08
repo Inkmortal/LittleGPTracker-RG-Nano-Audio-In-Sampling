@@ -1,0 +1,37 @@
+-include $(ROOT_DIR)rules_base
+
+DEFINES := \
+	-DPLATFORM_$(PLATFORM) \
+	-DBUFFERED \
+	-DCPP_MEMORY \
+	-DHAVE_STDINT_H \
+	-D_NDEBUG \
+	-D_NO_JACK_
+
+SDK := $(ROOT_DIR)../sdk/FunKey-sdk-DrUm78
+SYSROOT := $(SDK)/arm-funkey-linux-musleabihf/sysroot
+CROSS_COMPILE := $(SDK)/bin/arm-funkey-linux-musleabihf-
+
+CC = $(CROSS_COMPILE)gcc
+CXX = $(CROSS_COMPILE)g++
+STRIP = $(CROSS_COMPILE)strip
+SDL_CFLAGS  := -I$(SYSROOT)/usr/include/SDL -D_REENTRANT
+SDL_LIBS    := -lSDL
+
+INCLUDES = -Iinclude $(SDL_CFLAGS) -I$(ROOT_DIR)../sources
+OPT_FLAGS  = -O3 -march=armv7-a -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard
+
+
+TOOLPATH=$(SDK)/bin
+PREFIX		:=	arm-funkey-linux-musleabihf-
+
+CFLAGS	:=	$(DEFINES) $(INCLUDES) $(SDL_CFLAGS) $(OPT_FLAGS) -Wall
+CXXFLAGS:=	$(CFLAGS) -std=gnu++03
+LDFLAGS := -L$(SYSROOT)/usr/lib
+LIBS	:=  -lSDL -lasound -lpthread
+OUTPUT = ../lgpt-rgnano
+EXTENSION:= elf
+
+%.elf: $(OFILES)
+	$(CXX) $(LDFLAGS) -o $@ $(OFILES) $(LIBS)
+	@$(STRIP) $@

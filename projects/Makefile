@@ -4,9 +4,14 @@
 .SUFFIXES:
 #---------------------------------------------------------------------------------
 
-PLATFORM:=  RASPI
+PLATFORM?=  RASPI
 FONT := original.bmp
-include $(PWD)/Makefile.$(PLATFORM)
+
+MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+ROOT_DIR := $(dir $(MAKEFILE_PATH))
+
+export PLATFORM
+-include $(ROOT_DIR)Makefile.$(PLATFORM)
 
 #---------------------------------------------------------------------------------
 # options for FXE
@@ -29,6 +34,7 @@ COMMONDIRS := \
 	../sources/Services/Controllers \
 	../sources/System/FileSystem \
 	../sources/System/Timer \
+	../sources/System/Process \
 	../sources/System/Errors \
 	../sources/UIFramework/Framework \
 	../sources/UIFramework/BasicDatas \
@@ -104,6 +110,9 @@ SDLAUDIODIRS := \
 SDL2AUDIODIRS := \
 	../sources/Adapters/SDL2/Audio
 
+ALSADIRS := \
+	../sources/Adapters/ALSA/Audio
+
 BEAGLEBOARDDIRS := $(LINUXDIRS) $(DUMMYMIDIDIRS) $(RTAUDIODIRS) $(SDLDIRS)
 DEBDIRS := $(DBDIRS) $(JACKDIRS) $(RTAUDIODIRS) $(RTMIDIDIRS) $(SDLDIRS)
 RASPIDIRS := $(DBDIRS) $(JACKDIRS) $(RTAUDIODIRS) $(RTMIDIDIRS) $(SDLDIRS)
@@ -152,6 +161,7 @@ DUMMYMIDIDIRS := \
 BITTBOYDIRS := $(DINGUXDIRS) $(DINGUXAUDIODIRS)
 DINGOODIRS := $(DINGUXDIRS) $(DINGUXAUDIODIRS) $(DUMMYMIDIDIRS)
 MIYOODIRS := $(DINGUXDIRS) $(DUMMYMIDIDIRS)
+RGNANODIRS := $(DINGUXDIRS) $(DUMMYMIDIDIRS) $(ALSADIRS)
 GARLICDIRS := $(MIYOODIRS)
 GARLICPLUSDIRS := $(GARLICDIRS)
 RS97DIRS := $(DINGUXDIRS) $(DINGUXAUDIODIRS)
@@ -247,6 +257,7 @@ COMMONFILES := \
 	Application.o AppWindow.o SelectProjectDialog.o \
 	NewProjectDialog.o \
 	ImportSampleDialog.o \
+	RecordSampleDialog.o \
 	MixerView.o NullView.o \
 	SongView.o ChainView.o PhraseView.o ViewData.o ConsoleView.o ProjectView.o InstrumentView.o UIController.o \
 	View.o ModalView.o FieldView.o UIField.o UIIntField.o \
@@ -321,8 +332,12 @@ JACKFILES := \
 
 SDLAUDIOFILES := \
 					SDLAudioDriver.o \
-	SDLAudio.o
+	SDLAudio.o \
+	SDLAudioCapture.o
 
+
+ALSAFILES := \
+	ALSAAudioCapture.o
 DEBFILES := $(DBFILES) $(RTAUDIOFILES) $(RTMIDIFILES) $(JACKFILES)
 BEAGLEBOARDFILES := $(LINUXFILES) $(DUMMYMIDIFILES)
 RASPIFILES := $(DBDIRS) $(RTAUDIOFILES) $(RTMIDIFILES) $(JACKFILES)
@@ -412,6 +427,13 @@ MIYOOFILES := \
 	DummyMidi.o \
 	MIYOOSystem.o \
 	SDLAudio.o
+
+RGNANOFILES := \
+	$(DINGUXFILES) \
+	DummyMidi.o \
+	RGNANOSystem.o \
+	SDLAudio.o \
+	ALSAAudioCapture.o
 
 GARLICFILES = $(MIYOOFILES)
 GARLICPLUSFILES = $(GARLICFILES)
@@ -512,9 +534,9 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 #---------------------------------------------------------------------------------
 
 $(BUILD):
-	python3 ../sources/Resources/mkfont.py ../sources/Resources/$(FONT) ../sources/Resources/font.h
+	@# Font already generated, skip: python3 ../sources/Resources/mkfont.py ../sources/Resources/$(FONT) ../sources/Resources/font.h
 	@[ -d $@ ] || mkdir -p $@
-	@make --no-print-directory -C $(BUILD) -f $(PWD)/Makefile
+	@make --no-print-directory -C $(BUILD) -f $(PWD)/Makefile PLATFORM=$(PLATFORM)
 
 #---------------------------------------------------------------------------------
 
@@ -525,6 +547,10 @@ clean:
 #---------------------------------------------------------------------------------
 
 else
+
+# Re-declare VPATH for the recursive make
+vpath %.cpp $(subst :, ,$(VPATH))
+vpath %.c $(subst :, ,$(VPATH))
 
 DEPENDS	:=	$(OFILES:.o=.d)
 

@@ -731,6 +731,11 @@ void ChainView::DrawView() {
     drawMap();
     drawNotes();
 
+    // RG Nano: Draw channel meters in sidebar
+    if (ultraCompactLayout_) {
+        drawChannelMeters(anchor._x + 9, anchor._y);
+    }
+
     if (player->IsRunning()) {
         OnPlayerUpdate(PET_UPDATE);
     };
@@ -811,8 +816,47 @@ void ChainView::OnPlayerUpdate(PlayerEventType eventType, unsigned int tick) {
     pos._x += 200;
 /*
 	if (player->Clipped()) {
-           w_.DrawString("clip",pos,props); 
+           w_.DrawString("clip",pos,props);
     } else {
-           w_.DrawString("----",pos,props); 
+           w_.DrawString("----",pos,props);
     }
-*/} ;
+*/
+}
+
+// RG Nano: Draw channel meters in sidebar
+void ChainView::drawChannelMeters(int x, int y) {
+    Player *player = Player::GetInstance();
+    GUITextProperties props;
+    GUIPoint pos(x, y);
+
+    SetColor(CD_NORMAL);
+
+    // Draw meters for all 8 channels
+    for (int i = 0; i < 8; i++) {
+        // Channel number
+        char channelLabel[4];
+        sprintf(channelLabel, "%d", i + 1);
+        DrawString(pos._x, pos._y, channelLabel, props);
+
+        // Meter visualization
+        pos._x += 1;
+
+        bool isPlaying = player->IsChannelPlaying(i);
+        bool isMuted = player->IsChannelMuted(i);
+
+        if (isMuted) {
+            // Muted: show dashes
+            DrawString(pos._x, pos._y, "------", props);
+        } else if (isPlaying) {
+            // Playing: show active meter
+            DrawString(pos._x, pos._y, "######", props);
+        } else {
+            // Silent: show empty meter
+            DrawString(pos._x, pos._y, "......", props);
+        }
+
+        // Next row
+        pos._y++;
+        pos._x = x;
+    }
+};

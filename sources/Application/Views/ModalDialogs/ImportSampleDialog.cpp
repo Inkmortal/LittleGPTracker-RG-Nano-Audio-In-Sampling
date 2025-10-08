@@ -1,6 +1,7 @@
 #include "ImportSampleDialog.h"
 #include "Application/Instruments/SamplePool.h"
 #include "Application/Instruments/SampleInstrument.h"
+#include "RecordSampleDialog.h"
 
 #define LIST_SIZE 15
 #define LIST_WIDTH 28
@@ -9,10 +10,11 @@ bool ImportSampleDialog::initStatic_=false ;
 Path ImportSampleDialog::sampleLib_("") ;
 Path ImportSampleDialog::currentPath_("") ;
 
-static const char *buttonText[3]= {
+static const char *buttonText[4]= {
 	"Listen",
 	"Import",
-	"Exit"	
+	"Record",
+	"Exit"
 } ;
 
 ImportSampleDialog::ImportSampleDialog(View &view):ModalView(view) {
@@ -85,11 +87,11 @@ void ImportSampleDialog::DrawView() {
 	} ;
 
 	y=LIST_SIZE+2 ;
-	int offset=LIST_WIDTH/4 ;
+	int offset=LIST_WIDTH/5 ;
 
 	SetColor(CD_NORMAL) ;
 
-	for (int i=0;i<3;i++) {
+	for (int i=0;i<4;i++) {
 		const char *text=buttonText[i] ;
 		x=offset*(i+1)-strlen(text)/2 ;
 		props.invert_=(i==selected_)?true:false ;
@@ -167,7 +169,14 @@ void ImportSampleDialog::ProcessButtonMask(unsigned short mask,bool pressed) {
 					import(*element);
 				}
 				break ;
-			case 2: // Exit ;
+			case 2: // record
+				{
+					endPreview(); // Stop playback before recording
+					RecordSampleDialog *rsd=new RecordSampleDialog(*this);
+					DoModal(rsd);
+				}
+				break ;
+			case 3: // Exit ;
 				endPreview(); // Stop playback when exiting
 				EndModal(0) ;
 				break ;
@@ -199,11 +208,11 @@ void ImportSampleDialog::ProcessButtonMask(unsigned short mask,bool pressed) {
 		if (mask==EPBM_DOWN) warpToNextSample(1);
 		if (mask==EPBM_LEFT) {
 			selected_-=1;
-			if (selected_<0) selected_+=3;
+			if (selected_<0) selected_+=4;
 			isDirty_=true;
 		}
 		if (mask==EPBM_RIGHT) {
-			selected_=(selected_+1)%3;
+			selected_=(selected_+1)%4;
 			isDirty_=true;
 		}
 	}

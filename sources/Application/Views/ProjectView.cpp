@@ -100,6 +100,16 @@ ProjectView::ProjectView(GUIWindow &w,ViewData *data):FieldView(w,data) {
 	project_=data->project_ ;
 
 	GUIPoint position=GetAnchor() ;
+
+	// On mini layouts, left-align the project menu
+	if (miniLayout_) {
+		position._x = 1;
+	}
+
+#ifdef PLATFORM_RGNANO
+	// Shift menu up by 2 lines for consistency with instrument menu
+	position._y -= 2;
+#endif
 	
 	Variable *v=project_->FindVariable(VAR_TEMPO) ;
 	UITempoField *f=new UITempoField(ACTION_TEMPO_CHANGED,position,*v,"tempo: %d [%2.2x]  ",60,400,1,10) ;

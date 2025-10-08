@@ -911,6 +911,7 @@ void SongView::DrawView() {
     std::ostringstream os;
 
     os << ((player->GetSequencerMode() == SM_SONG) ? "Song" : "Live");
+
     os << " - ";
     os << songname_;
     std::string buffer(os.str());
@@ -941,17 +942,18 @@ void SongView::DrawView() {
         viewData_->song_->data_ + (SONG_CHANNEL_COUNT * viewData_->songOffset_);
     short dx = 3;
     short dy = 1;
+
     for (int j = 0; j < View::songRowCount_; j++) {
 
         pos._x = anchor._x;
+        unsigned char *rowData = viewData_->song_->data_ +
+                                  (SONG_CHANNEL_COUNT * (viewData_->songOffset_ + j));
 
         for (int i = 0; i < 8; i++) {
 
             bool invert = false;
 
             // see if we need to invert current step
-            // if there's a selection or we are at cursor position
-
             if (clipboard_.active_) {
                 if ((i >= selRect.Left()) && (i <= selRect.Right()) &&
                     (j + viewData_->songOffset_ >= selRect.Top()) &&
@@ -965,8 +967,7 @@ void SongView::DrawView() {
             }
 
             // draw current step
-
-            unsigned char d = *data++;
+            unsigned char d = rowData[i];
 
             if (d == 0xFE) {
                 SetColor(CD_SONGVIEWFE);
@@ -977,7 +978,12 @@ void SongView::DrawView() {
             }
 
             if (invert) {
-                SetColor(CD_HILITE2);
+                // Cursor pulse animation: alternate between HILITE2 and HILITE1
+                if ((cursorAnimFrame_ / 30) % 2 == 0) {
+                    SetColor(CD_HILITE2);
+                } else {
+                    SetColor(CD_HILITE1);
+                }
                 props.invert_ = true;
             }
 
@@ -988,18 +994,16 @@ void SongView::DrawView() {
                 DrawString(pos._x, pos._y, row, props);
             }
 
-            // Put back drawing state
-
             if (invert) {
                 SetColor(CD_NORMAL);
                 props.invert_ = false;
             }
 
-            // Next step
-
             pos._x += dx;
         }
+
         pos._y += dy;
+        data += SONG_CHANNEL_COUNT;
     }
     SetColor(CD_NORMAL);
 

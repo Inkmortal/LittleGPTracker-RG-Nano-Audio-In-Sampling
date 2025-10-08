@@ -66,6 +66,10 @@ class TableView : public View {
     uchar saveRow_;
 
     uchar lastPosition_[3];
+
+#ifdef PLATFORM_RGNANO
+    int horizontalScrollOffset_;  // For horizontal scrolling on narrow screens
+#endif
 };
 
 #endif
