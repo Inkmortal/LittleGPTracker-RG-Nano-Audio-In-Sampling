@@ -54,9 +54,6 @@ public:
     int GetPlayedBufferPercentage() ;
     int GetBusPeakPercent(int bus) ;
     int GetMasterPeakPercent() ;
-    int GetBusWaveformSample(int bus, int index) ;
-    int GetBusWaveformMin(int bus, int index) ;
-    int GetBusWaveformMax(int bus, int index) ;
     int GetMasterWaveformSample(int index) ;
     int GetMasterWaveformMin(int index) ;
     int GetMasterWaveformMax(int index) ;

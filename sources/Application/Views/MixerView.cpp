@@ -313,22 +313,12 @@ void MixerView::drawChannelMeters(bool force) {
 #if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
     MixerService *mixer = MixerService::GetInstance();
     SDLGUIWindowImp *imp = (SDLGUIWindowImp *)w_.GetImpWindow();
-    const int startX = 16;
-    const int topY = 36;
-    const int meterTop = 52;
-    const int meterHeight = 40;
-    const int stripWidth = 24;
-    const int meterWidth = 12;
-    const int scopeY = 98;
-    const int scopeHeight = 10;
-    const int noteRow = 14;
+    const int startCol = 2;
+    const int labelRow = 4;
+    const int meterRow = 7;
+    const int noteRow = 10;
+    const int cellWidth = 3;
     GUIColor panel(0x08, 0x12, 0x16);
-    GUIColor meterLow(0x35, 0xD3, 0xCE);
-    GUIColor meterHot(0xDB, 0x33, 0xDB);
-    GUIColor meterClip(0xF3, 0xFF, 0xFB);
-    GUIColor selected(0x58, 0xE6, 0xB0);
-    GUIColor muted(0x18, 0x35, 0x38);
-    GUIColor frame(0x24, 0x5E, 0x62);
 
     if (force) {
         imp->SetColor(panel);
@@ -339,9 +329,9 @@ void MixerView::drawChannelMeters(bool force) {
     GUITextProperties props;
     props.invert_ = false;
     char label[3];
+    char meterCell[4];
     for (int i=0; i<SONG_CHANNEL_COUNT; i++) {
-        int stripX = startX + i * stripWidth;
-        int x = stripX + 6;
+        int col = startCol + i * cellWidth;
         int bus = Mixer::GetInstance()->GetBus(i);
         int level = mixer->GetBusPeakPercent(bus);
         if (level<0) level=0;
@@ -349,33 +339,32 @@ void MixerView::drawChannelMeters(bool force) {
         bool isSelected = (i == viewData_->mixerCol_);
         bool isActive = Player::GetInstance()->IsChannelPlaying(i) || level > 0;
 
-        imp->SetColor(isSelected ? selected : frame);
-        GUIRect outline(x, meterTop - 2, x + meterWidth + 2, meterTop + meterHeight + 2);
-        imp->DrawRect(outline);
-        imp->SetColor(panel);
-        GUIRect inner(x + 1, meterTop - 1, x + meterWidth + 1, meterTop + meterHeight + 1);
-        imp->DrawRect(inner);
-
-        int fill = (level * meterHeight) / 100;
-        if (fill > 0) {
-            if (level > 92) {
-                imp->SetColor(meterClip);
-            } else if (level > 68) {
-                imp->SetColor(meterHot);
-            } else {
-                imp->SetColor(isActive ? meterLow : muted);
-            }
-            GUIRect bar(x + 2, meterTop + meterHeight - fill, x + meterWidth, meterTop + meterHeight);
-            imp->DrawRect(bar);
-        }
-
         SetColor(isSelected ? CD_HILITE2 : CD_NORMAL);
         hex2char(bus, label);
-        DrawString((stripX / 8), topY / 8, label, props);
-        drawChannelWaveform(bus, stripX + 4, scopeY, 16, scopeHeight, isSelected);
+        DrawString(col, labelRow, label, props);
+
+        meterCell[0]=' ';
+        meterCell[1]=' ';
+        meterCell[2]=0;
+        if (level > 4) meterCell[0]='=';
+        if (level > 38) meterCell[1]='=';
+        if (level > 78) {
+            meterCell[0]='!';
+            meterCell[1]='!';
+        }
+        if (isSelected) {
+            SetColor(CD_HILITE2);
+        } else if (level > 78) {
+            SetColor(CD_PLAY);
+        } else if (isActive) {
+            SetColor(CD_HILITE1);
+        } else {
+            SetColor(CD_NORMAL);
+        }
+        DrawString(col, meterRow, meterCell, props);
 
         SetColor(CD_NORMAL);
-        DrawString(stripX / 8, noteRow, "   ", props);
+        DrawString(col, noteRow, "   ", props);
         if (Player::GetInstance()->IsRunning() && viewData_->playMode_ != PM_AUDITION) {
             const char *playedNote = Player::GetInstance()->GetPlayedNote(i);
             char noteChar = playedNote && playedNote[0] ? playedNote[0] : ' ';
@@ -392,54 +381,15 @@ void MixerView::drawChannelMeters(bool force) {
                 }
             }
             SetColor(isSelected ? CD_HILITE2 : CD_HILITE1);
-            DrawString(stripX / 8, noteRow, lastChannelNote_[i], props);
+            DrawString(col, noteRow, lastChannelNote_[i], props);
         } else {
             lastChannelNote_[i][0]='-';
             lastChannelNote_[i][1]='-';
             SetColor(CD_NORMAL);
-            DrawString(stripX / 8, noteRow, lastChannelNote_[i], props);
+            DrawString(col, noteRow, lastChannelNote_[i], props);
         }
     }
     SetColor(CD_NORMAL);
-#endif
-}
-
-void MixerView::drawChannelWaveform(int bus, int x, int y, int width, int height, bool selected) {
-#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
-    MixerService *mixer = MixerService::GetInstance();
-    SDLGUIWindowImp *imp = (SDLGUIWindowImp *)w_.GetImpWindow();
-    const int columns = AudioMixer::WAVEFORM_SIZE;
-    const int mid = y + (height / 2);
-    GUIColor background(0x08, 0x12, 0x16);
-    GUIColor trace = selected ? GUIColor(0xDB, 0x33, 0xDB) : GUIColor(0x35, 0xD3, 0xCE);
-
-    imp->SetColor(background);
-    GUIRect clear(x, y, x + width, y + height);
-    imp->DrawRect(clear);
-
-    int peakAbs = 1;
-    for (int i=0; i<columns; i++) {
-        int sample = mixer->GetBusWaveformSample(bus, i);
-        int absSample = sample < 0 ? -sample : sample;
-        if (absSample > peakAbs) peakAbs = absSample;
-    }
-    int gain = (peakAbs < 95) ? ((95 * 100) / peakAbs) : 100;
-    if (gain > 520) gain = 520;
-
-    int previousY = mid;
-    imp->SetColor(trace);
-    for (int col=0; col<width; col++) {
-        int sampleIndex = (col * columns) / width;
-        int sample = mixer->GetBusWaveformSample(bus, sampleIndex);
-        int waveY = mid - ((sample * gain * (height / 2 - 1)) / 10000);
-        if (waveY < y + 1) waveY = y + 1;
-        if (waveY >= y + height - 1) waveY = y + height - 2;
-        int top = previousY < waveY ? previousY : waveY;
-        int bottom = previousY > waveY ? previousY : waveY;
-        GUIRect wave(x + col, top, x + col + 1, bottom + 1);
-        imp->DrawRect(wave);
-        previousY = waveY;
-    }
 #endif
 }
 
@@ -455,9 +405,9 @@ void MixerView::drawWaveform(bool force) {
 
     SDLGUIWindowImp *imp = (SDLGUIWindowImp *)w_.GetImpWindow();
     const int x = 16;
-    const int y = 136;
+    const int y = 104;
     const int width = 192;
-    const int height = 60;
+    const int height = 72;
     const int mid = y + (height / 2);
     const int columns = AudioMixer::WAVEFORM_SIZE;
     const int stepPx = 1;

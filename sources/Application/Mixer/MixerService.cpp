@@ -176,27 +176,6 @@ int MixerService::GetMasterPeakPercent() {
     return out_->GetPeakPercent();
 }
 
-int MixerService::GetBusWaveformSample(int bus, int index) {
-    if (bus<0 || bus>=MAX_BUS_COUNT) {
-        return 0;
-    }
-    return bus_[bus].GetWaveformSample(index);
-}
-
-int MixerService::GetBusWaveformMin(int bus, int index) {
-    if (bus<0 || bus>=MAX_BUS_COUNT) {
-        return 0;
-    }
-    return bus_[bus].GetWaveformMin(index);
-}
-
-int MixerService::GetBusWaveformMax(int bus, int index) {
-    if (bus<0 || bus>=MAX_BUS_COUNT) {
-        return 0;
-    }
-    return bus_[bus].GetWaveformMax(index);
-}
-
 int MixerService::GetMasterWaveformSample(int index) {
     if (!out_) {
         return 0;
