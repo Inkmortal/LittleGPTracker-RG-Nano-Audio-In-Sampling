@@ -1,0 +1,19 @@
+# The power menu must be isolated from tracker controls.
+# Select stays KEY_SELECT=q; Power is KEY_POWER=p in the simulator.
+route boot.new_project_random
+expect_view song
+reset_audio_stats
+press q 80
+wait 120
+expect_view song
+expect_audio_silence 0
+press p 80
+wait 160
+expect_view song
+expect_audio_silence 0
+press p 80
+wait 120
+expect_view song
+expect_audio_silence 0
+expect_no_error
+quit

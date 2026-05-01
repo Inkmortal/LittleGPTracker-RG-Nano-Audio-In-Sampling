@@ -16,6 +16,7 @@
 #include <fstream>
 #include <sstream>
 #include <stdlib.h>
+#include <string.h>
 
 bool SDLEventManager::finished_=false ;
 bool SDLEventManager::dumpEvent_=false ;
@@ -26,6 +27,7 @@ int SDLEventManager::exitConfirmSelection_=0;
 bool SDLEventManager::showDebugScreen_=false ;
 int SDLEventManager::debugScreenSelection_=0;
 bool SDLEventManager::menuInputHeld_[SDLK_LAST]={false};
+int SDLEventManager::powerMenuKey_=SDLK_POWER;
 
 SDLEventManager::SDLEventManager() 
 {
@@ -106,6 +108,16 @@ bool SDLEventManager::Init()
   {
 		keyname_[i]=SDL_GetKeyName((SDLKey)i) ;
 	} 
+
+	const char *powerKey=Config::GetInstance()->GetValue("KEY_POWER");
+	if (powerKey && strlen(powerKey)>0) {
+		int key=GetKeyCode(powerKey);
+		if (key>0) {
+			powerMenuKey_=key;
+		} else {
+			Trace::Error("EVENT invalid KEY_POWER=%s",powerKey);
+		}
+	}
   
 	return true ;
 } 
@@ -140,9 +152,8 @@ int SDLEventManager::MainLoop()
 						break;
 					}
 
-#ifdef PLATFORM_RGNANO
-					// Check for power menu toggle (SDLK_q)
-					if (event.key.keysym.sym == SDLK_q) {
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+					if (event.key.keysym.sym == powerMenuKey_) {
 						menuInputHeld_[event.key.keysym.sym]=true;
 						showPowerMenu_ = !showPowerMenu_;
 						if (showPowerMenu_) {
@@ -327,7 +338,7 @@ void SDLEventManager::LoadSimScript()
 		} else if (command.op=="expect_no_error" || command.op=="reset_audio_stats" || command.op=="end_audio_capture") {
 		} else if (command.op=="expect_colors") {
 			iss >> command.value;
-		} else if (command.op=="expect_audio_activity") {
+		} else if (command.op=="expect_audio_activity" || command.op=="expect_audio_silence") {
 			iss >> command.value;
 		} else if (command.op=="start_audio_capture") {
 			iss >> command.arg;
@@ -484,6 +495,11 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 			FailSimScript("audio activity assertion failed");
 			return;
 		}
+	} else if (command.op=="expect_audio_silence") {
+		if (!ExpectSimAudioSilence(command.value)) {
+			FailSimScript("audio silence assertion failed");
+			return;
+		}
 	} else if (command.op=="expect_audio_capture_bytes") {
 		if (!ExpectSimAudioCaptureBytes(command.value)) {
 			FailSimScript("audio capture assertion failed");
@@ -598,9 +614,14 @@ bool SDLEventManager::HandleSimMouse(SDLGUIWindowImp *window, SDL_Event &event)
 
 void SDLEventManager::SetSimKey(SDLGUIWindowImp *window, int key, bool pressed)
 {
-	keyboardCS_->SetKey(key,pressed);
-	if (window && window->IsRGNanoSkinEnabled()) {
-		window->SetRGNanoButtonPressed(key,pressed);
+	SDL_Event event;
+	memset(&event,0,sizeof(event));
+	event.type=pressed ? SDL_KEYDOWN : SDL_KEYUP;
+	event.key.type=event.type;
+	event.key.state=pressed ? SDL_PRESSED : SDL_RELEASED;
+	event.key.keysym.sym=(SDLKey)key;
+	if (SDL_PushEvent(&event)!=0) {
+		Trace::Error("RGNANO_SIM failed to push key event:%d",key);
 	}
 }
 
@@ -749,6 +770,21 @@ bool SDLEventManager::ExpectSimAudioActivity(int minPeak)
 		Trace::Error("RGNANO_SIM audio activity assertion failed");
 	}
 	return active;
+}
+
+bool SDLEventManager::ExpectSimAudioSilence(int maxPeak)
+{
+	if (maxPeak<0) {
+		maxPeak=0;
+	}
+	int peak=AudioDriver::GetSimAudioPeak();
+	unsigned long nonSilentBytes=AudioDriver::GetSimAudioNonSilentBytes();
+	bool silent=peak<=maxPeak && nonSilentBytes==0;
+	Trace::Log("RGNANO_SIM","expect_audio_silence peak=%d nonSilentBytes=%lu maxPeak=%d => %s",peak,nonSilentBytes,maxPeak,silent?"silent":"active");
+	if (!silent) {
+		Trace::Error("RGNANO_SIM audio silence assertion failed");
+	}
+	return silent;
 }
 
 bool SDLEventManager::ExpectSimAudioCaptureBytes(int minBytes)
@@ -1083,6 +1119,12 @@ void SDLEventManager::PostQuitMessage()
 
 int SDLEventManager::GetKeyCode(const char *key)
 {
+	if (!key) {
+		return -1;
+	}
+	if (!strcmp(key,"power") || !strcmp(key,"POWER")) {
+		return SDLK_POWER;
+	}
 	for (int i=0;i<SDLK_LAST;i++)
   {
 		if (!strcmp(key,keyname_[i]))
@@ -1200,6 +1242,13 @@ void SDLEventManager::HandlePowerMenuInput(SDLKey key)
 				break;
 		}
 	} else {
+		if (key == powerMenuKey_) {
+			showPowerMenu_ = false;
+			showExitConfirm_ = false;
+			exitConfirmSelection_ = 0;
+			return;
+		}
+
 		// Handle main power menu
 		switch (key) {
 			case SDLK_u:  // UP
@@ -1228,7 +1277,6 @@ void SDLEventManager::HandlePowerMenuInput(SDLKey key)
 
 			case SDLK_b:  // B button - cancel
 			case SDLK_ESCAPE:
-			case SDLK_q:  // Menu button again - close
 				showPowerMenu_ = false;
 				break;
 

@@ -38,6 +38,7 @@ private:
 	static bool showDebugScreen_ ;
 	static int debugScreenSelection_ ;
 	static bool menuInputHeld_[SDLK_LAST] ;
+	static int powerMenuKey_ ;
 	const char *keyname_[SDLK_LAST] ;
 	SDL_Joystick *joystick_[MAX_JOY_COUNT];
 	ButtonControllerSource *buttonCS_[MAX_JOY_COUNT] ;
@@ -77,6 +78,7 @@ private:
 	bool ExpectSimNoError();
 	bool ExpectSimView(const std::string &viewName);
 	bool ExpectSimAudioActivity(int minPeak);
+	bool ExpectSimAudioSilence(int maxPeak);
 	bool ExpectSimAudioCaptureBytes(int minBytes);
 	bool ExpectSimScreenText(const std::string &needle);
 	bool ExpectSimSongChain(int row, int channel, const std::string &expected);

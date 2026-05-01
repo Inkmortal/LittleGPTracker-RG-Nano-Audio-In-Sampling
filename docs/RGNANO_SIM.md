@@ -75,6 +75,7 @@ The producer persistence pair creates a multi-instrument project, saves it, rela
 | R | `n` |
 | Start | `s` |
 | Select | `q` |
+| Power menu | `p` |
 
 In skin mode, these controls can also be clicked directly on the device shell.
 
@@ -148,6 +149,9 @@ start_audio_capture demo-song-workflow.wav
 expect_audio_activity 64
 expect_audio_capture_bytes 120000
 end_audio_capture
+
+# fail unless no measured tracker audio has been produced since reset_audio_stats
+expect_audio_silence 0
 
 # fail if the simulator log contains an error marker
 expect_no_error

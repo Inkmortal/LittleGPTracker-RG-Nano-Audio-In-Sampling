@@ -16,6 +16,7 @@
 	<KEY_RSHOULDER value="n"/>
 	<KEY_START value="s"/>
 	<KEY_SELECT value="q"/>
+	<KEY_POWER value="p"/>
 	<KEYDELAY value="200"/>
 	<KEYREPEAT value="100"/>
 	<FONTTYPE value="0"/>

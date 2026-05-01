@@ -20,6 +20,7 @@ The simulator must preserve LGPT's button-mask behavior. `AppWindow` keeps a liv
 | R | `n` | `n` |
 | Start | `s` | `s` |
 | Select | `q` | `q` |
+| Power menu | `p` in simulator, `KEY_POWER=power` on RG Nano | `p` in simulator |
 
 Use `down <key>`, `press <key>`, and `up <key>` in scripts to make held combos exact. For example, `R + Down` is:
 
@@ -28,6 +29,8 @@ down n
 press d 80
 up n
 ```
+
+The power menu is intentionally separate from `Select`. `Select` remains an LGPT tracker input, while `KEY_POWER` is a global app/menu input that is swallowed before it reaches tracker playback or note preview handling.
 
 ## Global Field Editing
 
