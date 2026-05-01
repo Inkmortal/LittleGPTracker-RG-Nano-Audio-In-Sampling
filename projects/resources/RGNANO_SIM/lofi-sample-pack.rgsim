@@ -1,0 +1,9 @@
+# Verify the generated lofi sample fixture pack used by producer workflows.
+wait 500
+expect_file rgnano-sim-data/samples/lofi-kick.wav
+expect_file rgnano-sim-data/samples/lofi-snare.wav
+expect_file rgnano-sim-data/samples/lofi-hat.wav
+expect_file rgnano-sim-data/samples/lofi-chord.wav
+expect_file rgnano-sim-data/samples/lofi-vinyl.wav
+expect_no_error
+quit

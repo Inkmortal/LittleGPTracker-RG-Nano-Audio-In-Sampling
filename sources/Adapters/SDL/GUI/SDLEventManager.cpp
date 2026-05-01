@@ -298,10 +298,14 @@ void SDLEventManager::LoadSimScript()
 			if (!command.arg2.empty() && command.arg2[0]==' ') {
 				command.arg2.erase(0,1);
 			}
-		} else if (command.op=="expect_no_error" || command.op=="reset_audio_stats") {
+		} else if (command.op=="expect_no_error" || command.op=="reset_audio_stats" || command.op=="end_audio_capture") {
 		} else if (command.op=="expect_colors") {
 			iss >> command.value;
 		} else if (command.op=="expect_audio_activity") {
+			iss >> command.value;
+		} else if (command.op=="start_audio_capture") {
+			iss >> command.arg;
+		} else if (command.op=="expect_audio_capture_bytes") {
 			iss >> command.value;
 		} else if (command.op=="expect_song_chain" || command.op=="expect_chain_phrase") {
 			iss >> command.value >> command.value2 >> command.arg;
@@ -422,6 +426,13 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 	} else if (command.op=="reset_audio_stats") {
 		AudioDriver::ResetSimAudioStats();
 		Trace::Log("RGNANO_SIM","reset_audio_stats");
+	} else if (command.op=="start_audio_capture") {
+		if (!AudioDriver::BeginSimAudioCapture(command.arg.c_str())) {
+			FailSimScript("audio capture start failed");
+			return;
+		}
+	} else if (command.op=="end_audio_capture") {
+		AudioDriver::EndSimAudioCapture();
 	} else if (command.op=="expect_view") {
 		if (!ExpectSimView(command.arg)) {
 			FailSimScript("view assertion failed");
@@ -430,6 +441,11 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 	} else if (command.op=="expect_audio_activity") {
 		if (!ExpectSimAudioActivity(command.value)) {
 			FailSimScript("audio activity assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_audio_capture_bytes") {
+		if (!ExpectSimAudioCaptureBytes(command.value)) {
+			FailSimScript("audio capture assertion failed");
 			return;
 		}
 	} else if (command.op=="expect_screen_text") {
@@ -650,6 +666,20 @@ bool SDLEventManager::ExpectSimAudioActivity(int minPeak)
 		Trace::Error("RGNANO_SIM audio activity assertion failed");
 	}
 	return active;
+}
+
+bool SDLEventManager::ExpectSimAudioCaptureBytes(int minBytes)
+{
+	if (minBytes<=0) {
+		minBytes=44;
+	}
+	unsigned long bytes=AudioDriver::GetSimAudioCaptureBytes();
+	bool captured=bytes>=(unsigned long)minBytes;
+	Trace::Log("RGNANO_SIM","expect_audio_capture_bytes bytes=%lu minBytes=%d => %s",bytes,minBytes,captured?"captured":"short");
+	if (!captured) {
+		Trace::Error("RGNANO_SIM audio capture assertion failed");
+	}
+	return captured;
 }
 
 bool SDLEventManager::ExpectSimScreenText(const std::string &needle)

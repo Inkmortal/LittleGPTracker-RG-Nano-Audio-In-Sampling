@@ -76,6 +76,7 @@ private:
 	bool ExpectSimNoError();
 	bool ExpectSimView(const std::string &viewName);
 	bool ExpectSimAudioActivity(int minPeak);
+	bool ExpectSimAudioCaptureBytes(int minBytes);
 	bool ExpectSimScreenText(const std::string &needle);
 	bool ExpectSimSongChain(int row, int channel, const std::string &expected);
 	bool ExpectSimChainPhrase(int chain, int row, const std::string &expected);

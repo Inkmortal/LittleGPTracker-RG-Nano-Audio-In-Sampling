@@ -58,6 +58,9 @@ public:
 	static void ResetSimAudioStats();
 	static int GetSimAudioPeak();
 	static unsigned long GetSimAudioNonSilentBytes();
+	static bool BeginSimAudioCapture(const char *path);
+	static void EndSimAudioCapture();
+	static unsigned long GetSimAudioCaptureBytes();
 #endif
 
 	void OnNewBufferNeeded() ;

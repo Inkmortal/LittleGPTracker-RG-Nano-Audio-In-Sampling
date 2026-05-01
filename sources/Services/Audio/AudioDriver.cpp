@@ -4,10 +4,45 @@
 #include "System/Console/Trace.h"
 #include "System/Console/n_assert.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 #ifdef PLATFORM_RGNANO_SIM
 static int gSimAudioPeak = 0;
 static unsigned long gSimAudioNonSilentBytes = 0;
+static FILE *gSimAudioCaptureFile = 0;
+static unsigned long gSimAudioCaptureBytes = 0;
+
+static void WriteSimWav16(unsigned short value) {
+  unsigned char bytes[2];
+  bytes[0] = (unsigned char)(value & 0xFF);
+  bytes[1] = (unsigned char)((value >> 8) & 0xFF);
+  fwrite(bytes, 1, 2, gSimAudioCaptureFile);
+}
+
+static void WriteSimWav32(unsigned long value) {
+  unsigned char bytes[4];
+  bytes[0] = (unsigned char)(value & 0xFF);
+  bytes[1] = (unsigned char)((value >> 8) & 0xFF);
+  bytes[2] = (unsigned char)((value >> 16) & 0xFF);
+  bytes[3] = (unsigned char)((value >> 24) & 0xFF);
+  fwrite(bytes, 1, 4, gSimAudioCaptureFile);
+}
+
+static void WriteSimWavHeader(unsigned long dataBytes) {
+  fwrite("RIFF", 1, 4, gSimAudioCaptureFile);
+  WriteSimWav32(36 + dataBytes);
+  fwrite("WAVE", 1, 4, gSimAudioCaptureFile);
+  fwrite("fmt ", 1, 4, gSimAudioCaptureFile);
+  WriteSimWav32(16);
+  WriteSimWav16(1);
+  WriteSimWav16(2);
+  WriteSimWav32(44100);
+  WriteSimWav32(44100 * 2 * 2);
+  WriteSimWav16(4);
+  WriteSimWav16(16);
+  fwrite("data", 1, 4, gSimAudioCaptureFile);
+  WriteSimWav32(dataBytes);
+}
 #endif
 
 AudioDriver::AudioDriver(AudioSettings &settings) {
@@ -86,6 +121,10 @@ void AudioDriver::AddBuffer(short *buffer,int samplecount) {
       gSimAudioNonSilentBytes += sizeof(short);
     }
   }
+  if (gSimAudioCaptureFile) {
+    fwrite(buffer, 1, len, gSimAudioCaptureFile);
+    gSimAudioCaptureBytes += len;
+  }
 #endif
   pool_[poolQueuePosition_].size_=len ;
   poolQueuePosition_=(poolQueuePosition_+1)%SOUND_BUFFER_COUNT ;
@@ -123,5 +162,37 @@ int AudioDriver::GetSimAudioPeak() { return gSimAudioPeak; }
 
 unsigned long AudioDriver::GetSimAudioNonSilentBytes() {
   return gSimAudioNonSilentBytes;
+}
+
+bool AudioDriver::BeginSimAudioCapture(const char *path) {
+  EndSimAudioCapture();
+  if (!path || !path[0]) {
+    Trace::Error("RGNANO_SIM audio capture missing path");
+    return false;
+  }
+  gSimAudioCaptureFile = fopen(path, "wb");
+  if (!gSimAudioCaptureFile) {
+    Trace::Error("RGNANO_SIM failed to open audio capture %s", path);
+    return false;
+  }
+  gSimAudioCaptureBytes = 0;
+  WriteSimWavHeader(0);
+  Trace::Log("RGNANO_SIM", "audio capture started %s", path);
+  return true;
+}
+
+void AudioDriver::EndSimAudioCapture() {
+  if (!gSimAudioCaptureFile) {
+    return;
+  }
+  fseek(gSimAudioCaptureFile, 0, SEEK_SET);
+  WriteSimWavHeader(gSimAudioCaptureBytes);
+  fclose(gSimAudioCaptureFile);
+  gSimAudioCaptureFile = 0;
+  Trace::Log("RGNANO_SIM", "audio capture stopped bytes=%lu", gSimAudioCaptureBytes);
+}
+
+unsigned long AudioDriver::GetSimAudioCaptureBytes() {
+  return gSimAudioCaptureBytes;
 }
 #endif

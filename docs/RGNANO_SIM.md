@@ -40,6 +40,12 @@ Running without a script opens the RG Nano skin by default. The skin has a 240x2
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\sample-fixture.rgsim -Skin -SeedSampleFixture -ArtifactsDir .\sim-artifacts
 ```
 
+Use `-SeedLofiFixture` to generate a tiny built-in sample pack for producer workflow tests:
+
+```powershell
+.\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\lofi-sample-pack.rgsim -SeedLofiFixture -ArtifactsDir .\sim-artifacts
+```
+
 ## Buttons
 
 | RG Nano | Simulator key |
@@ -115,7 +121,10 @@ expect_phrase_row_count 0 8
 
 # reset and assert measured non-silent tracker audio output
 reset_audio_stats
+start_audio_capture demo-song-workflow.wav
 expect_audio_activity 64
+expect_audio_capture_bytes 120000
+end_audio_capture
 
 # fail if the simulator log contains an error marker
 expect_no_error
@@ -176,7 +185,7 @@ The uploaded-sample workflow seeds the simulator sample library, imports the sel
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\sample-import-workflow.rgsim -ResetLastProject -SeedSampleFixture -ArtifactsDir .\sim-artifacts
 ```
 
-The demo-song workflow drives the real RG Nano controls to create a song, chain, and phrase, enters an 8-step melodic pattern, imports the seeded WAV onto instrument `00`, starts playback, asserts measured audio activity, and verifies the Chain view activity meter in the unused sidebar space:
+The demo-song workflow drives the real RG Nano controls to create a song, chain, and phrase, enters an 8-step melodic pattern, imports the seeded WAV onto instrument `00`, starts playback, writes a listenable `demo-song-workflow.wav`, asserts measured audio activity, and verifies the Chain view activity meter in the unused sidebar space:
 
 ```powershell
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\demo-song-workflow.rgsim -ResetLastProject -SeedSampleFixture -Skin -ArtifactsDir .\sim-artifacts

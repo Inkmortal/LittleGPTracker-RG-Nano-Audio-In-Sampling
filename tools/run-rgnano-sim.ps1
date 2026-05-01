@@ -3,6 +3,7 @@ param(
   [string]$Script = "",
   [switch]$Skin,
   [switch]$SeedSampleFixture,
+  [switch]$SeedLofiFixture,
   [switch]$ResetLastProject,
   [string]$ArtifactsDir = ""
 )
@@ -76,8 +77,92 @@ function Write-TestWav {
   }
 }
 
+function Write-LofiWav {
+  param(
+    [string]$Path,
+    [string]$Kind
+  )
+  $sampleRate = 16000
+  $durationSeconds = switch ($Kind) {
+    "kick" { 0.45 }
+    "snare" { 0.35 }
+    "hat" { 0.18 }
+    "chord" { 2.0 }
+    "noise" { 4.0 }
+    default { 1.0 }
+  }
+  $sampleCount = [int]($sampleRate * $durationSeconds)
+  $dataSize = $sampleCount * 2
+  $rand = [System.Random]::new(1337 + $Kind.GetHashCode())
+  $writer = [System.IO.BinaryWriter]::new([System.IO.File]::Open($Path, [System.IO.FileMode]::Create))
+  try {
+    $writer.Write([System.Text.Encoding]::ASCII.GetBytes("RIFF"))
+    $writer.Write([int](36 + $dataSize))
+    $writer.Write([System.Text.Encoding]::ASCII.GetBytes("WAVEfmt "))
+    $writer.Write([int]16)
+    $writer.Write([Int16]1)
+    $writer.Write([Int16]1)
+    $writer.Write([int]$sampleRate)
+    $writer.Write([int]($sampleRate * 2))
+    $writer.Write([Int16]2)
+    $writer.Write([Int16]16)
+    $writer.Write([System.Text.Encoding]::ASCII.GetBytes("data"))
+    $writer.Write([int]$dataSize)
+
+    for ($i = 0; $i -lt $sampleCount; $i++) {
+      $t = $i / $sampleRate
+      $env = [Math]::Exp(-7.0 * $t)
+      $value = switch ($Kind) {
+        "kick" {
+          $freq = 52 + (80 * [Math]::Exp(-10.0 * $t))
+          [Math]::Sin((2 * [Math]::PI * $freq * $t)) * 22000 * [Math]::Exp(-8.0 * $t)
+        }
+        "snare" {
+          (($rand.NextDouble() * 2.0) - 1.0) * 13000 * [Math]::Exp(-11.0 * $t) +
+            [Math]::Sin((2 * [Math]::PI * 190 * $t)) * 5000 * [Math]::Exp(-9.0 * $t)
+        }
+        "hat" {
+          $noise = (($rand.NextDouble() * 2.0) - 1.0)
+          $noise * 10000 * [Math]::Exp(-28.0 * $t)
+        }
+        "chord" {
+          $freqs = @(220.0, 261.63, 329.63, 392.0)
+          $sum = 0.0
+          foreach ($freq in $freqs) {
+            $sum += [Math]::Sin((2 * [Math]::PI * $freq * $t))
+          }
+          ($sum / $freqs.Count) * 9500 * (0.75 + 0.25 * [Math]::Sin(2 * [Math]::PI * 0.6 * $t))
+        }
+        "noise" {
+          (($rand.NextDouble() * 2.0) - 1.0) * 900
+        }
+        default {
+          [Math]::Sin((2 * [Math]::PI * 440 * $t)) * 8000 * $env
+        }
+      }
+      if ($value -gt 32767) { $value = 32767 }
+      if ($value -lt -32768) { $value = -32768 }
+      $writer.Write([Int16]$value)
+    }
+  } finally {
+    $writer.Dispose()
+  }
+}
+
+if ($SeedSampleFixture -or $SeedLofiFixture) {
+  Get-ChildItem -LiteralPath $sampleDir -Filter "*.wav" -File -ErrorAction SilentlyContinue | Remove-Item -Force
+}
+
 if ($SeedSampleFixture) {
   Write-TestWav -Path (Join-Path $sampleDir "rgnano-test-tone.wav")
+}
+
+if ($SeedLofiFixture) {
+  Write-LofiWav -Path (Join-Path $sampleDir "lofi-kick.wav") -Kind "kick"
+  Write-LofiWav -Path (Join-Path $sampleDir "lofi-snare.wav") -Kind "snare"
+  Write-LofiWav -Path (Join-Path $sampleDir "lofi-hat.wav") -Kind "hat"
+  Write-LofiWav -Path (Join-Path $sampleDir "lofi-chord.wav") -Kind "chord"
+  Write-LofiWav -Path (Join-Path $sampleDir "lofi-vinyl.wav") -Kind "noise"
 }
 
 if ($ResetLastProject) {
@@ -120,6 +205,9 @@ if ($ArtifactsDir) {
     Copy-Item -LiteralPath $logPath -Destination (Join-Path $ArtifactsDir "rgnano-sim.log") -Force
   }
   Get-ChildItem -Path (Get-Location) -Filter "*.bmp" -File | Where-Object { $_.LastWriteTime -ge $runStarted } | ForEach-Object {
+    Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $ArtifactsDir $_.Name) -Force
+  }
+  Get-ChildItem -Path (Get-Location) -Filter "*.wav" -File | Where-Object { $_.LastWriteTime -ge $runStarted } | ForEach-Object {
     Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $ArtifactsDir $_.Name) -Force
   }
 }
