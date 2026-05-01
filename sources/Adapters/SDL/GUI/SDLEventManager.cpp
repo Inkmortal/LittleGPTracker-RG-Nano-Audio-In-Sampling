@@ -478,7 +478,7 @@ bool SDLEventManager::AddSimScriptLine(const std::string &line, const char *scri
 		if (command.arg.empty()) {
 			command.arg="80";
 		}
-	} else if (command.op=="expect_log") {
+	} else if (command.op=="expect_log" || command.op=="expect_screens_differ") {
 		iss >> command.arg;
 		std::getline(iss,command.arg2);
 		if (!command.arg2.empty() && command.arg2[0]==' ') {
@@ -643,6 +643,11 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 	} else if (command.op=="expect_no_error") {
 		if (!ExpectSimNoError()) {
 			FailSimScript("log error assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_screens_differ") {
+		if (!ExpectSimScreensDiffer(command.arg,command.arg2)) {
+			FailSimScript("screen difference assertion failed");
 			return;
 		}
 	} else if (command.op=="reset_audio_stats") {
@@ -967,42 +972,85 @@ bool SDLEventManager::ExpectSimProjectSample(const std::string &sampleName)
 	return exists;
 }
 
-bool SDLEventManager::ExpectSimLog(const std::string &needle)
+static std::string GetSimLogPath()
 {
 	const char *logPath=Config::GetInstance()->GetValue("RGNANOSIM_LOG");
 	if (!logPath) {
-		logPath="rgnano-sim.log";
+		return "rgnano-sim.log";
 	}
-	std::ifstream file(logPath);
+	std::string path(logPath);
+	std::ifstream file(path.c_str());
+	if (file.is_open()) {
+		return path;
+	}
+	std::string withExtension=path + ".log";
+	std::ifstream extensionFile(withExtension.c_str());
+	if (extensionFile.is_open()) {
+		return withExtension;
+	}
+	return path;
+}
+
+bool SDLEventManager::ExpectSimLog(const std::string &needle)
+{
+	std::string logPath=GetSimLogPath();
+	std::ifstream file(logPath.c_str());
 	if (!file.is_open()) {
-		Trace::Error("RGNANO_SIM expect_log failed to open %s",logPath);
+		Trace::Error("RGNANO_SIM expect_log failed to open %s",logPath.c_str());
 		return false;
 	}
 	std::stringstream buffer;
 	buffer << file.rdbuf();
 	std::string haystack=buffer.str();
 	bool found=haystack.find(needle)!=std::string::npos;
-	Trace::Log("RGNANO_SIM","expect_log %s in %s => %s",needle.c_str(),logPath,found?"found":"missing");
+	Trace::Log("RGNANO_SIM","expect_log %s in %s => %s",needle.c_str(),logPath.c_str(),found?"found":"missing");
 	return found;
 }
 
 bool SDLEventManager::ExpectSimNoError()
 {
-	const char *logPath=Config::GetInstance()->GetValue("RGNANOSIM_LOG");
-	if (!logPath) {
-		logPath="rgnano-sim.log";
-	}
-	std::ifstream file(logPath);
+	std::string logPath=GetSimLogPath();
+	std::ifstream file(logPath.c_str());
 	if (!file.is_open()) {
-		Trace::Error("RGNANO_SIM expect_no_error failed to open %s",logPath);
+		Trace::Error("RGNANO_SIM expect_no_error failed to open %s",logPath.c_str());
 		return false;
 	}
 	std::stringstream buffer;
 	buffer << file.rdbuf();
 	std::string haystack=buffer.str();
 	bool clean=haystack.find("[*ERROR*]")==std::string::npos && haystack.find("ERROR") == std::string::npos;
-	Trace::Log("RGNANO_SIM","expect_no_error in %s => %s",logPath,clean?"clean":"error found");
+	Trace::Log("RGNANO_SIM","expect_no_error in %s => %s",logPath.c_str(),clean?"clean":"error found");
 	return clean;
+}
+
+bool SDLEventManager::ExpectSimScreensDiffer(const std::string &firstPath, const std::string &secondPath)
+{
+	if (firstPath.empty() || secondPath.empty()) {
+		Trace::Error("RGNANO_SIM expect_screens_differ missing path");
+		return false;
+	}
+	std::ifstream first(firstPath.c_str(),std::ios::binary);
+	std::ifstream second(secondPath.c_str(),std::ios::binary);
+	if (!first.is_open() || !second.is_open()) {
+		Trace::Error("RGNANO_SIM expect_screens_differ failed to open %s or %s",firstPath.c_str(),secondPath.c_str());
+		return false;
+	}
+	std::vector<char> firstBytes((std::istreambuf_iterator<char>(first)),std::istreambuf_iterator<char>());
+	std::vector<char> secondBytes((std::istreambuf_iterator<char>(second)),std::istreambuf_iterator<char>());
+	bool differs=firstBytes.size()!=secondBytes.size();
+	if (!differs) {
+		for (size_t i=0;i<firstBytes.size();i++) {
+			if (firstBytes[i]!=secondBytes[i]) {
+				differs=true;
+				break;
+			}
+		}
+	}
+	Trace::Log("RGNANO_SIM","expect_screens_differ %s %s => %s",firstPath.c_str(),secondPath.c_str(),differs?"different":"same");
+	if (!differs) {
+		Trace::Error("RGNANO_SIM expected screenshots to differ");
+	}
+	return differs;
 }
 
 bool SDLEventManager::ExpectSimView(const std::string &viewName)

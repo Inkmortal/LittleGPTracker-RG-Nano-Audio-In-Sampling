@@ -79,6 +79,7 @@ private:
 	bool ExpectSimProjectSample(const std::string &sampleName);
 	bool ExpectSimLog(const std::string &needle);
 	bool ExpectSimNoError();
+	bool ExpectSimScreensDiffer(const std::string &firstPath, const std::string &secondPath);
 	bool ExpectSimView(const std::string &viewName);
 	bool ExpectSimSelectedText(const std::string &needle);
 	bool ExpectSimPlayerRunning(const std::string &expected);

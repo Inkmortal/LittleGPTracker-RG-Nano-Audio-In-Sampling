@@ -151,6 +151,7 @@ expect_play_mode phrase
 expect_streaming_sample rgnano-test-tone.wav
 expect_playing_channel 0 00
 expect_skin_frame_clean
+expect_screens_differ before.bmp after.bmp
 
 # write current view, cursor/model state, highlighted text, and full 40x30 text screen to the log
 dump_state sample import open
@@ -268,6 +269,12 @@ The mixer waveform workflow verifies the Mixer screen's live master waveform dur
 
 ```powershell
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\mixer-waveform-workflow.rgsim -ResetLastProject -SeedLofiFixture -Skin -ArtifactsDir .\sim-artifacts
+```
+
+The mixer waveform minute workflow is a longer visual/listening pass. It builds the Wuxia/lofi arrangement, switches to Mixer, captures about one minute of audio, and saves start/mid/end shell plus exact 240x240 app screenshots of the hybrid waveform:
+
+```powershell
+.\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\mixer-waveform-minute.rgsim -ResetLastProject -SeedLofiFixture -Skin -ArtifactsDir .\sim-artifacts-waveform-minute
 ```
 
 The note-spelling workflow verifies that the same pitch can be displayed with sharp or flat note names from the Project `Notes:` setting:

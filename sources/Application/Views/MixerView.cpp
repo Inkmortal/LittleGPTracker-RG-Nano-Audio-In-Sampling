@@ -13,6 +13,14 @@ MixerView::MixerView(GUIWindow &w,ViewData *viewData):View(w,viewData) {
 	clipboard_.active_=false ;
 	clipboard_.data_=0 ;
 	invertBatt_=false;
+    lastWaveformDrawMs_=0;
+    waveformPrimed_=false;
+    for (int i=0; i<WAVEFORM_DRAW_COLUMNS; i++) {
+        waveformLineTop_[i]=-1;
+        waveformLineBottom_[i]=-1;
+        waveformUpper_[i]=-1;
+        waveformLower_[i]=-1;
+    }
 }
 
 MixerView::~MixerView() {
@@ -222,7 +230,7 @@ void MixerView::DrawView() {
 		}
 	}; 
 	
-    drawWaveform() ;
+    drawWaveform(true) ;
     drawMap() ;
 	drawNotes() ;
 	drawMiniMeters() ;
@@ -287,15 +295,22 @@ void MixerView::OnPlayerUpdate(PlayerEventType ,unsigned int tick) {
 	pos._y+=1 ;	
 	DrawString(pos._x,pos._y,strbuffer,props) ;
 
+    drawWaveform() ;
     drawNotes() ;
     drawMiniMeters() ;
 
 } ;
 
-void MixerView::drawWaveform() {
+void MixerView::drawWaveform(bool force) {
     MixerService *mixer = MixerService::GetInstance();
 
 #if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+    unsigned int now=SDL_GetTicks();
+    if (!force && lastWaveformDrawMs_!=0 && now-lastWaveformDrawMs_<33) {
+        return;
+    }
+    lastWaveformDrawMs_=now;
+
     SDLGUIWindowImp *imp = (SDLGUIWindowImp *)w_.GetImpWindow();
     const int x = 24;
     const int y = 72;
@@ -303,46 +318,114 @@ void MixerView::drawWaveform() {
     const int height = 48;
     const int mid = y + (height / 2);
     const int columns = AudioMixer::WAVEFORM_SIZE;
+    const int stepPx = 1;
+    GUIColor scopeBackground(0x1D,0x0A,0x1F);
+    GUIColor scopeTrace(0xDB,0x33,0xDB);
+    GUIColor scopeBright(0xF5,0xEB,0xFF);
+    int peakAbs = 1;
+    for (int i=0; i<columns; i++) {
+        int sample = mixer->GetMasterWaveformSample(i);
+        int absSample = sample < 0 ? -sample : sample;
+        if (absSample > peakAbs) peakAbs = absSample;
+    }
+    int gain = (peakAbs < 85) ? ((85 * 100) / peakAbs) : 100;
+    if (gain > 520) gain = 520;
 
-    SetColor(CD_HILITE2);
-    for (int col = 0; col < width; col++) {
+    imp->SetColor(scopeBackground);
+    GUIRect clear(x, y, x + width, y + height);
+    imp->DrawRect(clear);
+
+    if (force || !waveformPrimed_) {
+        for (int i=0; i<WAVEFORM_DRAW_COLUMNS; i++) {
+            waveformLineTop_[i]=-1;
+            waveformLineBottom_[i]=-1;
+            waveformUpper_[i]=-1;
+            waveformLower_[i]=-1;
+        }
+        waveformPrimed_=true;
+    }
+
+    imp->SetColor(scopeBright);
+    for (int col = 0; col < width; col += 8) {
+        GUIRect center(x + col, mid, x + col + 2, mid + 1);
+        imp->DrawRect(center);
+    }
+
+    for (int col = 0; col < width; col += stepPx) {
+        int drawIndex = col / stepPx;
         int sampleIndex = (col * columns) / width;
-        int nextIndex = ((col + 1) * columns) / width;
+        int prevIndex = sampleIndex > 0 ? sampleIndex - 1 : sampleIndex;
+        int nextIndex = ((col + stepPx) * columns) / width;
         if (nextIndex >= columns) {
             nextIndex = columns - 1;
         }
+        int prevSample = mixer->GetMasterWaveformSample(prevIndex);
         int sample = mixer->GetMasterWaveformSample(sampleIndex);
         int nextSample = mixer->GetMasterWaveformSample(nextIndex);
         int minSample = mixer->GetMasterWaveformMin(sampleIndex);
         int maxSample = mixer->GetMasterWaveformMax(sampleIndex);
-        int waveY = mid - ((sample * (height / 2 - 2)) / 100);
-        int nextY = mid - ((nextSample * (height / 2 - 2)) / 100);
-        if (waveY < y) waveY = y;
-        if (waveY >= y + height) waveY = y + height - 1;
-        if (nextY < y) nextY = y;
-        if (nextY >= y + height) nextY = y + height - 1;
-        int lineTop = waveY < nextY ? waveY : nextY;
-        int lineBottom = waveY > nextY ? waveY : nextY;
-        GUIRect wave(x + col, lineTop, x + col + 1, lineBottom + 1);
+
+        int smoothed = (prevSample + (sample * 2) + nextSample) / 4;
+        int waveY = mid - ((smoothed * gain * (height / 2 - 2)) / 10000);
+        if (waveY < y + 2) waveY = y + 2;
+        if (waveY >= y + height - 2) waveY = y + height - 3;
+
+        imp->SetColor(scopeTrace);
+        int lineTop = waveY;
+        int lineBottom = waveY;
+        GUIRect wave(x + col, waveY, x + col + stepPx, waveY + 1);
         imp->DrawRect(wave);
 
-        if ((col % 4)==0) {
-            int top = mid - ((maxSample * (height / 2 - 2)) / 100);
-            int bottom = mid - ((minSample * (height / 2 - 2)) / 100);
-            if (top < y) top = y;
-            if (top >= y + height) top = y + height - 1;
-            if (bottom < y) bottom = y;
-            if (bottom >= y + height) bottom = y + height - 1;
-            GUIRect upper(x + col, top, x + col + 1, top + 1);
-            GUIRect lower(x + col, bottom, x + col + 1, bottom + 1);
-            imp->DrawRect(upper);
-            imp->DrawRect(lower);
+        if (sampleIndex>0) {
+            int prevSmoothed = (prevSample + sample) / 2;
+            int prevY = mid - ((prevSmoothed * gain * (height / 2 - 2)) / 10000);
+            if (prevY < y + 2) prevY = y + 2;
+            if (prevY >= y + height - 2) prevY = y + height - 3;
+            if (prevY != waveY) {
+                int delta = prevY > waveY ? prevY - waveY : waveY - prevY;
+                int bridgeTop = waveY;
+                int bridgeBottom = waveY;
+                if (delta <= 4) {
+                    bridgeTop = prevY < waveY ? prevY : waveY;
+                    bridgeBottom = prevY > waveY ? prevY : waveY;
+                } else if (prevY < waveY) {
+                    bridgeTop = waveY - 2;
+                } else {
+                    bridgeBottom = waveY + 2;
+                }
+                if (bridgeTop < y + 2) bridgeTop = y + 2;
+                if (bridgeBottom >= y + height - 2) bridgeBottom = y + height - 3;
+                GUIRect bridge(x + col, bridgeTop, x + col + 1, bridgeBottom + 1);
+                imp->DrawRect(bridge);
+                lineTop = bridgeTop;
+                lineBottom = bridgeBottom;
+            }
+        }
+
+        waveformLineTop_[drawIndex]=lineTop;
+        waveformLineBottom_[drawIndex]=lineBottom;
+
+        if ((col % 20)==0) {
+            int energy = maxSample - minSample;
+            if (energy > 115) {
+                imp->SetColor(scopeBright);
+                int sparkTop = waveY - 1;
+                int sparkBottom = waveY + 1;
+                if (sparkTop < y + 1) sparkTop = y + 1;
+                if (sparkBottom >= y + height - 1) sparkBottom = y + height - 2;
+                GUIRect spark(x + col, sparkTop, x + col + 1, sparkBottom + 1);
+                imp->DrawRect(spark);
+                waveformUpper_[drawIndex]=sparkTop;
+                waveformLower_[drawIndex]=sparkBottom;
+            } else {
+                waveformUpper_[drawIndex]=-1;
+                waveformLower_[drawIndex]=-1;
+            }
+        } else {
+            waveformUpper_[drawIndex]=-1;
+            waveformLower_[drawIndex]=-1;
         }
     }
-
-    SetColor(CD_NORMAL);
-    GUIRect center(x, mid, x + width, mid + 1);
-    imp->DrawRect(center);
 #else
     GUITextProperties props;
     GUIPoint pos;

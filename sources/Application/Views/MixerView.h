@@ -18,9 +18,16 @@ protected:
 	void onStart() ;
 	void onStop() ;
 	void updateCursor(int dx,int dy)  ;
-    void drawWaveform() ;
+    void drawWaveform(bool force=false) ;
 private:
+    static const int WAVEFORM_DRAW_COLUMNS = 176 ;
 	const char *song_ ;
+    unsigned int lastWaveformDrawMs_ ;
+    bool waveformPrimed_ ;
+    int waveformLineTop_[WAVEFORM_DRAW_COLUMNS] ;
+    int waveformLineBottom_[WAVEFORM_DRAW_COLUMNS] ;
+    int waveformUpper_[WAVEFORM_DRAW_COLUMNS] ;
+    int waveformLower_[WAVEFORM_DRAW_COLUMNS] ;
 
 	struct {                      // .Clipboard structure
         bool active_ ;            // .If currently making a selection
