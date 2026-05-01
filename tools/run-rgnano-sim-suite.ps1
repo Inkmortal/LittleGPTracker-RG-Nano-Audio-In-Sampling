@@ -50,6 +50,11 @@ $suite = @(
     Args = @("-ResetLastProject", "-SeedSampleFixture", "-Skin")
   },
   @{
+    Name = "all-8-channels-workflow"
+    Script = "all-8-channels-workflow.rgsim"
+    Args = @("-ResetLastProject", "-SeedLofiFixture", "-Skin")
+  },
+  @{
     Name = "lofi-sample-pack"
     Script = "lofi-sample-pack.rgsim"
     Args = @("-SeedLofiFixture")

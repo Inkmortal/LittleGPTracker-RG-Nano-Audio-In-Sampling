@@ -1,0 +1,103 @@
+# All 8 channels workflow:
+# Prove the RG Nano build can arrange, play, and report activity on every
+# tracker channel at once.
+route boot.new_project_random
+expect_view song
+
+sim_set_tempo 96
+sim_import_sample_to_instrument 0 lofi-kick.wav
+sim_import_sample_to_instrument 1 lofi-snare.wav
+sim_import_sample_to_instrument 2 lofi-hat.wav
+sim_import_sample_to_instrument 3 lofi-chord.wav
+sim_import_sample_to_instrument 4 wuxia-guzheng.wav
+sim_import_sample_to_instrument 5 wuxia-dizi.wav
+sim_import_sample_to_instrument 6 wuxia-erhu.wav
+sim_import_sample_to_instrument 7 wuxia-drum.wav
+expect_project_sample lofi-kick.wav
+expect_project_sample lofi-snare.wav
+expect_project_sample lofi-hat.wav
+expect_project_sample lofi-chord.wav
+expect_project_sample wuxia-guzheng.wav
+expect_project_sample wuxia-dizi.wav
+expect_project_sample wuxia-erhu.wav
+expect_project_sample wuxia-drum.wav
+
+# Independent chains across all eight song channels.
+sim_set_song_chain 0 0 0
+sim_set_song_chain 0 1 1
+sim_set_song_chain 0 2 2
+sim_set_song_chain 0 3 3
+sim_set_song_chain 0 4 4
+sim_set_song_chain 0 5 5
+sim_set_song_chain 0 6 6
+sim_set_song_chain 0 7 7
+expect_song_chain 0 0 00
+expect_song_chain 0 1 01
+expect_song_chain 0 2 02
+expect_song_chain 0 3 03
+expect_song_chain 0 4 04
+expect_song_chain 0 5 05
+expect_song_chain 0 6 06
+expect_song_chain 0 7 07
+
+# Each chain uses its own phrase and each phrase triggers its matching instrument.
+sim_set_chain_phrase 0 0 0 0
+sim_set_chain_phrase 1 0 1 0
+sim_set_chain_phrase 2 0 2 0
+sim_set_chain_phrase 3 0 3 0
+sim_set_chain_phrase 4 0 4 0
+sim_set_chain_phrase 5 0 5 0
+sim_set_chain_phrase 6 0 6 0
+sim_set_chain_phrase 7 0 7 0
+expect_chain_phrase 0 0 00
+expect_chain_phrase 1 0 01
+expect_chain_phrase 2 0 02
+expect_chain_phrase 3 0 03
+expect_chain_phrase 4 0 04
+expect_chain_phrase 5 0 05
+expect_chain_phrase 6 0 06
+expect_chain_phrase 7 0 07
+
+sim_set_phrase_note 0 0 60 0
+sim_set_phrase_note 1 0 64 1
+sim_set_phrase_note 2 0 67 2
+sim_set_phrase_note 3 0 72 3
+sim_set_phrase_note 4 0 55 4
+sim_set_phrase_note 5 0 59 5
+sim_set_phrase_note 6 0 62 6
+sim_set_phrase_note 7 0 48 7
+expect_phrase_row_count 0 1
+expect_phrase_row_count 7 1
+
+dump_state all 8 channels arranged
+screenshot all-8-channels-song.bmp
+route song.to_mixer
+wait 120
+expect_view mixer
+screenshot all-8-channels-mixer.bmp
+route mixer.to_song
+wait 120
+expect_view song
+
+reset_audio_stats
+start_audio_capture all-8-channels-workflow.wav
+press s 80
+wait 220
+expect_player_running yes
+expect_play_mode song
+expect_playing_channel 0 00
+expect_playing_channel 1 01
+expect_playing_channel 2 02
+expect_playing_channel 3 03
+expect_playing_channel 4 04
+expect_playing_channel 5 05
+expect_playing_channel 6 06
+expect_playing_channel 7 07
+wait 1200
+expect_audio_activity 64
+expect_audio_capture_bytes 90000
+end_audio_capture
+expect_size 240 240
+expect_colors 3
+expect_no_error
+quit

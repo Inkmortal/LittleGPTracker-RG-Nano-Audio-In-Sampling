@@ -242,6 +242,12 @@ The demo-song workflow drives the real RG Nano controls to create a song, chain,
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\demo-song-workflow.rgsim -ResetLastProject -SeedSampleFixture -Skin -ArtifactsDir .\sim-artifacts
 ```
 
+The all-8-channels workflow assigns independent chains, phrases, notes, and instruments to all 8 tracker channels, starts song playback, and asserts that every channel reports active playback:
+
+```powershell
+.\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\all-8-channels-workflow.rgsim -ResetLastProject -SeedLofiFixture -Skin -ArtifactsDir .\sim-artifacts
+```
+
 The producer navigation tour exercises the main RG Nano view routes after creating song/chain/phrase state:
 
 ```powershell

@@ -4,7 +4,7 @@ This document tracks whether the RG Nano fork is credible as a tiny music-produc
 
 ## Current Verdict
 
-The core LGPT production spine is present: Song, Chain, Phrase, Instrument, Table, Groove, Project/settings, sample import, sample preview, playback, save/reopen, and simulator capture all exist.
+The core LGPT production spine is present: Song, Chain, Phrase, Instrument, Table, Groove, Project/settings, sample import, sample preview, playback, save/reopen, all 8 tracker channels, and simulator capture all exist.
 
 The open question is no longer "can it make a song?" It can. The open question is whether every producer-facing screen is legible enough, whether navigation feels intentional on the RG Nano buttons, and which M8-style features should be added first.
 
@@ -19,6 +19,7 @@ Latest audit: passed on the native `RGNANO_SIM` executable at 240x240. Every scr
 | Boot project selector | Existing modal | Load/new project | Confirmed in sim | Must stay readable because every session starts here. |
 | New project dialog | Existing modal | Create song folders | Confirmed in sim | Naming UI is cramped but the random-name path is usable. |
 | Song view | Existing core view | Arrange chains across 8 tracks | Confirmed in sim | Split mode fits all 8 tracks, but dense rows need continued readability checks. |
+| 8-channel playback | Existing core engine | Full arrangements across all tracks | Confirmed in sim | `all-8-channels-workflow.rgsim` assigns independent chains, phrases, notes, and instruments to channels 0-7 and asserts all 8 channels are playing. |
 | Mixer view | Existing view, route restored | Track activity, play time, CPU/clip/battery | Confirmed in sim | `SongView` could request `VT_MIXER`, but `AppWindow` was not switching to it. This pass restores it and labels the screen as `Mixer Song` or `Mixer Live`. |
 | Chain view | Existing core view | Phrase order and transposition | Confirmed in sim | Usable, but transposition readability should be checked at device scale. |
 | Phrase view | Existing core view | Notes, instruments, commands | Confirmed in sim | This is the most important editing screen; command columns need special audit. |
