@@ -5,5 +5,9 @@ expect_file rgnano-sim-data/samples/lofi-snare.wav
 expect_file rgnano-sim-data/samples/lofi-hat.wav
 expect_file rgnano-sim-data/samples/lofi-chord.wav
 expect_file rgnano-sim-data/samples/lofi-vinyl.wav
+expect_file rgnano-sim-data/samples/wuxia-guzheng.wav
+expect_file rgnano-sim-data/samples/wuxia-dizi.wav
+expect_file rgnano-sim-data/samples/wuxia-erhu.wav
+expect_file rgnano-sim-data/samples/wuxia-drum.wav
 expect_no_error
 quit

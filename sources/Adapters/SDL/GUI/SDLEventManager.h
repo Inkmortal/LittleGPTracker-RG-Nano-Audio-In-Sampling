@@ -81,6 +81,11 @@ private:
 	bool ExpectSimSongChain(int row, int channel, const std::string &expected);
 	bool ExpectSimChainPhrase(int chain, int row, const std::string &expected);
 	bool ExpectSimPhraseRowCount(int phrase, int minRows);
+	bool SimSetTempo(int bpm);
+	bool SimImportSampleToInstrument(int instrument, const std::string &sampleName);
+	bool SimSetSongChain(int row, int channel, int chain);
+	bool SimSetChainPhrase(int chain, int row, int phrase, int transpose);
+	bool SimSetPhraseNote(int phrase, int row, int note, int instrument);
 	bool ExpectSimScreenSize(SDLGUIWindowImp *window, int width, int height);
 	bool ExpectSimScreenColors(SDLGUIWindowImp *window, int minColors);
 	int CountSurfaceColors(SDL_Surface *surface, int maxColors);

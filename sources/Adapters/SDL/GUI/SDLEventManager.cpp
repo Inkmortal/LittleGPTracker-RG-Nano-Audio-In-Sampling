@@ -2,6 +2,9 @@
 #include "SDLEventManager.h"
 #include "Application/Application.h"
 #include "Application/AppWindow.h"
+#include "Application/Instruments/InstrumentBank.h"
+#include "Application/Instruments/SampleInstrument.h"
+#include "Application/Instruments/SamplePool.h"
 #include "System/FileSystem/FileSystem.h"
 #include "UIFramework/BasicDatas/GUIEvent.h"
 #include "SDLGUIWindowImp.h"
@@ -311,6 +314,16 @@ void SDLEventManager::LoadSimScript()
 			iss >> command.value >> command.value2 >> command.arg;
 		} else if (command.op=="expect_phrase_row_count") {
 			iss >> command.value >> command.value2;
+		} else if (command.op=="sim_set_tempo") {
+			iss >> command.value;
+		} else if (command.op=="sim_import_sample_to_instrument") {
+			iss >> command.value >> command.arg;
+		} else if (command.op=="sim_set_song_chain") {
+			iss >> command.value >> command.value2 >> command.arg;
+		} else if (command.op=="sim_set_chain_phrase") {
+			iss >> command.value >> command.value2 >> command.arg >> command.arg2;
+		} else if (command.op=="sim_set_phrase_note") {
+			iss >> command.value >> command.value2 >> command.arg >> command.arg2;
 		} else if (command.op=="expect_size") {
 			iss >> command.value >> command.value2;
 		}
@@ -466,6 +479,31 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 	} else if (command.op=="expect_phrase_row_count") {
 		if (!ExpectSimPhraseRowCount(command.value,command.value2)) {
 			FailSimScript("phrase row count assertion failed");
+			return;
+		}
+	} else if (command.op=="sim_set_tempo") {
+		if (!SimSetTempo(command.value)) {
+			FailSimScript("tempo setup failed");
+			return;
+		}
+	} else if (command.op=="sim_import_sample_to_instrument") {
+		if (!SimImportSampleToInstrument(command.value,command.arg)) {
+			FailSimScript("sample import setup failed");
+			return;
+		}
+	} else if (command.op=="sim_set_song_chain") {
+		if (!SimSetSongChain(command.value,command.value2,atoi(command.arg.c_str()))) {
+			FailSimScript("song setup failed");
+			return;
+		}
+	} else if (command.op=="sim_set_chain_phrase") {
+		if (!SimSetChainPhrase(command.value,command.value2,atoi(command.arg.c_str()),atoi(command.arg2.c_str()))) {
+			FailSimScript("chain setup failed");
+			return;
+		}
+	} else if (command.op=="sim_set_phrase_note") {
+		if (!SimSetPhraseNote(command.value,command.value2,atoi(command.arg.c_str()),atoi(command.arg2.c_str()))) {
+			FailSimScript("phrase setup failed");
 			return;
 		}
 	} else if (command.op=="expect_colors") {
@@ -754,6 +792,98 @@ bool SDLEventManager::ExpectSimPhraseRowCount(int phrase, int minRows)
 	bool matches=count>=minRows;
 	Trace::Log("RGNANO_SIM","expect_phrase_row_count phrase=%d count=%d min=%d => %s",phrase,count,minRows,matches?"match":"mismatch");
 	return matches;
+}
+
+static ViewData *GetSimViewData()
+{
+	GUIWindow *guiWindow=Application::GetInstance()->GetWindow();
+	AppWindow *appWindow=(AppWindow *)guiWindow;
+	return appWindow ? appWindow->GetViewData() : 0;
+}
+
+bool SDLEventManager::SimSetTempo(int bpm)
+{
+	ViewData *viewData=GetSimViewData();
+	if (!viewData || !viewData->project_) {
+		Trace::Error("RGNANO_SIM sim_set_tempo has no project");
+		return false;
+	}
+	Variable *tempo=viewData->project_->FindVariable(VAR_TEMPO);
+	if (!tempo) {
+		Trace::Error("RGNANO_SIM sim_set_tempo missing tempo variable");
+		return false;
+	}
+	tempo->SetInt(bpm);
+	Trace::Log("RGNANO_SIM","sim_set_tempo %d",bpm);
+	return true;
+}
+
+bool SDLEventManager::SimImportSampleToInstrument(int instrument, const std::string &sampleName)
+{
+	ViewData *viewData=GetSimViewData();
+	if (!viewData || !viewData->project_ || instrument<0 || instrument>=MAX_SAMPLEINSTRUMENT_COUNT || sampleName.empty()) {
+		Trace::Error("RGNANO_SIM sim_import_sample_to_instrument invalid args instrument=%d sample=%s",instrument,sampleName.c_str());
+		return false;
+	}
+	std::string aliasPath="./rgnano-sim-data/samples/";
+	aliasPath+=sampleName;
+	Path samplePath(aliasPath.c_str());
+	Path resolvedPath(samplePath.GetPath());
+	if (!resolvedPath.Exists()) {
+		Trace::Error("RGNANO_SIM sim_import_sample_to_instrument missing %s (%s)",sampleName.c_str(),resolvedPath.GetPath().c_str());
+		return false;
+	}
+	int sampleIndex=SamplePool::GetInstance()->ImportSample(samplePath);
+	if (sampleIndex<0) {
+		return false;
+	}
+	InstrumentBank *bank=viewData->project_->GetInstrumentBank();
+	SampleInstrument *sampleInstrument=(SampleInstrument *)bank->GetInstrument(instrument);
+	sampleInstrument->AssignSample(sampleIndex);
+	Trace::Log("RGNANO_SIM","sim_import_sample_to_instrument inst=%d sample=%s index=%d",instrument,sampleName.c_str(),sampleIndex);
+	return true;
+}
+
+bool SDLEventManager::SimSetSongChain(int row, int channel, int chain)
+{
+	ViewData *viewData=GetSimViewData();
+	if (!viewData || !viewData->song_ || row<0 || row>=SONG_ROW_COUNT || channel<0 || channel>=SONG_CHANNEL_COUNT || chain<0 || chain>=CHAIN_COUNT) {
+		Trace::Error("RGNANO_SIM sim_set_song_chain invalid args row=%d channel=%d chain=%d",row,channel,chain);
+		return false;
+	}
+	*(viewData->song_->data_ + channel + SONG_CHANNEL_COUNT * row)=(unsigned char)chain;
+	viewData->song_->chain_->SetUsed((unsigned char)chain);
+	Trace::Log("RGNANO_SIM","sim_set_song_chain row=%d channel=%d chain=%02X",row,channel,chain);
+	return true;
+}
+
+bool SDLEventManager::SimSetChainPhrase(int chain, int row, int phrase, int transpose)
+{
+	ViewData *viewData=GetSimViewData();
+	if (!viewData || !viewData->song_ || chain<0 || chain>=CHAIN_COUNT || row<0 || row>=16 || phrase<0 || phrase>=PHRASE_COUNT || transpose<0 || transpose>255) {
+		Trace::Error("RGNANO_SIM sim_set_chain_phrase invalid args chain=%d row=%d phrase=%d transpose=%d",chain,row,phrase,transpose);
+		return false;
+	}
+	*(viewData->song_->chain_->data_ + 16 * chain + row)=(unsigned char)phrase;
+	*(viewData->song_->chain_->transpose_ + 16 * chain + row)=(unsigned char)transpose;
+	viewData->song_->chain_->SetUsed((unsigned char)chain);
+	viewData->song_->phrase_->SetUsed((unsigned char)phrase);
+	Trace::Log("RGNANO_SIM","sim_set_chain_phrase chain=%02X row=%d phrase=%02X transpose=%02X",chain,row,phrase,transpose);
+	return true;
+}
+
+bool SDLEventManager::SimSetPhraseNote(int phrase, int row, int note, int instrument)
+{
+	ViewData *viewData=GetSimViewData();
+	if (!viewData || !viewData->song_ || phrase<0 || phrase>=PHRASE_COUNT || row<0 || row>=16 || note<0 || note>119 || instrument<0 || instrument>=MAX_INSTRUMENT_COUNT) {
+		Trace::Error("RGNANO_SIM sim_set_phrase_note invalid args phrase=%d row=%d note=%d instrument=%d",phrase,row,note,instrument);
+		return false;
+	}
+	*(viewData->song_->phrase_->note_ + 16 * phrase + row)=(unsigned char)note;
+	*(viewData->song_->phrase_->instr_ + 16 * phrase + row)=(unsigned char)instrument;
+	viewData->song_->phrase_->SetUsed((unsigned char)phrase);
+	Trace::Log("RGNANO_SIM","sim_set_phrase_note phrase=%02X row=%d note=%d instrument=%02X",phrase,row,note,instrument);
+	return true;
 }
 
 bool SDLEventManager::ExpectSimScreenSize(SDLGUIWindowImp *window, int width, int height)

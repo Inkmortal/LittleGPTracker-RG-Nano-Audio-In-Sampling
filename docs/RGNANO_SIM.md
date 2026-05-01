@@ -40,10 +40,16 @@ Running without a script opens the RG Nano skin by default. The skin has a 240x2
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\sample-fixture.rgsim -Skin -SeedSampleFixture -ArtifactsDir .\sim-artifacts
 ```
 
-Use `-SeedLofiFixture` to generate a tiny built-in sample pack for producer workflow tests:
+Use `-SeedLofiFixture` to generate a built-in sample pack for producer workflow tests. It currently creates drum, hat, chord, vinyl-bed, guzheng-like, dizi-like, erhu-like, and traditional drum WAVs locally so simulator tests stay reproducible and license-clean:
 
 ```powershell
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\lofi-sample-pack.rgsim -SeedLofiFixture -ArtifactsDir .\sim-artifacts
+```
+
+The Wuxia/donghua lofi studio workflow imports that palette, programs an 8-channel tracker arrangement, plays it through the simulator, and captures a two-minute WAV you can listen to:
+
+```powershell
+.\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\wuxia-lofi-studio.rgsim -ResetLastProject -SeedLofiFixture -Skin -ArtifactsDir .\sim-artifacts-wuxia-lofi
 ```
 
 ## Buttons
@@ -118,6 +124,13 @@ expect_screen_text 1######
 expect_song_chain 0 0 00
 expect_chain_phrase 0 0 00
 expect_phrase_row_count 0 8
+
+# directly program tracker state for long producer workflows
+sim_set_tempo 82
+sim_import_sample_to_instrument 3 wuxia-guzheng.wav
+sim_set_song_chain 0 3 3
+sim_set_chain_phrase 3 0 3 0
+sim_set_phrase_note 3 0 50 3
 
 # reset and assert measured non-silent tracker audio output
 reset_audio_stats

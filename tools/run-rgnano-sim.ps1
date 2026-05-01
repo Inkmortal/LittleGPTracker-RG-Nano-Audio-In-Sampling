@@ -89,6 +89,10 @@ function Write-LofiWav {
     "hat" { 0.18 }
     "chord" { 2.0 }
     "noise" { 4.0 }
+    "guzheng" { 1.4 }
+    "dizi" { 1.2 }
+    "erhu" { 1.8 }
+    "drum" { 0.7 }
     default { 1.0 }
   }
   $sampleCount = [int]($sampleRate * $durationSeconds)
@@ -136,6 +140,33 @@ function Write-LofiWav {
         "noise" {
           (($rand.NextDouble() * 2.0) - 1.0) * 900
         }
+        "guzheng" {
+          $base = 293.66
+          $pluck = [Math]::Sin(2 * [Math]::PI * $base * $t) +
+            0.45 * [Math]::Sin(2 * [Math]::PI * $base * 2.01 * $t) +
+            0.22 * [Math]::Sin(2 * [Math]::PI * $base * 3.02 * $t)
+          $pluck * 15000 * [Math]::Exp(-3.2 * $t)
+        }
+        "dizi" {
+          $vibrato = 1.0 + 0.012 * [Math]::Sin(2 * [Math]::PI * 5.2 * $t)
+          $base = 587.33 * $vibrato
+          ($([Math]::Sin(2 * [Math]::PI * $base * $t)) +
+            0.18 * [Math]::Sin(2 * [Math]::PI * $base * 2.0 * $t)) * 10000 *
+            [Math]::Min(1.0, $t * 12.0) * [Math]::Exp(-0.8 * $t)
+        }
+        "erhu" {
+          $vibrato = 1.0 + 0.018 * [Math]::Sin(2 * [Math]::PI * 4.8 * $t)
+          $base = 220.0 * $vibrato
+          $saw = 2.0 * (($base * $t) - [Math]::Floor(0.5 + $base * $t))
+          $sine = [Math]::Sin(2 * [Math]::PI * $base * $t)
+          (($saw * 0.45) + ($sine * 0.55)) * 9000 *
+            [Math]::Min(1.0, $t * 7.0) * [Math]::Exp(-0.35 * $t)
+        }
+        "drum" {
+          $thump = [Math]::Sin(2 * [Math]::PI * 92 * $t) * 16000 * [Math]::Exp(-7.0 * $t)
+          $skin = (($rand.NextDouble() * 2.0) - 1.0) * 5000 * [Math]::Exp(-13.0 * $t)
+          $thump + $skin
+        }
         default {
           [Math]::Sin((2 * [Math]::PI * 440 * $t)) * 8000 * $env
         }
@@ -163,6 +194,10 @@ if ($SeedLofiFixture) {
   Write-LofiWav -Path (Join-Path $sampleDir "lofi-hat.wav") -Kind "hat"
   Write-LofiWav -Path (Join-Path $sampleDir "lofi-chord.wav") -Kind "chord"
   Write-LofiWav -Path (Join-Path $sampleDir "lofi-vinyl.wav") -Kind "noise"
+  Write-LofiWav -Path (Join-Path $sampleDir "wuxia-guzheng.wav") -Kind "guzheng"
+  Write-LofiWav -Path (Join-Path $sampleDir "wuxia-dizi.wav") -Kind "dizi"
+  Write-LofiWav -Path (Join-Path $sampleDir "wuxia-erhu.wav") -Kind "erhu"
+  Write-LofiWav -Path (Join-Path $sampleDir "wuxia-drum.wav") -Kind "drum"
 }
 
 if ($ResetLastProject) {
