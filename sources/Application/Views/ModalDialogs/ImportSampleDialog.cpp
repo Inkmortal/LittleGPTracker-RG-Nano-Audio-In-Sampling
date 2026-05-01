@@ -87,13 +87,13 @@ void ImportSampleDialog::DrawView() {
 	} ;
 
 	y=LIST_SIZE+2 ;
-	int offset=LIST_WIDTH/5 ;
 
 	SetColor(CD_NORMAL) ;
 
+	const int buttonX[4] = {1, 8, 15, 22};
 	for (int i=0;i<4;i++) {
 		const char *text=buttonText[i] ;
-		x=offset*(i+1)-strlen(text)/2 ;
+		x=buttonX[i] ;
 		props.invert_=(i==selected_)?true:false ;
 		DrawString(x,y,text,props) ;
 	}	
