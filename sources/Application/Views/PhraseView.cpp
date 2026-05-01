@@ -1,5 +1,6 @@
 #include "PhraseView.h"
 #include "Application/Instruments/CommandList.h"
+#include "Application/Mixer/MixerService.h"
 #include "Application/Model/Scale.h"
 #include "Application/Model/Table.h"
 #include "Application/Utils/HelpLegend.h"
@@ -8,6 +9,9 @@
 #include "Application/Views/ModalDialogs/CommandSelectorModal.h"
 #include "System/Console/Trace.h"
 #include "UIController.h"
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+#include "Adapters/SDL/GUI/SDLGUIWindowImp.h"
+#endif
 #include <stdlib.h>
 #include <string.h>
 
@@ -25,6 +29,7 @@ PhraseView::PhraseView(GUIWindow &w, ViewData *viewData)
     : View(w, viewData), cmdEdit_("edit", FCC_EDIT, 0) {
     phrase_ = viewData_->song_->phrase_;
     lastPlayingPos_ = 0;
+    lastMiniWaveformDrawMs_ = 0;
     GUIPoint pos(0, 10);
     cmdEditField_ =
         new UIBigHexVarField(pos, cmdEdit_, 4, "%4.4X", 0, 0xFFFF, 16, true);
@@ -1457,6 +1462,7 @@ void PhraseView::DrawView() {
 
     drawMap();
     drawNotes();
+    drawMiniWaveform(true);
 
     Player *player = Player::GetInstance();
     if (player->IsRunning()) {
@@ -1473,6 +1479,7 @@ void PhraseView::OnPlayerUpdate(PlayerEventType eventType, unsigned int tick) {
 
     GUITextProperties props;
     drawNotes();
+    drawMiniWaveform(eventType == PET_STOP);
 
     GUIPoint anchor = GetAnchor();
     GUIPoint pos = anchor;
@@ -1553,6 +1560,109 @@ void PhraseView::OnPlayerUpdate(PlayerEventType eventType, unsigned int tick) {
         }
     */
 };
+
+void PhraseView::drawMiniWaveform(bool force) {
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+    Player *player = Player::GetInstance();
+    unsigned int now = SDL_GetTicks();
+    if (!force && lastMiniWaveformDrawMs_ != 0 &&
+        now - lastMiniWaveformDrawMs_ < 33) {
+        return;
+    }
+    lastMiniWaveformDrawMs_ = now;
+
+    SDLGUIWindowImp *imp = (SDLGUIWindowImp *)w_.GetImpWindow();
+    MixerService *mixer = MixerService::GetInstance();
+    const int x = 88;
+    const int y = 26;
+    const int width = 128;
+    const int height = 12;
+    const int mid = y + (height / 2);
+    const int columns = AudioMixer::WAVEFORM_SIZE;
+    GUIColor scopeBackground(0x08, 0x12, 0x16);
+    GUIColor scopeTrace(0x35, 0xD3, 0xCE);
+    GUIColor scopeBright(0xF3, 0xFF, 0xFB);
+
+    imp->SetColor(scopeBackground);
+    GUIRect clear(x, y, x + width, y + height);
+    imp->DrawRect(clear);
+
+    if (!player->IsRunning()) {
+        return;
+    }
+
+    int peakAbs = 1;
+    for (int i = 0; i < columns; i++) {
+        int sample = mixer->GetMasterWaveformSample(i);
+        int absSample = sample < 0 ? -sample : sample;
+        if (absSample > peakAbs) {
+            peakAbs = absSample;
+        }
+    }
+    int gain = (peakAbs < 110) ? ((110 * 100) / peakAbs) : 100;
+    if (gain > 620) {
+        gain = 620;
+    }
+
+    imp->SetColor(scopeBright);
+    for (int col = 0; col < width; col += 12) {
+        GUIRect center(x + col, mid, x + col + 2, mid + 1);
+        imp->DrawRect(center);
+    }
+
+    int previousY = mid;
+    for (int col = 0; col < width; col++) {
+        int sampleIndex = (col * columns) / width;
+        int prevIndex = sampleIndex > 0 ? sampleIndex - 1 : sampleIndex;
+        int nextIndex = ((col + 1) * columns) / width;
+        if (nextIndex >= columns) {
+            nextIndex = columns - 1;
+        }
+
+        int previous = mixer->GetMasterWaveformSample(prevIndex);
+        int sample = mixer->GetMasterWaveformSample(sampleIndex);
+        int next = mixer->GetMasterWaveformSample(nextIndex);
+        int smoothed = (previous + (sample * 2) + next) / 4;
+        int waveY = mid - ((smoothed * gain * (height / 2 - 1)) / 10000);
+        if (waveY < y + 1) {
+            waveY = y + 1;
+        }
+        if (waveY >= y + height - 1) {
+            waveY = y + height - 2;
+        }
+
+        imp->SetColor(scopeTrace);
+        int top = previousY < waveY ? previousY : waveY;
+        int bottom = previousY > waveY ? previousY : waveY;
+        if (bottom - top > 4) {
+            if (previousY < waveY) {
+                top = waveY - 3;
+            } else {
+                bottom = waveY + 3;
+            }
+        }
+        if (top < y + 1) {
+            top = y + 1;
+        }
+        if (bottom >= y + height - 1) {
+            bottom = y + height - 2;
+        }
+
+        GUIRect wave(x + col, top, x + col + 1, bottom + 1);
+        imp->DrawRect(wave);
+
+        int minSample = mixer->GetMasterWaveformMin(sampleIndex);
+        int maxSample = mixer->GetMasterWaveformMax(sampleIndex);
+        if ((col % 24) == 0 && maxSample - minSample > 140) {
+            imp->SetColor(scopeBright);
+            GUIRect spark(x + col, waveY - 1, x + col + 1, waveY + 2);
+            imp->DrawRect(spark);
+        }
+
+        previousY = waveY;
+    }
+#endif
+}
 
 void PhraseView::printHelpLegend(FourCC command, GUITextProperties props) {
     SetColor(CD_NORMAL);

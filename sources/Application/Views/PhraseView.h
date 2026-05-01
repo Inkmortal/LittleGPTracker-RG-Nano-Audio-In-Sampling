@@ -50,6 +50,7 @@ class PhraseView : public View {
     void processSelectionButtonMask(unsigned short mask);
 
     void setTextProps(GUITextProperties &props, int row, int col, bool restore);
+    void drawMiniWaveform(bool force = false);
 
   private:
     int row_;
@@ -61,6 +62,7 @@ class PhraseView : public View {
     bool commandSelectorModalActive_;
     Phrase *phrase_;
     int lastPlayingPos_;
+    unsigned int lastMiniWaveformDrawMs_;
     Variable cmdEdit_;
     UIBigHexVarField *cmdEditField_;
     void printHelpLegend(FourCC command, GUITextProperties props);
