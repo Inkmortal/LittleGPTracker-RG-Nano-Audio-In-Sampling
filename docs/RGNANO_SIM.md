@@ -61,6 +61,8 @@ In skin mode, these controls can also be clicked directly on the device shell.
 
 This target is intended for automated UI, project, sample, and audio-output smoke tests before moving a build to the physical RG Nano.
 
+The source-derived control and navigation map lives in [RGNANO_INPUT_MAP.md](RGNANO_INPUT_MAP.md). Use that map as the authority for simulator workflows: LGPT handles held button masks, so tests should use real combos instead of treating buttons as isolated clicks.
+
 ## Scripted Smoke Tests
 
 Pass a script with:
@@ -121,4 +123,10 @@ The sample fixture smoke test generates a tiny 440 Hz WAV file in `rgnano-sim-da
 
 ```powershell
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\sample-fixture.rgsim -Skin -SeedSampleFixture -ArtifactsDir .\sim-artifacts
+```
+
+The source-derived new-project route drives the actual boot controls from `SelectProjectDialog` and `NewProjectDialog`:
+
+```powershell
+.\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\new-project-route.rgsim -ResetLastProject -ArtifactsDir .\sim-artifacts
 ```

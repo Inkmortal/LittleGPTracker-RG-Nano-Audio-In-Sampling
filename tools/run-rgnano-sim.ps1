@@ -3,6 +3,7 @@ param(
   [string]$Script = "",
   [switch]$Skin,
   [switch]$SeedSampleFixture,
+  [switch]$ResetLastProject,
   [string]$ArtifactsDir = ""
 )
 
@@ -75,6 +76,13 @@ function Write-TestWav {
 
 if ($SeedSampleFixture) {
   Write-TestWav -Path (Join-Path $sampleDir "rgnano-test-tone.wav")
+}
+
+if ($ResetLastProject) {
+  $lastProjectFile = Join-Path $exeDir "last_project"
+  if (Test-Path -LiteralPath $lastProjectFile) {
+    Remove-Item -LiteralPath $lastProjectFile -Force
+  }
 }
 
 $args = @()

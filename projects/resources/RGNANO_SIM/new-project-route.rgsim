@@ -1,0 +1,17 @@
+# Source-derived boot route:
+# Load -> New -> NewProjectDialog -> Random -> Ok -> loaded project.
+wait 500
+press r 80
+press a 80
+wait 200
+press d 80
+press a 80
+press r 80
+press a 80
+wait 1000
+screenshot new-project-route.bmp
+expect_size 240 240
+expect_colors 4
+expect_file projects/last_project
+expect_no_error
+quit
