@@ -39,7 +39,7 @@ tempoNudge_(0)
 	Variable *transpose=new Variable("transpose", VAR_TRANSPOSE, 0);
 	this->Insert(transpose);
     Variable *scaleKey =
-        new Variable("scaleKey", VAR_SCALE_KEY, 0, 11);
+        new Variable("scaleKey", VAR_SCALE_KEY, -1, 11);
     this->Insert(scaleKey);
     Variable *scale =
         new Variable("scale", VAR_SCALE, scaleNames, scaleCount, 0);
@@ -139,7 +139,7 @@ int Project::GetScaleKey() {
     Variable *v = FindVariable(VAR_SCALE_KEY);
     NAssert(v);
     int key = v->GetInt();
-    if (key<0) key=0;
+    if (key<-1) key=-1;
     if (key>11) key=11;
     return key;
 }

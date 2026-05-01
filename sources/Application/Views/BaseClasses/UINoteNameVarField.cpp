@@ -21,6 +21,8 @@ void UINoteNameVarField::Draw(GUIWindow &w,int offset) {
 
 	int mode = noteMode_ ? noteMode_->GetInt() : getNoteNameMode();
 	char buffer[80] ;
-	sprintf(buffer,format_,getNoteName(src_.GetInt(),mode)) ;
+	int note = src_.GetInt();
+	const char *name = note<0 ? "--" : getNoteName(note,mode);
+	sprintf(buffer,format_,name) ;
 	w.DrawString(buffer,position,props) ;
 } ;

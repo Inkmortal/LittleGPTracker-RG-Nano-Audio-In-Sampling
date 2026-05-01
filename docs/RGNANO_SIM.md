@@ -269,6 +269,12 @@ The scale/key workflow verifies that Project `Key:` is visible, that Project `Sc
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\scale-key-workflow.rgsim -ResetLastProject -ArtifactsDir .\sim-artifacts
 ```
 
+The scale/free override workflow verifies the RG Nano button economy for note entry: new projects default to Project `Key: --`, `A + D-pad` stays chromatic until a key is chosen, and `L + D-pad` on a note cell is the quick chromatic override once key/scale snapping is active:
+
+```powershell
+.\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\scale-free-override-workflow.rgsim -ResetLastProject -ArtifactsDir .\sim-artifacts
+```
+
 The producer navigation tour exercises the main RG Nano view routes after creating song/chain/phrase state:
 
 ```powershell

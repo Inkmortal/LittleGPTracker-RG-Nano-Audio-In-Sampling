@@ -158,7 +158,7 @@ ProjectView::ProjectView(GUIWindow &w,ViewData *data):FieldView(w,data) {
     v = project_->FindVariable(VAR_SCALE_KEY);
     position._y += 1;
     field =
-        new UINoteNameVarField(position, *v, noteNames, "Key: %s", 0, 11, 1, 1);
+        new UINoteNameVarField(position, *v, noteNames, "Key: %s", -1, 11, 1, 1);
     T_SimpleList<UIField>::Insert(field);
 
     v = project_->FindVariable(VAR_SCALE);

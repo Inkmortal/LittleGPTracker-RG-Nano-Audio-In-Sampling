@@ -160,7 +160,7 @@ void PhraseView::onCommandSelectorPreview(ModalView &) {
 }
 
 void PhraseView::updateCursorValue(ViewUpdateDirection direction, int xOffset,
-                                   int yOffset) {
+                                   int yOffset, bool useScale) {
 
     unsigned char *c = 0;
     unsigned char limit = 0;
@@ -255,17 +255,18 @@ void PhraseView::updateCursorValue(ViewUpdateDirection direction, int xOffset,
     }
     if ((c) && (*c != 0xFF)) {
         int offset = offsets_[col_ + xOffset][direction];
-        // if note column apply the set scale
-        if (col_ + xOffset == 0) {
-            // Add/remove from offset to match selected scale
+        // If note column and Key is enabled, apply the set scale.
+        if (useScale && col_ + xOffset == 0) {
             int scale = viewData_->project_->GetScale();
             int key = viewData_->project_->GetScaleKey();
-            int noteInKey = (*c + offset - key) % 12;
-            if (noteInKey<0) noteInKey += 12;
-            while (!scaleSteps[scale][noteInKey]) {
-                offset > 0 ? offset++ : offset--;
-                noteInKey = (*c + offset - key) % 12;
+            if (key>=0) {
+                int noteInKey = (*c + offset - key) % 12;
                 if (noteInKey<0) noteInKey += 12;
+                while (!scaleSteps[scale][noteInKey]) {
+                    offset > 0 ? offset++ : offset--;
+                    noteInKey = (*c + offset - key) % 12;
+                    if (noteInKey<0) noteInKey += 12;
+                }
             }
         }
         updateData(c, offset, limit, wrap);
@@ -1095,7 +1096,16 @@ void PhraseView::processNormalButtonMask(unsigned short mask) {
             } else {
                 // L Modifier
                 if (mask & EPBM_L) {
-
+                    if (col_ == 0) {
+                        if (mask & EPBM_DOWN)
+                            updateCursorValue(VUD_DOWN, 0, 0, false);
+                        if (mask & EPBM_UP)
+                            updateCursorValue(VUD_UP, 0, 0, false);
+                        if (mask & EPBM_LEFT)
+                            updateCursorValue(VUD_LEFT, 0, 0, false);
+                        if (mask & EPBM_RIGHT)
+                            updateCursorValue(VUD_RIGHT, 0, 0, false);
+                    }
                 } else {
                     // No modifier
 

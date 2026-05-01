@@ -1307,7 +1307,7 @@ bool SDLEventManager::SimSetScale(int scale)
 bool SDLEventManager::SimSetScaleKey(int key)
 {
 	ViewData *viewData=GetSimViewData();
-	if (!viewData || !viewData->project_ || key<0 || key>11) {
+	if (!viewData || !viewData->project_ || key<-1 || key>11) {
 		Trace::Error("RGNANO_SIM sim_set_key invalid key %d",key);
 		return false;
 	}
