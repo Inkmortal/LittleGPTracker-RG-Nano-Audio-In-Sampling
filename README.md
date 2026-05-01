@@ -1,12 +1,12 @@
-# LittleGPTracker RG Nano Audio-In/Sampling
+# LittleGPTracker for RG Nano
 
 ![Piggy](https://avatars.githubusercontent.com/u/180156201?s=400&u=ebb53bdea61a025edce0c3782ac75b532dd65dd7&v=4)
 
-This is an experimental **LittleGPTracker / Little Piggy Tracker** fork focused on making the **Anbernic RG Nano** useful as a pocket-sized music workstation.
+This is an experimental **LittleGPTracker / Little Piggy Tracker** fork for the **Anbernic RG Nano**.
 
-The immediate goal is not to clone Dirtywave M8 firmware. It is to build a native RG Nano tracker workflow that feels serious on the actual device: compose with LGPT-style tracker sequencing, import and manage samples, refine the 240x240 interface, and test changes through a desktop simulator before copying builds to hardware.
+The goal is to turn the RG Nano into a tiny, serious tracker workstation: compose with LGPT-style sequencing, import and manage samples, refine the 240x240 interface for the actual device, and test changes through a desktop simulator before copying builds to hardware.
 
-The longer-term target is a tiny on-the-go production setup where the RG Nano can act as the final arrangement and production box for sketches made on small devices such as a PO-33, chord/synth gadgets, or prepared sample packs.
+This is not a Dirtywave M8 firmware clone. It is a native RG Nano fork of LGPT aimed at a similar pocket-production role: the Nano acts as the final arrangement and production box for sketches made on small devices such as a PO-33, chord/synth gadgets, or prepared sample packs.
 
 ## Current Focus
 
@@ -19,14 +19,92 @@ The longer-term target is a tiny on-the-go production setup where the RG Nano ca
 
 ## Current Status
 
-- Public experimental fork, not a polished release.
+- Public experimental RG Nano fork, not a polished release.
 - RG Nano-specific code exists for packaging, UI layout, audio capture experiments, and simulator support.
 - The simulator can build on Windows with MSYS2/MinGW, run scripted input, write logs, and capture SDL screenshots.
 - Hardware testing is still required before treating any build as performance-ready.
 
 For the simulator, see [docs/RGNANO_SIM.md](docs/RGNANO_SIM.md).
 
-## Quick Start
+## RG Nano Install
+
+The RG Nano hardware target builds an ELF named `lgpt-rgnano.elf`. Runtime resources live in:
+
+```text
+projects/resources/RGNANO/
+```
+
+That folder contains:
+
+- `config.xml` - RG Nano config, 240x240 screen, sample/project paths, key mapping
+- `lgpt.funkey-s.desktop` - launcher entry for FunKey-style menus
+- `lgpt.png` - launcher icon
+- `INSTALL_HOW_TO.txt` - short device install notes
+
+To install a build on the RG Nano:
+
+1. Build or download `lgpt-rgnano.elf`.
+2. Copy `lgpt-rgnano.elf` to the RG Nano apps directory, commonly `/mnt/sdcard/Apps/` or the equivalent apps folder for your firmware.
+3. Copy everything from `projects/resources/RGNANO/` into the same app folder.
+4. Create these folders on the SD card if they do not already exist:
+
+```text
+/mnt/Tracks
+/mnt/Samples
+```
+
+5. Put `.wav` samples in `/mnt/Samples`.
+6. Launch LittleGPTracker from the RG Nano app menu.
+
+The default RG Nano config uses:
+
+```xml
+<ROOTFOLDER value="/mnt/Tracks"/>
+<SAMPLELIB value="/mnt/Samples"/>
+<SCREENMULT value="1"/>
+<CHANNELMODE value="SPLIT"/>
+```
+
+Use `SPLIT` mode to see all 8 channels on the square screen, or change `CHANNELMODE` to `PAGED` for a roomier 4-channel-at-a-time view.
+
+## RG Nano Controls
+
+The fork keeps LGPT controls but adds RG Nano screen/layout behavior.
+
+| Action | Control |
+| --- | --- |
+| Toggle split/paged channel view | `L + Select` |
+| Paged mode, show channels 1-4 | `L + Left` |
+| Paged mode, show channels 5-8 | `L + Right` |
+| Confirm / primary action | `A` |
+| Back / secondary action | `B` |
+| Navigation | D-pad |
+| Menu/transport behavior | See LGPT docs |
+
+## Building For RG Nano
+
+The RG Nano make target is:
+
+```bash
+cd projects
+make PLATFORM=RGNANO
+```
+
+It expects the FunKey SDK at:
+
+```text
+sdk/FunKey-sdk-DrUm78
+```
+
+The target uses `projects/Makefile.RGNANO` and outputs:
+
+```text
+projects/lgpt-rgnano.elf
+```
+
+This hardware build path is still being tightened. If you only want to work on the UI, workflow, and simulator right now, use the simulator flow below.
+
+## Simulator Quick Start
 
 Build the simulator:
 
@@ -41,6 +119,22 @@ Run the simulator smoke test:
 ```
 
 The smoke test boots the RG Nano simulator, waits for the project screen, captures `smoke-boot.bmp`, and exits.
+
+The simulator uses the same 240x240 screen contract and RG Nano key names, so it is the safest place to test UI and workflow changes before putting a build on the device.
+
+## Sample Workflow
+
+The RG Nano does not have a built-in microphone. This fork is therefore designed around two paths:
+
+- copy prepared samples to `/mnt/Samples`
+- experiment with audio input only where the RG Nano firmware/kernel exposes a usable capture device
+
+The practical production workflow today is:
+
+1. Make sounds on another device, such as a PO-33, chord gadget, synth, phone, or computer.
+2. Export or record those sounds as `.wav` files.
+3. Copy the samples into `/mnt/Samples` on the RG Nano SD card.
+4. Arrange, sequence, edit, and finish the track inside LGPT on the RG Nano.
 
 ## About This Fork
 
