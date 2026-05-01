@@ -64,6 +64,7 @@ SDLGUIWindowImp::SDLGUIWindowImp(GUICreateWindowParams &p)
   SDLCreateWindowParams &sdlP=(SDLCreateWindowParams &)p;
   cacheFonts_=sdlP.cacheFonts_ ;
   framebuffer_=sdlP.framebuffer_ ;
+  rgnanoSkin_=false ;
   
   // By default if we are not running a framebuffer device
   // we assumed it's windowed
@@ -142,12 +143,30 @@ SDLGUIWindowImp::SDLGUIWindowImp(GUICreateWindowParams &p)
 		}
 	}
   #endif
+
+#ifdef PLATFORM_RGNANO_SIM
+	const char *skin=Config::GetInstance()->GetValue("RGNANOSIM_SKIN") ;
+	if ((skin)&&(!strcmp(skin,"YES"))) {
+		rgnanoSkin_=true;
+		windowed_=true;
+	}
+#endif
   // Create a window that is the requested size
   
   screenRect_._topLeft._x=0;
   screenRect_._topLeft._y=0;
+#ifdef PLATFORM_RGNANO_SIM
+  if (rgnanoSkin_) {
+	screenRect_._bottomRight._x=360;
+	screenRect_._bottomRight._y=520;
+  } else {
+	screenRect_._bottomRight._x=windowed_?appWidth*mult_:screenWidth;
+	screenRect_._bottomRight._y=windowed_?appHeight*mult_:screenHeight;
+  }
+#else
   screenRect_._bottomRight._x=windowed_?appWidth*mult_:screenWidth;
   screenRect_._bottomRight._y=windowed_?appHeight*mult_:screenHeight;
+#endif
 
   Trace::Log("DISPLAY","Creating SDL Window (%d,%d)",screenRect_.Width(), screenRect_.Height());
 	screen_ = SDL_SetVideoMode(screenRect_.Width(),screenRect_.Height(),bitDepth_ ,fullscreen?SDL_FULLSCREEN:SDL_HWSURFACE);
@@ -157,6 +176,12 @@ SDLGUIWindowImp::SDLGUIWindowImp(GUICreateWindowParams &p)
 
 	appAnchorX_=(screenRect_.Width()-appWidth*mult_)/2 ;
 	appAnchorY_=(screenRect_.Height()-appHeight*mult_)/2 ;
+#ifdef PLATFORM_RGNANO_SIM
+	if (rgnanoSkin_) {
+		appAnchorX_=60;
+		appAnchorY_=44;
+	}
+#endif
 
 	SDL_WM_SetIcon(SDL_LoadBMP("lgpt_icon.bmp"), NULL);
 
@@ -569,6 +594,17 @@ void SDLGUIWindowImp::Clear(GUIColor &c,bool overlay)
 	backgroundColor_=SDL_MapRGB(screen_->format,c._r&0xFF,c._g&0xFF,c._b&0xFF);
   SDL_FillRect(screen_, &rect,backgroundColor_) ;  
 
+#ifdef PLATFORM_RGNANO_SIM
+	if (rgnanoSkin_) {
+		DrawRGNanoSkin();
+		rect.x=appAnchorX_;
+		rect.y=appAnchorY_;
+		rect.w=appWidth*mult_;
+		rect.h=appHeight*mult_;
+		SDL_FillRect(screen_, &rect,backgroundColor_) ;
+	}
+#endif
+
 #ifdef _SHOW_GP2X_
 	drawGP2X() ;
 	rect.x=appAnchorX_;
@@ -662,6 +698,13 @@ void SDLGUIWindowImp::Flush()
     SDL_UpdateRect(screen_, 0, 0, rect_.Width(), rect_.Height());
 #endif
 #ifndef BUFFERED
+#ifdef PLATFORM_RGNANO_SIM
+    if (rgnanoSkin_) {
+        SDL_UpdateRect(screen_, 0, 0, screenRect_.Width(),screenRect_.Height());
+        updateCount_=0;
+        return;
+    }
+#endif
     // blit partial updates on resource constrained platforms
     if ((!framebuffer_)&&(updateCount_!=0))
     {
@@ -677,6 +720,63 @@ void SDLGUIWindowImp::Flush()
     updateCount_=0;
 #endif
 }
+
+#ifdef PLATFORM_RGNANO_SIM
+void SDLGUIWindowImp::DrawRGNanoButton(int x, int y, int w, int h, Uint32 color)
+{
+	SDL_Rect rect;
+	rect.x=x;
+	rect.y=y;
+	rect.w=w;
+	rect.h=h;
+	SDL_FillRect(screen_,&rect,color);
+}
+
+void SDLGUIWindowImp::DrawRGNanoSkin()
+{
+	Uint32 body=SDL_MapRGB(screen_->format,38,42,48);
+	Uint32 bevel=SDL_MapRGB(screen_->format,68,74,84);
+	Uint32 screenBezel=SDL_MapRGB(screen_->format,12,14,18);
+	Uint32 button=SDL_MapRGB(screen_->format,25,28,34);
+	Uint32 accent=SDL_MapRGB(screen_->format,86,96,110);
+	SDL_Rect rect;
+
+	rect.x=18;
+	rect.y=14;
+	rect.w=324;
+	rect.h=492;
+	SDL_FillRect(screen_,&rect,body);
+
+	rect.x=26;
+	rect.y=22;
+	rect.w=308;
+	rect.h=476;
+	SDL_FillRect(screen_,&rect,bevel);
+
+	rect.x=40;
+	rect.y=34;
+	rect.w=280;
+	rect.h=264;
+	SDL_FillRect(screen_,&rect,screenBezel);
+
+	rect.x=appAnchorX_-2;
+	rect.y=appAnchorY_-2;
+	rect.w=appWidth*mult_+4;
+	rect.h=appHeight*mult_+4;
+	SDL_FillRect(screen_,&rect,SDL_MapRGB(screen_->format,0,0,0));
+
+	DrawRGNanoButton(74,344,28,28,button);
+	DrawRGNanoButton(74,404,28,28,button);
+	DrawRGNanoButton(44,374,28,28,button);
+	DrawRGNanoButton(104,374,28,28,button);
+	DrawRGNanoButton(246,356,34,34,button);
+	DrawRGNanoButton(284,394,34,34,button);
+	DrawRGNanoButton(98,464,58,16,accent);
+	DrawRGNanoButton(204,464,58,16,accent);
+	DrawRGNanoButton(44,306,72,14,accent);
+	DrawRGNanoButton(244,306,72,14,accent);
+}
+#endif
 
 void SDLGUIWindowImp::ProcessExpose() 
 {

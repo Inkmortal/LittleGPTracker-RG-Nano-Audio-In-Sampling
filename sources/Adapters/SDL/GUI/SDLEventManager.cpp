@@ -25,6 +25,7 @@ SDLEventManager::SDLEventManager()
 	simCommandIndex_=0;
 	simNextCommandTime_=0;
 	simPendingReleaseKey_=0;
+	simMouseKey_=0;
 	simScriptActive_=false;
 	simScriptFailed_=false;
 #endif
@@ -45,6 +46,12 @@ bool SDLEventManager::Init()
   
 	SDL_EnableUNICODE(1);
 	SDL_ShowCursor(SDL_DISABLE);
+#ifdef PLATFORM_RGNANO_SIM
+	const char *skin=Config::GetInstance()->GetValue("RGNANOSIM_SKIN") ;
+	if ((skin)&&(!strcmp(skin,"YES"))) {
+		SDL_ShowCursor(SDL_ENABLE);
+	}
+#endif
 	
 	atexit(SDL_Quit) ;
 	
@@ -110,6 +117,11 @@ int SDLEventManager::MainLoop()
 #endif
 		if (hasEvent)
     {
+#ifdef PLATFORM_RGNANO_SIM
+			if (HandleSimMouse(sdlWindow,event)) {
+				continue;
+			}
+#endif
 			switch (event.type) {
 				case SDL_KEYDOWN:
 					if (dumpEvent_)
@@ -352,6 +364,60 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 	simNextCommandTime_=now+40;
 }
 
+bool SDLEventManager::HandleSimMouse(SDLGUIWindowImp *window, SDL_Event &event)
+{
+	if (!window || !window->IsRGNanoSkinEnabled()) {
+		return false;
+	}
+	if (event.type==SDL_MOUSEBUTTONDOWN) {
+		int key=GetSimButtonAt(event.button.x,event.button.y);
+		if (key>0) {
+			keyboardCS_->SetKey(key,true);
+			simMouseKey_=key;
+			Trace::Log("RGNANO_SIM","mouse down key:%d",key);
+			return true;
+		}
+	} else if (event.type==SDL_MOUSEBUTTONUP) {
+		if (simMouseKey_>0) {
+			keyboardCS_->SetKey(simMouseKey_,false);
+			Trace::Log("RGNANO_SIM","mouse up key:%d",simMouseKey_);
+			simMouseKey_=0;
+			return true;
+		}
+	}
+	return false;
+}
+
+int SDLEventManager::GetSimButtonAt(int x, int y)
+{
+	struct ButtonRect {
+		int x;
+		int y;
+		int w;
+		int h;
+		int key;
+	};
+	ButtonRect buttons[] = {
+		{74,344,28,28,SDLK_u},
+		{74,404,28,28,SDLK_d},
+		{44,374,28,28,SDLK_l},
+		{104,374,28,28,SDLK_r},
+		{246,356,34,34,SDLK_a},
+		{284,394,34,34,SDLK_b},
+		{98,464,58,16,SDLK_s},
+		{204,464,58,16,SDLK_q},
+		{44,306,72,14,SDLK_m},
+		{244,306,72,14,SDLK_n}
+	};
+	for (int i=0;i<(int)(sizeof(buttons)/sizeof(buttons[0]));i++) {
+		if (x>=buttons[i].x && x<buttons[i].x+buttons[i].w &&
+			y>=buttons[i].y && y<buttons[i].y+buttons[i].h) {
+			return buttons[i].key;
+		}
+	}
+	return 0;
+}
+
 void SDLEventManager::FailSimScript(const char *message)
 {
 	simScriptFailed_=true;
@@ -383,8 +449,14 @@ bool SDLEventManager::ExpectSimScreenSize(SDLGUIWindowImp *window, int width, in
 		Trace::Error("RGNANO_SIM expect_size has no screen surface");
 		return false;
 	}
-	Trace::Log("RGNANO_SIM","expect_size found %dx%d, expected %dx%d",surface->w,surface->h,width,height);
-	return surface->w==width && surface->h==height;
+	int appSurfaceWidth=surface->w;
+	int appSurfaceHeight=surface->h;
+	if (window->IsRGNanoSkinEnabled()) {
+		appSurfaceWidth=240*window->GetScale();
+		appSurfaceHeight=240*window->GetScale();
+	}
+	Trace::Log("RGNANO_SIM","expect_size found %dx%d app surface in %dx%d window, expected %dx%d",appSurfaceWidth,appSurfaceHeight,surface->w,surface->h,width,height);
+	return appSurfaceWidth==width && appSurfaceHeight==height;
 }
 
 bool SDLEventManager::ExpectSimScreenColors(SDLGUIWindowImp *window, int minColors)

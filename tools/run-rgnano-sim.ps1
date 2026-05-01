@@ -1,6 +1,7 @@
 param(
   [string]$ExePath = ".\projects\lgpt-rgnano-sim.exe",
-  [string]$Script = ""
+  [string]$Script = "",
+  [switch]$Skin
 )
 
 $root = Split-Path -Parent $PSScriptRoot
@@ -33,8 +34,16 @@ $dataDir = Join-Path $exeDir "rgnano-sim-data"
 New-Item -ItemType Directory -Force -Path (Join-Path $dataDir "tracks") | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $dataDir "samples") | Out-Null
 
+$args = @()
 if ($Script) {
-  & $exeFullPath "-RGNANOSIM_SCRIPT=$Script"
+  $args += "-RGNANOSIM_SCRIPT=$Script"
+}
+if ($Skin -or -not $Script) {
+  $args += "-RGNANOSIM_SKIN=YES"
+}
+
+if ($args.Count -gt 0) {
+  & $exeFullPath @args
 } else {
   & $exeFullPath
 }

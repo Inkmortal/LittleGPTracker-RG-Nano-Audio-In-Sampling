@@ -42,6 +42,10 @@ public: // Added functionality
 	void ProcessQuit() ;
 	void ProcessUserEvent(SDL_Event &event) ;
 	SDL_Surface* GetSurface() { return screen_; }
+	bool IsRGNanoSkinEnabled() const { return rgnanoSkin_; }
+	int GetAppAnchorX() const { return appAnchorX_; }
+	int GetAppAnchorY() const { return appAnchorY_; }
+	int GetScale() const { return mult_; }
 protected:
 	void prepareFonts() ;
 	void prepareFullFonts() ;
@@ -49,6 +53,10 @@ protected:
 	void prepareBitmaps() ;
   void transform(const GUIRect &srcRect,SDL_Rect *dstRect);
   void transform(const GUIPoint &srcPoint, int *x, int *y);
+#ifdef PLATFORM_RGNANO_SIM
+	void DrawRGNanoSkin() ;
+	void DrawRGNanoButton(int x, int y, int w, int h, Uint32 color) ;
+#endif
 #ifdef _SHOW_GP2X_
 	void drawGP2X() ;
 	void drawGP2XOverlay() ;
@@ -71,5 +79,6 @@ private:
 	int appAnchorX_ ;
 	int appAnchorY_ ;
 	int mult_ ;
+	bool rgnanoSkin_ ;
 } ;
 #endif

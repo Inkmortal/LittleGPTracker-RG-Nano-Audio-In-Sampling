@@ -58,10 +58,13 @@ private:
 	size_t simCommandIndex_;
 	unsigned long simNextCommandTime_;
 	int simPendingReleaseKey_;
+	int simMouseKey_;
 	bool simScriptActive_;
 	bool simScriptFailed_;
 	void LoadSimScript();
 	void ProcessSimScript(SDLGUIWindowImp *window);
+	bool HandleSimMouse(SDLGUIWindowImp *window, SDL_Event &event);
+	int GetSimButtonAt(int x, int y);
 	void SaveSimScreenshot(SDLGUIWindowImp *window, const std::string &path);
 	void FailSimScript(const char *message);
 	bool ExpectSimScreenSize(SDLGUIWindowImp *window, int width, int height);
