@@ -850,9 +850,11 @@ void SDLGUIWindowImp::DrawRGNanoGlyph(int x, int y, char c, Uint32 color)
 
 void SDLGUIWindowImp::DrawRGNanoSkin()
 {
-	Uint32 shadow=SDL_MapRGB(screen_->format,5,16,32);
-	Uint32 body=SDL_MapRGB(screen_->format,28,91,181);
-	Uint32 bevel=SDL_MapRGB(screen_->format,74,145,226);
+	Uint32 shadow=SDL_MapRGB(screen_->format,3,17,27);
+	Uint32 body=SDL_MapRGB(screen_->format,13,80,112);
+	Uint32 bevel=SDL_MapRGB(screen_->format,31,126,158);
+	Uint32 shine=SDL_MapRGB(screen_->format,82,171,190);
+	Uint32 darkEdge=SDL_MapRGB(screen_->format,7,49,74);
 	Uint32 screenBezel=SDL_MapRGB(screen_->format,18,16,26);
 	SDL_Rect rect;
 
@@ -860,7 +862,7 @@ void SDLGUIWindowImp::DrawRGNanoSkin()
 	rect.y=0;
 	rect.w=360;
 	rect.h=560;
-	SDL_FillRect(screen_,&rect,SDL_MapRGB(screen_->format,6,12,24));
+	SDL_FillRect(screen_,&rect,SDL_MapRGB(screen_->format,4,13,21));
 
 	rect.x=20;
 	rect.y=30;
@@ -879,6 +881,36 @@ void SDLGUIWindowImp::DrawRGNanoSkin()
 	rect.w=308;
 	rect.h=490;
 	SDL_FillRect(screen_,&rect,bevel);
+
+	rect.x=30;
+	rect.y=40;
+	rect.w=298;
+	rect.h=10;
+	SDL_FillRect(screen_,&rect,shine);
+
+	rect.x=30;
+	rect.y=50;
+	rect.w=298;
+	rect.h=26;
+	SDL_FillRect(screen_,&rect,SDL_MapRGB(screen_->format,23,109,145));
+
+	rect.x=30;
+	rect.y=488;
+	rect.w=298;
+	rect.h=28;
+	SDL_FillRect(screen_,&rect,darkEdge);
+
+	rect.x=30;
+	rect.y=76;
+	rect.w=8;
+	rect.h=412;
+	SDL_FillRect(screen_,&rect,shine);
+
+	rect.x=318;
+	rect.y=76;
+	rect.w=10;
+	rect.h=412;
+	SDL_FillRect(screen_,&rect,darkEdge);
 
 	rect.x=42;
 	rect.y=54;
