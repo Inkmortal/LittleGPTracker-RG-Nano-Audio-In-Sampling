@@ -56,6 +56,7 @@ protected:
   void transform(const GUIRect &srcRect,SDL_Rect *dstRect);
   void transform(const GUIPoint &srcPoint, int *x, int *y);
   bool isAppPixelVisible(int x, int y, int w, int h) const;
+  bool clipToAppSurface(SDL_Rect *rect) const;
 #ifdef PLATFORM_RGNANO_SIM
 	void DrawRGNanoSkin() ;
 	void DrawRGNanoControls() ;

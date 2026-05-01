@@ -523,6 +523,33 @@ bool SDLGUIWindowImp::isAppPixelVisible(int x, int y, int w, int h) const
 	return true;
 }
 
+bool SDLGUIWindowImp::clipToAppSurface(SDL_Rect *rect) const
+{
+	if (!rect) return false;
+	int left=0;
+	int top=0;
+	int right=screenRect_._bottomRight._x;
+	int bottom=screenRect_._bottomRight._y;
+#ifdef PLATFORM_RGNANO_SIM
+	if (rgnanoSkin_) {
+		left=appAnchorX_;
+		top=appAnchorY_;
+		right=appAnchorX_+appWidth*mult_;
+		bottom=appAnchorY_+appHeight*mult_;
+	}
+#endif
+	int rectRight=rect->x+rect->w;
+	int rectBottom=rect->y+rect->h;
+	if (rect->x<left) rect->x=left;
+	if (rect->y<top) rect->y=top;
+	if (rectRight>right) rectRight=right;
+	if (rectBottom>bottom) rectBottom=bottom;
+	if (rectRight<=rect->x || rectBottom<=rect->y) return false;
+	rect->w=rectRight-rect->x;
+	rect->h=rectBottom-rect->y;
+	return true;
+}
+
 void SDLGUIWindowImp::DrawString(const char *string,GUIPoint &pos,GUITextProperties &p,bool overlay) 
 {
 
@@ -601,6 +628,7 @@ void SDLGUIWindowImp::DrawRect(GUIRect &r)
 {
   SDL_Rect rect;
   transform(r, &rect);
+  if (!clipToAppSurface(&rect)) return;
   SDL_FillRect(screen_, &rect,currentColor_) ;
 } ;
 
@@ -650,6 +678,7 @@ void SDLGUIWindowImp::ClearRect(GUIRect &r)
 {
   SDL_Rect rect;
   transform(r, &rect);
+  if (!clipToAppSurface(&rect)) return;
   SDL_FillRect(screen_, &rect,backgroundColor_) ;
 } ;
 
