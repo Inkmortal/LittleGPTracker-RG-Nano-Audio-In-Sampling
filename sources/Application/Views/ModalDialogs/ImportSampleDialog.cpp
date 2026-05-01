@@ -128,6 +128,9 @@ void ImportSampleDialog::endPreview() {
 
 void ImportSampleDialog::import(Path &element) {
 
+#ifdef PLATFORM_RGNANO_SIM
+	Trace::Log("ImportSampleDialog","import %s",element.GetPath().c_str());
+#endif
 	SamplePool *pool=SamplePool::GetInstance() ;
 	int sampleID=pool->ImportSample(element) ;
 	if (sampleID>=0) {
@@ -156,6 +159,13 @@ void ImportSampleDialog::ProcessButtonMask(unsigned short mask,bool pressed) {
 		if (mask&EPBM_DOWN) warpToNextSample(1) ;
 
 		Path *element = getImportElement();
+		if (!element) {
+			Trace::Error("ImportSampleDialog no element for A mask %u",mask);
+			return;
+		}
+#ifdef PLATFORM_RGNANO_SIM
+		Trace::Log("ImportSampleDialog","A mask=%u selected=%d element=%s dir=%d",mask,selected_,element->GetPath().c_str(),element->IsDirectory()?1:0);
+#endif
 		setCurrent(element, mask);
 
 		switch(selected_) {
@@ -185,6 +195,13 @@ void ImportSampleDialog::ProcessButtonMask(unsigned short mask,bool pressed) {
 		if (mask&EPBM_UP) warpToNextSample(-1);
 		if (mask&EPBM_DOWN) warpToNextSample(1);
 		Path *element = getImportElement();
+		if (!element) {
+			Trace::Error("ImportSampleDialog no element for START mask %u",mask);
+			return;
+		}
+#ifdef PLATFORM_RGNANO_SIM
+		Trace::Log("ImportSampleDialog","START mask=%u selected=%d element=%s dir=%d",mask,selected_,element->GetPath().c_str(),element->IsDirectory()?1:0);
+#endif
 		setCurrent(element, mask);
 		if(!element->IsDirectory()) {
 			preview(*element);
@@ -227,12 +244,12 @@ bool ImportSampleDialog::isSampleLibRoot()
 Path* ImportSampleDialog::getImportElement() {
 	IteratorPtr<Path> it(sampleList_.GetIterator());
 	int count = 0;
-	Path *element = 0;
 	for(it->Begin(); !it->IsDone(); it->Next()) {
 		if (count++ == currentSample_) {
 			return &it->CurrentItem();
 		}
 	}
+	return 0;
 }
 
 void ImportSampleDialog::setCurrent(Path *element, unsigned short mask) {
@@ -292,4 +309,7 @@ void ImportSampleDialog::setCurrentFolder(Path *path) {
 			}
 		}
 	}
+#ifdef PLATFORM_RGNANO_SIM
+	Trace::Log("ImportSampleDialog","folder %s entries=%d current=%d",currentPath_.GetPath().c_str(),sampleList_.Size(),currentSample_);
+#endif
 } ;

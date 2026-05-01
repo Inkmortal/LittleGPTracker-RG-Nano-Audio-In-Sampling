@@ -231,3 +231,5 @@ The simulator should not need hand-written one-off probes for every screen. The 
 `tools\rgnano-sim-routes.ps1` is the first route-helper layer. Scripts can use `route from.to` commands such as `route project.to_song`, `route song.to_chain`, `route phrase.to_instrument`, and `route instrument.open_sample_import`; the runner expands them into the exact held-button events described above.
 
 `expect_view <name>` is the source-level view assertion for simulator scripts. It reads the active `AppWindow` view directly, so route tests can fail on “still in Chain” instead of only failing later because a screenshot looked wrong.
+
+`expect_project_sample <filename>` resolves the active project's `samples:` alias and checks that an imported WAV exists there. This is the first assertion that proves uploaded sample import changed the LGPT project, not just the simulator UI.

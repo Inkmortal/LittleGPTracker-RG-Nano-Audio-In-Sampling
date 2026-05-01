@@ -2,6 +2,7 @@
 #include "SDLEventManager.h"
 #include "Application/Application.h"
 #include "Application/AppWindow.h"
+#include "System/FileSystem/FileSystem.h"
 #include "UIFramework/BasicDatas/GUIEvent.h"
 #include "SDLGUIWindowImp.h"
 #include "Application/Model/Config.h"
@@ -276,7 +277,7 @@ void SDLEventManager::LoadSimScript()
 			if (command.value<=0) {
 				command.value=80;
 			}
-		} else if (command.op=="down" || command.op=="up" || command.op=="screenshot" || command.op=="log" || command.op=="expect_file" || command.op=="expect_view") {
+		} else if (command.op=="down" || command.op=="up" || command.op=="screenshot" || command.op=="log" || command.op=="expect_file" || command.op=="expect_project_sample" || command.op=="expect_view") {
 			iss >> command.arg;
 		} else if (command.op=="click") {
 			iss >> command.value >> command.value2 >> command.arg;
@@ -383,6 +384,11 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 	} else if (command.op=="expect_file") {
 		if (!ExpectSimFile(command.arg)) {
 			FailSimScript("file assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_project_sample") {
+		if (!ExpectSimProjectSample(command.arg)) {
+			FailSimScript("project sample assertion failed");
 			return;
 		}
 	} else if (command.op=="expect_log") {
@@ -520,6 +526,21 @@ bool SDLEventManager::ExpectSimFile(const std::string &path)
 	std::ifstream file(path.c_str(),std::ios::binary);
 	bool exists=file.good();
 	Trace::Log("RGNANO_SIM","expect_file %s => %s",path.c_str(),exists?"exists":"missing");
+	return exists;
+}
+
+bool SDLEventManager::ExpectSimProjectSample(const std::string &sampleName)
+{
+	if (sampleName.empty()) {
+		Trace::Error("RGNANO_SIM expect_project_sample missing sample name");
+		return false;
+	}
+	std::string aliasPath="samples:";
+	aliasPath+=sampleName;
+	Path samplePath(aliasPath.c_str());
+	Path resolvedPath(samplePath.GetPath());
+	bool exists=resolvedPath.Exists();
+	Trace::Log("RGNANO_SIM","expect_project_sample %s => %s (%s)",sampleName.c_str(),exists?"exists":"missing",resolvedPath.GetPath().c_str());
 	return exists;
 }
 

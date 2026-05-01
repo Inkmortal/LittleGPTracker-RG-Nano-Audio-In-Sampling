@@ -96,6 +96,9 @@ screenshot smoke-song.bmp
 # fail unless a file exists
 expect_file rgnano-sim-data/samples/rgnano-test-tone.wav
 
+# fail unless a sample was imported into the active project's samples folder
+expect_project_sample rgnano-test-tone.wav
+
 # fail unless the simulator log contains text
 expect_log Loaded
 
@@ -125,6 +128,8 @@ route song.to_chain
 route chain.to_phrase
 route phrase.to_instrument
 route instrument.open_sample_import
+route sample_import.to_first_file
+route sample_import.import_selected
 ```
 
 Route helpers live in `tools\rgnano-sim-routes.ps1`. They are intentionally small and explicit, so routes like `phrase.to_table` remain tied to the source map instead of hidden in test-specific scripts.
@@ -151,4 +156,10 @@ The first source-derived music workflow creates a new project, creates a chain, 
 
 ```powershell
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\basic-music-workflow.rgsim -ResetLastProject -ArtifactsDir .\sim-artifacts
+```
+
+The uploaded-sample workflow seeds the simulator sample library, imports the selected WAV into the active project, and asserts the project sample exists:
+
+```powershell
+.\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\sample-import-workflow.rgsim -ResetLastProject -SeedSampleFixture -ArtifactsDir .\sim-artifacts
 ```

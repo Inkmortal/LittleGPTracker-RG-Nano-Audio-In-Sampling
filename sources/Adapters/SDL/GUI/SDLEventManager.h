@@ -70,6 +70,7 @@ private:
 	void SaveSimScreenshot(SDLGUIWindowImp *window, const std::string &path);
 	void FailSimScript(const char *message);
 	bool ExpectSimFile(const std::string &path);
+	bool ExpectSimProjectSample(const std::string &sampleName);
 	bool ExpectSimLog(const std::string &needle);
 	bool ExpectSimNoError();
 	bool ExpectSimView(const std::string &viewName);

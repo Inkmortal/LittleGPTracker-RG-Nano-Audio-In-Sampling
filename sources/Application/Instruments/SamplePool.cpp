@@ -154,6 +154,9 @@ bool SamplePool::loadSample(const char *path) {
 int SamplePool::ImportSample(Path &path) {
 
 	if (count_==MAX_PIG_SAMPLES) return -1 ;
+#ifdef PLATFORM_RGNANO_SIM
+	Trace::Log("SamplePool","ImportSample src=%s",path.GetPath().c_str());
+#endif
 
 	// construct target path
 
@@ -175,6 +178,8 @@ int SamplePool::ImportSample(Path &path) {
 
 	I_File *fout=FileSystem::GetInstance()->Open(dstPath.GetPath().c_str(),"w") ;
 	if (!fout) {
+		Trace::Error("Failed to open output file %s",
+		             dstPath.GetCanonicalPath().c_str());
 		fin->Close() ;
 		delete (fin) ;
 		return -1 ;
