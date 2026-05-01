@@ -242,6 +242,8 @@ int SDLEventManager::MainLoop()
 } ;
 
 #ifdef PLATFORM_RGNANO_SIM
+#include "Services/Audio/AudioDriver.h"
+
 void SDLEventManager::LoadSimScript()
 {
 	const char *scriptPath=Config::GetInstance()->GetValue("RGNANOSIM_SCRIPT");
@@ -290,8 +292,10 @@ void SDLEventManager::LoadSimScript()
 			if (!command.arg2.empty() && command.arg2[0]==' ') {
 				command.arg2.erase(0,1);
 			}
-		} else if (command.op=="expect_no_error") {
+		} else if (command.op=="expect_no_error" || command.op=="reset_audio_stats") {
 		} else if (command.op=="expect_colors") {
+			iss >> command.value;
+		} else if (command.op=="expect_audio_activity") {
 			iss >> command.value;
 		} else if (command.op=="expect_size") {
 			iss >> command.value >> command.value2;
@@ -405,9 +409,17 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 			FailSimScript("log error assertion failed");
 			return;
 		}
+	} else if (command.op=="reset_audio_stats") {
+		AudioDriver::ResetSimAudioStats();
+		Trace::Log("RGNANO_SIM","reset_audio_stats");
 	} else if (command.op=="expect_view") {
 		if (!ExpectSimView(command.arg)) {
 			FailSimScript("view assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_audio_activity") {
+		if (!ExpectSimAudioActivity(command.value)) {
+			FailSimScript("audio activity assertion failed");
 			return;
 		}
 	} else if (command.op=="expect_colors") {
@@ -593,6 +605,21 @@ bool SDLEventManager::ExpectSimView(const std::string &viewName)
 		Trace::Error("RGNANO_SIM expected view %s but found %s",viewName.c_str(),current);
 	}
 	return matches;
+}
+
+bool SDLEventManager::ExpectSimAudioActivity(int minPeak)
+{
+	if (minPeak<=0) {
+		minPeak=64;
+	}
+	int peak=AudioDriver::GetSimAudioPeak();
+	unsigned long nonSilentBytes=AudioDriver::GetSimAudioNonSilentBytes();
+	bool active=peak>=minPeak && nonSilentBytes>0;
+	Trace::Log("RGNANO_SIM","expect_audio_activity peak=%d nonSilentBytes=%lu minPeak=%d => %s",peak,nonSilentBytes,minPeak,active?"active":"silent");
+	if (!active) {
+		Trace::Error("RGNANO_SIM audio activity assertion failed");
+	}
+	return active;
 }
 
 bool SDLEventManager::ExpectSimScreenSize(SDLGUIWindowImp *window, int width, int height)

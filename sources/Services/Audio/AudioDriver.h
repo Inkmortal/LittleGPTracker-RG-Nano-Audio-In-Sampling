@@ -54,6 +54,11 @@ public:
 	void AddBuffer(short *buffer,int size) ; // size in samples
 
 	AudioSettings GetAudioSettings() ;
+#ifdef PLATFORM_RGNANO_SIM
+	static void ResetSimAudioStats();
+	static int GetSimAudioPeak();
+	static unsigned long GetSimAudioNonSilentBytes();
+#endif
 
 	void OnNewBufferNeeded() ;
 

@@ -3,6 +3,12 @@
 #include "System/System/System.h"
 #include "System/Console/Trace.h"
 #include "System/Console/n_assert.h"
+#include <stdlib.h>
+
+#ifdef PLATFORM_RGNANO_SIM
+static int gSimAudioPeak = 0;
+static unsigned long gSimAudioNonSilentBytes = 0;
+#endif
 
 AudioDriver::AudioDriver(AudioSettings &settings) {
 	settings_=settings ;
@@ -69,6 +75,18 @@ void AudioDriver::AddBuffer(short *buffer,int samplecount) {
   pool_[poolQueuePosition_].buffer_=(char*) ((short *)SYS_MALLOC(len)) ;
 
   SYS_MEMCPY(pool_[poolQueuePosition_].buffer_,(char *)buffer,len) ;
+#ifdef PLATFORM_RGNANO_SIM
+  int sampleCount = len / (int)sizeof(short);
+  for (int i = 0; i < sampleCount; i++) {
+    int value = abs((int)buffer[i]);
+    if (value > gSimAudioPeak) {
+      gSimAudioPeak = value;
+    }
+    if (value > 0) {
+      gSimAudioNonSilentBytes += sizeof(short);
+    }
+  }
+#endif
   pool_[poolQueuePosition_].size_=len ;
   poolQueuePosition_=(poolQueuePosition_+1)%SOUND_BUFFER_COUNT ;
 	hasData_=true ;
@@ -94,3 +112,16 @@ bool AudioDriver::hasData() {
 AudioSettings AudioDriver::GetAudioSettings() {
 	return settings_ ;
 } ;
+
+#ifdef PLATFORM_RGNANO_SIM
+void AudioDriver::ResetSimAudioStats() {
+  gSimAudioPeak = 0;
+  gSimAudioNonSilentBytes = 0;
+}
+
+int AudioDriver::GetSimAudioPeak() { return gSimAudioPeak; }
+
+unsigned long AudioDriver::GetSimAudioNonSilentBytes() {
+  return gSimAudioNonSilentBytes;
+}
+#endif

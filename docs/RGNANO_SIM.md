@@ -105,6 +105,10 @@ expect_log Loaded
 # fail unless the active LGPT view matches the source-derived view name
 expect_view song
 
+# reset and assert measured non-silent tracker audio output
+reset_audio_stats
+expect_audio_activity 64
+
 # fail if the simulator log contains an error marker
 expect_no_error
 
@@ -162,4 +166,10 @@ The uploaded-sample workflow seeds the simulator sample library, imports the sel
 
 ```powershell
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\sample-import-workflow.rgsim -ResetLastProject -SeedSampleFixture -ArtifactsDir .\sim-artifacts
+```
+
+The demo-song workflow drives the real RG Nano controls to create a song, chain, and phrase, enters an 8-step melodic pattern, imports the seeded WAV onto instrument `00`, starts playback, and asserts measured audio activity:
+
+```powershell
+.\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\demo-song-workflow.rgsim -ResetLastProject -SeedSampleFixture -Skin -ArtifactsDir .\sim-artifacts
 ```
