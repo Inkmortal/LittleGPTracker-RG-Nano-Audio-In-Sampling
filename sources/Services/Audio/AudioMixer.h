@@ -25,10 +25,13 @@ public:
     virtual void SetMasterVolume(int volume) ;
 	virtual bool Clipped() ;
 	int GetPeakPercent() ;
+	static const int WAVEFORM_SIZE = 32 ;
+	int GetWaveformSample(int index) ;
 	
 private:
   fixed hardClip(fixed sample);
   fixed softClip(fixed sample);
+  void updateWaveform(fixed *buffer,int samplecount,int peak);
   bool enableRendering_;
   std::string renderPath_;
   WavFileWriter *writer_;
@@ -40,5 +43,6 @@ private:
   int masterVolume_;
   bool clipped_;
   int peakPercent_;
+  int waveform_[WAVEFORM_SIZE];
 } ;
 #endif

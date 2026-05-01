@@ -436,9 +436,7 @@ void SDLGUIWindowImp::DrawChar(const char c, GUIPoint &pos, GUITextProperties &p
   int xx,yy;
   transform(pos, &xx, &yy);
 
-  if ((xx<0) || (yy<0)) return;
-  if ((xx>=screenRect_._bottomRight._x) || (yy>=screenRect_._bottomRight._y))
-       return ;
+  if (!isAppPixelVisible(xx, yy, 8*mult_, 8*mult_)) return;
 	if ((!framebuffer_)&&(updateCount_<MAX_OVERLAYS)) {
 		SDL_Rect *area=updateRects_+updateCount_++ ;
 		area->x=xx ;
@@ -509,6 +507,22 @@ void SDLGUIWindowImp::transform(const GUIPoint &srcPoint, int *x, int *y)
 	*y=appAnchorY_ + srcPoint._y*mult_ ; 
 }
 
+bool SDLGUIWindowImp::isAppPixelVisible(int x, int y, int w, int h) const
+{
+	if ((x<0) || (y<0)) return false;
+	if ((x+w)>screenRect_._bottomRight._x || (y+h)>screenRect_._bottomRight._y) return false;
+#ifdef PLATFORM_RGNANO_SIM
+	if (rgnanoSkin_) {
+		int left=appAnchorX_;
+		int top=appAnchorY_;
+		int right=appAnchorX_+appWidth*mult_;
+		int bottom=appAnchorY_+appHeight*mult_;
+		if (x<left || y<top || (x+w)>right || (y+h)>bottom) return false;
+	}
+#endif
+	return true;
+}
+
 void SDLGUIWindowImp::DrawString(const char *string,GUIPoint &pos,GUITextProperties &p,bool overlay) 
 {
 
@@ -527,6 +541,10 @@ void SDLGUIWindowImp::DrawString(const char *string,GUIPoint &pos,GUITextPropert
 
 	for (int l=0;l<len;l++)
   {
+		if (!isAppPixelVisible(xx, yy, 8*mult_, 8*mult_)) {
+			xx+=8*mult_;
+			continue;
+		}
 		if (((cacheFonts_)&&(currentColor_==foregroundColor_)&&(!p.invert_)))
     {
 			SDL_Rect srcRect ;
@@ -726,6 +744,73 @@ void SDLGUIWindowImp::Flush()
 }
 
 #ifdef PLATFORM_RGNANO_SIM
+bool SDLGUIWindowImp::IsRGNanoSkinFrameClean()
+{
+	if (!rgnanoSkin_ || !screen_) {
+		return true;
+	}
+	SDL_Rect checks[4];
+	int appLeft=appAnchorX_;
+	int appTop=appAnchorY_;
+	int appRight=appAnchorX_+appWidth*mult_;
+	int appBottom=appAnchorY_+appHeight*mult_;
+	int guard=48;
+
+	checks[0].x=appRight;
+	checks[0].y=appTop;
+	checks[0].w=MIN(guard,screenRect_.Width()-appRight);
+	checks[0].h=appHeight*mult_;
+	checks[1].x=MAX(0,appLeft-guard);
+	checks[1].y=appTop;
+	checks[1].w=appLeft-checks[1].x;
+	checks[1].h=appHeight*mult_;
+	checks[2].x=appLeft;
+	checks[2].y=MAX(0,appTop-guard);
+	checks[2].w=appWidth*mult_;
+	checks[2].h=appTop-checks[2].y;
+	checks[3].x=appLeft;
+	checks[3].y=appBottom;
+	checks[3].w=appWidth*mult_;
+	checks[3].h=MIN(guard,screenRect_.Height()-appBottom);
+
+	if (SDL_MUSTLOCK(screen_)) {
+		if (SDL_LockSurface(screen_)<0) {
+			return false;
+		}
+	}
+	for (int i=0;i<4;i++) {
+		for (int y=checks[i].y;y<checks[i].y+checks[i].h;y++) {
+			for (int x=checks[i].x;x<checks[i].x+checks[i].w;x++) {
+				int pixelSize=screen_->format->BytesPerPixel;
+				unsigned char *p=((unsigned char *)screen_->pixels)+y*screen_->pitch+x*pixelSize;
+				Uint32 pixel=0;
+				switch (pixelSize) {
+					case 1: pixel=*p; break;
+					case 2: pixel=*(Uint16 *)p; break;
+					case 3:
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+						pixel=p[0]<<16 | p[1]<<8 | p[2];
+#else
+						pixel=p[0] | p[1]<<8 | p[2]<<16;
+#endif
+						break;
+					default: pixel=*(Uint32 *)p; break;
+				}
+				if (pixel==backgroundColor_ || pixel==foregroundColor_ || pixel==currentColor_) {
+					if (SDL_MUSTLOCK(screen_)) {
+						SDL_UnlockSurface(screen_);
+					}
+					return false;
+				}
+			}
+		}
+	}
+	if (SDL_MUSTLOCK(screen_)) {
+		SDL_UnlockSurface(screen_);
+	}
+	return true;
+}
+
 void SDLGUIWindowImp::SetRGNanoButtonPressed(int key, bool pressed)
 {
 	if (key>=0 && key<SDLK_LAST) {

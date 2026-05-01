@@ -1,4 +1,5 @@
 #include "MixerView.h"
+#include "Application/Mixer/MixerService.h"
 #include "Application/Model/Mixer.h"
 #include "Application/Utils/char.h"
 #include <string>
@@ -218,6 +219,7 @@ void MixerView::DrawView() {
 		}
 	}; 
 	
+    drawWaveform() ;
     drawMap() ;
 	drawNotes() ;
 	drawMiniMeters() ;
@@ -286,3 +288,42 @@ void MixerView::OnPlayerUpdate(PlayerEventType ,unsigned int tick) {
     drawMiniMeters() ;
 
 } ;
+
+void MixerView::drawWaveform() {
+    GUITextProperties props;
+    GUIPoint pos;
+    MixerService *mixer = MixerService::GetInstance();
+
+    const int x = 3;
+    const int y = 8;
+    const int width = 24;
+    const int height = 9;
+    const int mid = height / 2;
+
+    SetColor(CD_NORMAL);
+    pos._x = x;
+    pos._y = y - 1;
+    DrawString(pos._x, pos._y, "wave", props);
+
+    char grid[9][25];
+    for (int row = 0; row < height; row++) {
+        for (int col = 0; col < width; col++) {
+            grid[row][col] = (row == mid) ? '-' : ' ';
+        }
+        grid[row][width] = 0;
+    }
+
+    for (int col = 0; col < width; col++) {
+        int sample = mixer->GetMasterWaveformSample((col * AudioMixer::WAVEFORM_SIZE) / width);
+        int waveY = mid - ((sample * mid) / 100);
+        if (waveY < 0) waveY = 0;
+        if (waveY >= height) waveY = height - 1;
+        grid[waveY][col] = '*';
+    }
+
+    for (int row = 0; row < height; row++) {
+        pos._x = x;
+        pos._y = y + row;
+        DrawString(pos._x, pos._y, grid[row], props);
+    }
+}

@@ -484,7 +484,7 @@ bool SDLEventManager::AddSimScriptLine(const std::string &line, const char *scri
 		if (!command.arg2.empty() && command.arg2[0]==' ') {
 			command.arg2.erase(0,1);
 		}
-	} else if (command.op=="expect_no_error" || command.op=="reset_audio_stats" || command.op=="end_audio_capture" || command.op=="sim_save_project" || command.op=="quit") {
+	} else if (command.op=="expect_no_error" || command.op=="expect_skin_frame_clean" || command.op=="reset_audio_stats" || command.op=="end_audio_capture" || command.op=="sim_save_project" || command.op=="quit") {
 	} else if (command.op=="expect_colors" || command.op=="expect_audio_activity" || command.op=="expect_audio_silence" || command.op=="expect_audio_capture_bytes" || command.op=="expect_tempo" || command.op=="sim_set_tempo" || command.op=="sim_set_scale" || command.op=="sim_set_key") {
 		iss >> command.value;
 	} else if (command.op=="start_audio_capture") {
@@ -781,6 +781,11 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 	} else if (command.op=="expect_size") {
 		if (!ExpectSimScreenSize(window,command.value,command.value2)) {
 			FailSimScript("screen size assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_skin_frame_clean") {
+		if (!ExpectSimSkinFrameClean(window)) {
+			FailSimScript("skin frame assertion failed");
 			return;
 		}
 	} else if (command.op=="log") {
@@ -1443,6 +1448,21 @@ bool SDLEventManager::ExpectSimScreenColors(SDLGUIWindowImp *window, int minColo
 		return false;
 	}
 	return true;
+}
+
+bool SDLEventManager::ExpectSimSkinFrameClean(SDLGUIWindowImp *window)
+{
+	if (!window) {
+		Trace::Error("RGNANO_SIM expect_skin_frame_clean has no window");
+		return false;
+	}
+	window->Flush();
+	bool clean=window->IsRGNanoSkinFrameClean();
+	Trace::Log("RGNANO_SIM","expect_skin_frame_clean => %s",clean?"clean":"contaminated");
+	if (!clean) {
+		Trace::Error("RGNANO_SIM skin frame was contaminated by app rendering");
+	}
+	return clean;
 }
 
 int SDLEventManager::CountSurfaceColors(SDL_Surface *surface, int maxColors)

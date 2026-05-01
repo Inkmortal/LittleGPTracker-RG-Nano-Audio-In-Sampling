@@ -176,6 +176,13 @@ int MixerService::GetMasterPeakPercent() {
     return out_->GetPeakPercent();
 }
 
+int MixerService::GetMasterWaveformSample(int index) {
+    if (!out_) {
+        return 0;
+    }
+    return out_->GetWaveformSample(index);
+}
+
 void MixerService::toggleRendering(bool enable) {
     isRendering_ = enable;
     switch (mode_) {

@@ -18,6 +18,7 @@ protected:
 	void onStart() ;
 	void onStop() ;
 	void updateCursor(int dx,int dy)  ;
+    void drawWaveform() ;
 private:
 	const char *song_ ;
 

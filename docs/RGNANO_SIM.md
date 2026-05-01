@@ -58,6 +58,12 @@ The all-channel workflow is the compact RG Nano playback regression. It programs
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\all-8-channels-workflow.rgsim -ResetLastProject -SeedLofiFixture -ArtifactsDir .\sim-artifacts-all-8
 ```
 
+The mixer waveform workflow programs a minimal song, starts playback, opens Mixer, asserts that the live master waveform is visible, captures audio, and screenshots the 240x240 Mixer layout:
+
+```powershell
+.\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\mixer-waveform-workflow.rgsim -ResetLastProject -SeedLofiFixture -Skin -ArtifactsDir .\sim-artifacts-mixer-waveform
+```
+
 The producer persistence pair creates a multi-instrument project, saves it, relaunches through `AUTO_LOAD_LAST`, verifies tempo/song/chain/phrase/sample bindings, and captures audio from the reopened project:
 
 ```powershell
@@ -144,6 +150,8 @@ expect_play_mode song
 expect_play_mode phrase
 expect_streaming_sample rgnano-test-tone.wav
 expect_playing_channel 0 00
+expect_screen_text wave
+expect_skin_frame_clean
 
 # write current view, cursor/model state, highlighted text, and full 40x30 text screen to the log
 dump_state sample import open
@@ -255,6 +263,12 @@ The all-8-channels workflow assigns independent chains, phrases, notes, and inst
 
 ```powershell
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\all-8-channels-workflow.rgsim -ResetLastProject -SeedLofiFixture -Skin -ArtifactsDir .\sim-artifacts
+```
+
+The mixer waveform workflow verifies the Mixer screen's live master waveform during song playback:
+
+```powershell
+.\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\mixer-waveform-workflow.rgsim -ResetLastProject -SeedLofiFixture -Skin -ArtifactsDir .\sim-artifacts
 ```
 
 The note-spelling workflow verifies that the same pitch can be displayed with sharp or flat note names from the Project `Notes:` setting:

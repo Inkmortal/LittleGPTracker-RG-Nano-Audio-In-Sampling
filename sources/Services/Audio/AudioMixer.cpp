@@ -17,6 +17,9 @@ AudioMixer::AudioMixer(const char *name):
 	masterVolume_ = 100 ;
 	clipped_ = false ;
 	peakPercent_ = 0 ;
+    for (int i=0; i<WAVEFORM_SIZE; i++) {
+        waveform_[i]=0;
+    }
 	
 	// Precalculate constant values for softclipping algorithm
 	softClipData_[0].alpha = 1.45f; // -1.5db (approx.)
@@ -122,10 +125,14 @@ bool AudioMixer::Render(fixed *buffer,int samplecount) {
              percent = 100;
          }
          peakPercent_ = percent;
+         updateWaveform(buffer,samplecount,peak);
      } else if (peakPercent_ > 0) {
          peakPercent_ -= 8;
          if (peakPercent_ < 0) {
              peakPercent_ = 0;
+         }
+         for (int i=0; i<WAVEFORM_SIZE; i++) {
+             waveform_[i]=(waveform_[i]*3)/4;
          }
      }
     if (enableRendering_&&writer_) {
@@ -152,6 +159,36 @@ void AudioMixer::SetMasterVolume(int volume) {
 bool AudioMixer::Clipped() { return clipped_; }
 
 int AudioMixer::GetPeakPercent() { return peakPercent_; }
+
+int AudioMixer::GetWaveformSample(int index) {
+    if (index<0 || index>=WAVEFORM_SIZE) {
+        return 0;
+    }
+    return waveform_[index];
+}
+
+void AudioMixer::updateWaveform(fixed *buffer,int samplecount,int peak) {
+    if (!buffer || samplecount<=0 || peak<=0) {
+        return;
+    }
+    int step=samplecount/WAVEFORM_SIZE;
+    if (step<1) {
+        step=1;
+    }
+    for (int i=0; i<WAVEFORM_SIZE; i++) {
+        int frame=i*step;
+        if (frame>=samplecount) {
+            frame=samplecount-1;
+        }
+        fixed left=buffer[frame*2];
+        fixed right=buffer[frame*2+1];
+        fixed mono=(left+right)/2;
+        int sample=(int)(((long long)mono*100)/peak);
+        if (sample>100) sample=100;
+        if (sample<-100) sample=-100;
+        waveform_[i]=sample;
+    }
+}
 
 fixed AudioMixer::hardClip(fixed sample) {
     if (sample > MAX_POSITIVE_FIXED || sample < MAX_NEGATIVE_FIXED) {

@@ -104,6 +104,7 @@ private:
 	bool SimSaveProject();
 	bool ExpectSimScreenSize(SDLGUIWindowImp *window, int width, int height);
 	bool ExpectSimScreenColors(SDLGUIWindowImp *window, int minColors);
+	bool ExpectSimSkinFrameClean(SDLGUIWindowImp *window);
 	int CountSurfaceColors(SDL_Surface *surface, int maxColors);
 	Uint32 ReadSurfacePixel(SDL_Surface *surface, int x, int y);
 	void LogSimState(const char *label, bool includeScreen);

@@ -43,6 +43,7 @@ public: // Added functionality
 	void ProcessUserEvent(SDL_Event &event) ;
 	SDL_Surface* GetSurface() { return screen_; }
 	bool IsRGNanoSkinEnabled() const { return rgnanoSkin_; }
+	bool IsRGNanoSkinFrameClean() ;
 	int GetAppAnchorX() const { return appAnchorX_; }
 	int GetAppAnchorY() const { return appAnchorY_; }
 	int GetScale() const { return mult_; }
@@ -54,6 +55,7 @@ protected:
 	void prepareBitmaps() ;
   void transform(const GUIRect &srcRect,SDL_Rect *dstRect);
   void transform(const GUIPoint &srcPoint, int *x, int *y);
+  bool isAppPixelVisible(int x, int y, int w, int h) const;
 #ifdef PLATFORM_RGNANO_SIM
 	void DrawRGNanoSkin() ;
 	void DrawRGNanoControls() ;

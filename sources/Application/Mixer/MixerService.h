@@ -54,6 +54,7 @@ public:
     int GetPlayedBufferPercentage() ;
     int GetBusPeakPercent(int bus) ;
     int GetMasterPeakPercent() ;
+    int GetMasterWaveformSample(int index) ;
 	
 	virtual void Execute(FourCC id,float value) ;
 
