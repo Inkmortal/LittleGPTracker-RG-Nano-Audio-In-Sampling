@@ -14,6 +14,7 @@
                      "tasks":  {
                                    "dev":  "powershell -NoProfile -ExecutionPolicy Bypass -File .\\tools\\build-rgnano-sim.ps1",
                                    "smoke":  "powershell -NoProfile -ExecutionPolicy Bypass -File .\\tools\\run-rgnano-sim.ps1 -Script .\\projects\\resources\\RGNANO_SIM\\smoke.rgsim",
+                                   "suite":  "powershell -NoProfile -ExecutionPolicy Bypass -File .\\tools\\run-rgnano-sim-suite.ps1",
                                    "info":  "RG Nano simulator: use .\\run.ps1 -Task dev to build, .\\run.ps1 -Task smoke to run scripted smoke test."
                                }
                  }

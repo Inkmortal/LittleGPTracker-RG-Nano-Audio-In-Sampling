@@ -188,6 +188,12 @@ The canonical smoke test is:
 .\run.ps1 -Task smoke
 ```
 
+The full producer/device regression suite builds the simulator, runs every canonical workflow in sequence, stores each run's logs/screenshots/WAV captures under `sim-artifacts-suite`, and writes `suite-summary.json`:
+
+```powershell
+.\run.ps1 -Task suite
+```
+
 The sample fixture smoke test generates a tiny 440 Hz WAV file in `rgnano-sim-data/samples`, verifies it exists, checks the simulator log, exercises a skinned button click, captures a screenshot, and copies logs/screenshots into `sim-artifacts`:
 
 ```powershell
