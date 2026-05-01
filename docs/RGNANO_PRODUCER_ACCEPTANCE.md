@@ -22,14 +22,14 @@ Latest audit: passed on the native `RGNANO_SIM` executable at 240x240. Every scr
 | 8-channel playback | Existing core engine plus live Nano meters | Full arrangements across all tracks | Confirmed in sim | `all-8-channels-workflow.rgsim` assigns independent chains, phrases, notes, and instruments to channels 0-7, asserts all 8 channels are playing, captures audio, and screenshots the active note/instrument monitor plus one-row meter strip. |
 | Mixer view | Existing view, route restored | Track activity, play time, CPU/clip/battery | Confirmed in sim | `SongView` could request `VT_MIXER`, but `AppWindow` was not switching to it. This pass restores it and labels the screen as `Mixer Song` or `Mixer Live`. |
 | Chain view | Existing core view plus dynamic sidebar meters | Phrase order, transposition, channel activity | Confirmed in sim | Usable, and the right sidebar meter now reflects live audio peak/activity instead of a static playing marker. |
-| Phrase view | Existing core view | Notes, instruments, commands | Confirmed in sim | This is the most important editing screen; command columns need special audit. |
+| Phrase view | Existing core view plus sharp/flat note display | Notes, instruments, commands | Confirmed in sim | This is the most important editing screen; command columns need special audit. `note-spelling-workflow.rgsim` verifies `C#3`/`Db3` display switching. |
 | Phrase table | Existing core view | Per-step command automation | Confirmed in sim | Needs command-selector coverage next. |
 | Groove view | Existing core view | Swing/timing feel | Confirmed in sim | Good M8-adjacent feature already present. |
 | Instrument view | Existing core view | Sample assignment and shaping | Confirmed in sim | Strongest native screen for sound design today, but long labels are cramped. |
 | Instrument table | Existing core view | Instrument-local modulation/commands | Confirmed in sim | Important for M8-style movement; needs better discoverability. |
 | Sample import modal | Existing modal | Browse, preview, import WAVs | Confirmed in sim | Native `Listen` preview is now assertable. |
 | Record modal | Existing code | Live capture | Out of current scope | Leave alone until hardware audio input path is real. |
-| Project/settings view | Existing core view | Tempo, scale, render, save/load | Confirmed in sim | Already has global `Scale:` and `Render:` fields, worth elevating in workflow docs. |
+| Project/settings view | Existing core view | Tempo, scale, note spelling, render, save/load | Confirmed in sim | Adds `Notes: Sharps/Flats` next to the existing global `Scale:` field without adding new button combos. |
 | Power menu overlay | RG Nano simulator feature | Exit/debug without leaking input | Confirmed in sim | Text labels now render in screenshots, and the power input remains globally isolated from tracker controls. |
 | Command selector/help | Existing modal/helper code | FX command discovery | Needs dedicated route | High priority for usability because M8 has strong command help. |
 | Render/export flow | Existing project/render fields | Bounce songs/stems/samples | Needs dedicated test | Project view exposes render mode; simulator captures audio, but producer UX is not audited yet. |
@@ -54,6 +54,7 @@ Sources used for comparison:
 | Song/chain/phrase | Present | M8 makes the hierarchy explicit and fast | Keep LGPT structure; improve screen labels and route hints. |
 | Tables/groove | Present | M8 tables/modulation are central to movement | Make table/instrument-table access clearer and test command editing. |
 | Project scale | Global `Scale:` exists | M8 has a dedicated Scale View and scale/key workflow | First expose scale workflow better; later add a compact Scale screen. |
+| Note spelling | Project `Notes:` setting supports sharps/flats | M8 keeps musical context visible while editing | Keep this as a simple Project setting; later add automatic spelling from key/scale. |
 | Render | Project render field exists | M8 has a dedicated Render View and render-to-sample workflow | Add a producer-friendly render flow and simulator assertion. |
 | Instrument engines | Sample instruments exist | M8 has Wavsynth, Macrosynth, Sampler, FM Synth, Hypersynth, MIDI Out, and External Instrument | Start native and incremental: wavetable/simple synth, then FM or macro-style engines. |
 

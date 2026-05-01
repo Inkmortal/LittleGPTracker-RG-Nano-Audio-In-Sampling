@@ -55,6 +55,11 @@ $suite = @(
     Args = @("-ResetLastProject", "-SeedLofiFixture", "-Skin")
   },
   @{
+    Name = "note-spelling-workflow"
+    Script = "note-spelling-workflow.rgsim"
+    Args = @("-ResetLastProject")
+  },
+  @{
     Name = "lofi-sample-pack"
     Script = "lofi-sample-pack.rgsim"
     Args = @("-SeedLofiFixture")

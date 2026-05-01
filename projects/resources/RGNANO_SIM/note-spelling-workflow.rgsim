@@ -1,0 +1,30 @@
+# Note spelling workflow:
+# Project setting can show the same pitch with sharp or flat names.
+route boot.new_project_random
+expect_view song
+
+sim_set_song_chain 0 0 0
+sim_set_chain_phrase 0 0 0 0
+sim_set_phrase_note 0 0 61 0
+expect_song_chain 0 0 00
+expect_chain_phrase 0 0 00
+expect_phrase_row_count 0 1
+
+route song.to_chain
+wait 120
+expect_view chain
+route chain.to_phrase
+wait 120
+expect_view phrase
+expect_screen_text C# 3
+
+sim_set_note_names flats
+wait 120
+expect_screen_text Db 3
+
+sim_set_note_names sharps
+wait 120
+expect_screen_text C# 3
+expect_size 240 240
+expect_no_error
+quit

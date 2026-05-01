@@ -465,7 +465,7 @@ bool SDLEventManager::AddSimScriptLine(const std::string &line, const char *scri
 		if (command.value<=0) {
 			command.value=80;
 		}
-	} else if (command.op=="down" || command.op=="up" || command.op=="screenshot" || command.op=="log" || command.op=="expect_file" || command.op=="expect_project_sample" || command.op=="expect_view" || command.op=="expect_player_running" || command.op=="expect_play_mode") {
+	} else if (command.op=="down" || command.op=="up" || command.op=="screenshot" || command.op=="log" || command.op=="expect_file" || command.op=="expect_project_sample" || command.op=="expect_view" || command.op=="expect_player_running" || command.op=="expect_play_mode" || command.op=="sim_set_note_names") {
 		iss >> command.arg;
 	} else if (command.op=="expect_screen_text" || command.op=="expect_selected_text" || command.op=="expect_streaming_sample" || command.op=="dump_state") {
 		std::getline(iss,command.arg);
@@ -730,6 +730,11 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 	} else if (command.op=="sim_set_tempo") {
 		if (!SimSetTempo(command.value)) {
 			FailSimScript("tempo setup failed");
+			return;
+		}
+	} else if (command.op=="sim_set_note_names") {
+		if (!SimSetNoteNames(command.arg)) {
+			FailSimScript("note name setup failed");
 			return;
 		}
 	} else if (command.op=="sim_import_sample_to_instrument") {
@@ -1232,6 +1237,38 @@ bool SDLEventManager::SimSetTempo(int bpm)
 	}
 	tempo->SetInt(bpm);
 	Trace::Log("RGNANO_SIM","sim_set_tempo %d",bpm);
+	return true;
+}
+
+bool SDLEventManager::SimSetNoteNames(const std::string &mode)
+{
+	ViewData *viewData=GetSimViewData();
+	if (!viewData || !viewData->project_) {
+		Trace::Error("RGNANO_SIM sim_set_note_names has no project");
+		return false;
+	}
+	int value=-1;
+	if (mode=="sharps" || mode=="Sharps" || mode=="sharp") {
+		value=0;
+	} else if (mode=="flats" || mode=="Flats" || mode=="flat") {
+		value=1;
+	}
+	if (value<0) {
+		Trace::Error("RGNANO_SIM sim_set_note_names invalid mode %s",mode.c_str());
+		return false;
+	}
+	Variable *noteNames=viewData->project_->FindVariable(VAR_NOTE_NAMES);
+	if (!noteNames) {
+		Trace::Error("RGNANO_SIM sim_set_note_names missing project variable");
+		return false;
+	}
+	noteNames->SetInt(value);
+	viewData->project_->GetNoteNameMode();
+	AppWindow *appWindow=(AppWindow *)Application::GetInstance()->GetWindow();
+	if (appWindow) {
+		appWindow->RefreshCurrentView();
+	}
+	Trace::Log("RGNANO_SIM","sim_set_note_names %s",mode.c_str());
 	return true;
 }
 

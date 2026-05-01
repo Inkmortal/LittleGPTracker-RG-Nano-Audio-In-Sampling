@@ -1301,7 +1301,7 @@ void PhraseView::DrawView() {
         if (d == 0xFF) {
             DrawString(pos._x, pos._y, "----", props);
         } else {
-            note2char(d, buffer);
+            note2char(d, buffer, viewData_->project_->GetNoteNameMode());
             DrawString(pos._x, pos._y, buffer, props);
         }
         setTextProps(props, 0, j, true);

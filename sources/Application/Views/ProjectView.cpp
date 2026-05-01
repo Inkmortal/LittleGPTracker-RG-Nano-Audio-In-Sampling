@@ -163,6 +163,12 @@ ProjectView::ProjectView(GUIWindow &w,ViewData *data):FieldView(w,data) {
         new UIIntVarField(position, *v, "Scale: %s", 0, scaleCount - 1, 1, 10);
     T_SimpleList<UIField>::Insert(field);
 
+    v = project_->FindVariable(VAR_NOTE_NAMES);
+    position._y += 1;
+    field =
+        new UIIntVarField(position, *v, "Notes: %s", 0, 1, 1, 1);
+    T_SimpleList<UIField>::Insert(field);
+
     position._y += 2;
     UIActionField *a1 =
         new UIActionField("Compact Sequencer", ACTION_PURGE, position);

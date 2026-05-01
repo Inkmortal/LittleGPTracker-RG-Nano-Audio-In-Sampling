@@ -13,6 +13,7 @@
 #include "Table.h"
 
 #include "ProjectDatas.h"
+#include "Application/Utils/char.h"
 #include <math.h>
 
 Project::Project()
@@ -41,6 +42,10 @@ tempoNudge_(0)
         new Variable("scale", VAR_SCALE, scaleNames, scaleCount, 0);
     this->Insert(scale);
     scale->SetInt(0);
+    Variable *noteNames =
+        new Variable("noteNames", VAR_NOTE_NAMES, noteNameModes, 2, NOTE_NAME_SHARPS);
+    this->Insert(noteNames);
+    setNoteNameMode(NOTE_NAME_SHARPS);
     Variable *renderMode =
         new Variable("renderMode", VAR_RENDER, renderModes, MAX_RENDER_MODE, 0);
     this->Insert(renderMode);
@@ -80,6 +85,14 @@ int Project::GetScale() {
     Variable *v = FindVariable(VAR_SCALE);
     NAssert(v);
     return v->GetInt();
+}
+
+int Project::GetNoteNameMode() {
+    Variable *v = FindVariable(VAR_NOTE_NAMES);
+    NAssert(v);
+    int mode = v->GetInt();
+    setNoteNameMode(mode);
+    return mode;
 }
 
 int Project::GetTempo() {

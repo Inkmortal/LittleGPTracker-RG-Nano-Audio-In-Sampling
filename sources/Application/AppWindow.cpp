@@ -451,6 +451,18 @@ AppWindow *AppWindow::Create(GUICreateWindowParams &params) {
 
 void AppWindow::SetDirty() { _isDirty = true; };
 
+void AppWindow::SetCurrentViewDirty() {
+    if (_currentView) {
+        _currentView->SetDirty(true);
+    }
+    SetDirty();
+};
+
+void AppWindow::RefreshCurrentView() {
+    SetCurrentViewDirty();
+    Redraw();
+};
+
 bool AppWindow::onEvent(GUIEvent &event) {
 
     // We need to tell the app to quit once we're out of the

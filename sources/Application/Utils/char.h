@@ -6,6 +6,16 @@
 
 extern char h2c__[16] ;
 extern const char *notes__[12] ;
+extern const char *flatNotes__[12] ;
+
+enum NoteNameMode {
+	NOTE_NAME_SHARPS = 0,
+	NOTE_NAME_FLATS = 1
+};
+
+void setNoteNameMode(int mode);
+int getNoteNameMode();
+const char *getNoteName(unsigned char note, int mode=-1);
 
 inline void hex2char(const unsigned char c,char *s) {
 	char *dest__=s ;
@@ -32,10 +42,10 @@ inline void char2hex(const char *s,unsigned char *c) {
 	*c=b1+b2 ;
 }
 
-inline void note2char(unsigned char d,char *s) {
+inline void note2char(unsigned char d,char *s,int mode=-1) {
 	int oct=d/12-2 ;
 	int note=d%12 ;
-	strcpy(s,notes__[note]) ;
+	strcpy(s,getNoteName(note,mode)) ;
 	if (oct<0) {
 		s[2]='-' ;
         oct=-oct ;
@@ -45,9 +55,9 @@ inline void note2char(unsigned char d,char *s) {
 	s[3]='0'+oct ;
 } ;
 
-inline void note2visualizer(unsigned char d,char *s) {
+inline void note2visualizer(unsigned char d,char *s,int mode=-1) {
 	int note=d%12 ;
-	strcpy(s,notes__[note]) ;
+	strcpy(s,getNoteName(note,mode)) ;
 	s[2]='\0';//sloppy, can we make the array shorter?
 	s[3]='\0';//sloppy, can we make the array shorter?
 } ;

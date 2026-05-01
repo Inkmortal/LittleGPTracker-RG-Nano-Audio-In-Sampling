@@ -172,7 +172,7 @@ int PlayerMixer::GetChannelNote(int channel) {
 char *PlayerMixer::GetPlayedNote(int channel) {
 
     if (notes_[channel]!=0xFF) {
-		note2visualizer(notes_[channel],noteBuffer) ; 
+		note2visualizer(notes_[channel],noteBuffer,project_->GetNoteNameMode()) ;
 		return noteBuffer ;
     }
     return "  " ;

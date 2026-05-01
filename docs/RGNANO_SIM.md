@@ -157,6 +157,7 @@ expect_instrument_sample 4 wuxia-guzheng.wav
 
 # directly program tracker state for long producer workflows
 sim_set_tempo 82
+sim_set_note_names flats
 sim_import_sample_to_instrument 3 wuxia-guzheng.wav
 sim_set_song_chain 0 3 3
 sim_set_chain_phrase 3 0 3 0
@@ -252,6 +253,12 @@ The all-8-channels workflow assigns independent chains, phrases, notes, and inst
 
 ```powershell
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\all-8-channels-workflow.rgsim -ResetLastProject -SeedLofiFixture -Skin -ArtifactsDir .\sim-artifacts
+```
+
+The note-spelling workflow verifies that the same pitch can be displayed with sharp or flat note names from the Project `Notes:` setting:
+
+```powershell
+.\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\note-spelling-workflow.rgsim -ResetLastProject -ArtifactsDir .\sim-artifacts
 ```
 
 The producer navigation tour exercises the main RG Nano view routes after creating song/chain/phrase state:
