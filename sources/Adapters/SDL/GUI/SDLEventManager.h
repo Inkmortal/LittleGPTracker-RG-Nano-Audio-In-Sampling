@@ -95,6 +95,8 @@ private:
 	bool ExpectSimInstrumentSample(int instrument, const std::string &sampleName);
 	bool SimSetTempo(int bpm);
 	bool SimSetNoteNames(const std::string &mode);
+	bool SimSetScale(int scale);
+	bool SimSetScaleKey(int key);
 	bool SimImportSampleToInstrument(int instrument, const std::string &sampleName);
 	bool SimSetSongChain(int row, int channel, int chain);
 	bool SimSetChainPhrase(int chain, int row, int phrase, int transpose);

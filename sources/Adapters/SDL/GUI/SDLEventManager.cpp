@@ -5,6 +5,7 @@
 #include "Application/Instruments/InstrumentBank.h"
 #include "Application/Instruments/SampleInstrument.h"
 #include "Application/Instruments/SamplePool.h"
+#include "Application/Model/Scale.h"
 #include "Application/Player/Player.h"
 #include "Application/Persistency/PersistencyService.h"
 #include "System/FileSystem/FileSystem.h"
@@ -484,7 +485,7 @@ bool SDLEventManager::AddSimScriptLine(const std::string &line, const char *scri
 			command.arg2.erase(0,1);
 		}
 	} else if (command.op=="expect_no_error" || command.op=="reset_audio_stats" || command.op=="end_audio_capture" || command.op=="sim_save_project" || command.op=="quit") {
-	} else if (command.op=="expect_colors" || command.op=="expect_audio_activity" || command.op=="expect_audio_silence" || command.op=="expect_audio_capture_bytes" || command.op=="expect_tempo" || command.op=="sim_set_tempo") {
+	} else if (command.op=="expect_colors" || command.op=="expect_audio_activity" || command.op=="expect_audio_silence" || command.op=="expect_audio_capture_bytes" || command.op=="expect_tempo" || command.op=="sim_set_tempo" || command.op=="sim_set_scale" || command.op=="sim_set_key") {
 		iss >> command.value;
 	} else if (command.op=="start_audio_capture") {
 		iss >> command.arg;
@@ -735,6 +736,16 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 	} else if (command.op=="sim_set_note_names") {
 		if (!SimSetNoteNames(command.arg)) {
 			FailSimScript("note name setup failed");
+			return;
+		}
+	} else if (command.op=="sim_set_scale") {
+		if (!SimSetScale(command.value)) {
+			FailSimScript("scale setup failed");
+			return;
+		}
+	} else if (command.op=="sim_set_key") {
+		if (!SimSetScaleKey(command.value)) {
+			FailSimScript("scale key setup failed");
 			return;
 		}
 	} else if (command.op=="sim_import_sample_to_instrument") {
@@ -1269,6 +1280,48 @@ bool SDLEventManager::SimSetNoteNames(const std::string &mode)
 		appWindow->RefreshCurrentView();
 	}
 	Trace::Log("RGNANO_SIM","sim_set_note_names %s",mode.c_str());
+	return true;
+}
+
+bool SDLEventManager::SimSetScale(int scale)
+{
+	ViewData *viewData=GetSimViewData();
+	if (!viewData || !viewData->project_ || scale<0 || scale>=scaleCount) {
+		Trace::Error("RGNANO_SIM sim_set_scale invalid scale %d",scale);
+		return false;
+	}
+	Variable *scaleVar=viewData->project_->FindVariable(VAR_SCALE);
+	if (!scaleVar) {
+		Trace::Error("RGNANO_SIM sim_set_scale missing project variable");
+		return false;
+	}
+	scaleVar->SetInt(scale);
+	AppWindow *appWindow=(AppWindow *)Application::GetInstance()->GetWindow();
+	if (appWindow) {
+		appWindow->RefreshCurrentView();
+	}
+	Trace::Log("RGNANO_SIM","sim_set_scale %d",scale);
+	return true;
+}
+
+bool SDLEventManager::SimSetScaleKey(int key)
+{
+	ViewData *viewData=GetSimViewData();
+	if (!viewData || !viewData->project_ || key<0 || key>11) {
+		Trace::Error("RGNANO_SIM sim_set_key invalid key %d",key);
+		return false;
+	}
+	Variable *keyVar=viewData->project_->FindVariable(VAR_SCALE_KEY);
+	if (!keyVar) {
+		Trace::Error("RGNANO_SIM sim_set_key missing project variable");
+		return false;
+	}
+	keyVar->SetInt(key);
+	AppWindow *appWindow=(AppWindow *)Application::GetInstance()->GetWindow();
+	if (appWindow) {
+		appWindow->RefreshCurrentView();
+	}
+	Trace::Log("RGNANO_SIM","sim_set_key %d",key);
 	return true;
 }
 

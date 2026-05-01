@@ -16,6 +16,7 @@
 #define VAR_SOFTCLIP 		MAKE_FOURCC('S', 'F', 'T', 'C')
 #define VAR_SOFTCLIP_GAIN 	MAKE_FOURCC('S', 'F', 'G', 'N')
 #define VAR_PREGAIN   		MAKE_FOURCC('P', 'R', 'G', 'N')
+#define VAR_SCALE_KEY 		MAKE_FOURCC('S', 'K', 'E', 'Y')
 #define VAR_SCALE 			MAKE_FOURCC('S', 'C', 'A', 'L')
 #define VAR_NOTE_NAMES 		MAKE_FOURCC('N', 'N', 'A', 'M')
 #define VAR_RENDER MAKE_FOURCC('R', 'N', 'D', 'R')
@@ -47,6 +48,7 @@ public:
   int GetSoftclipGain();
   int GetPregain();
   int GetRenderMode();
+  int GetScaleKey();
   void Trigger();
 
   static const unsigned int MAX_RENDER_MODE = 3;

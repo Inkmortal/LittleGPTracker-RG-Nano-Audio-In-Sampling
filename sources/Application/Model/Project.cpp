@@ -38,6 +38,9 @@ tempoNudge_(0)
 	this->Insert(wrap);
 	Variable *transpose=new Variable("transpose", VAR_TRANSPOSE, 0);
 	this->Insert(transpose);
+    Variable *scaleKey =
+        new Variable("scaleKey", VAR_SCALE_KEY, 0, 11);
+    this->Insert(scaleKey);
     Variable *scale =
         new Variable("scale", VAR_SCALE, scaleNames, scaleCount, 0);
     this->Insert(scale);
@@ -130,6 +133,15 @@ int Project::GetRenderMode() {
     Variable *v = FindVariable(VAR_RENDER);
     NAssert(v);
 	return v->GetInt();
+}
+
+int Project::GetScaleKey() {
+    Variable *v = FindVariable(VAR_SCALE_KEY);
+    NAssert(v);
+    int key = v->GetInt();
+    if (key<0) key=0;
+    if (key>11) key=11;
+    return key;
 }
 
 void Project::NudgeTempo(int value) {

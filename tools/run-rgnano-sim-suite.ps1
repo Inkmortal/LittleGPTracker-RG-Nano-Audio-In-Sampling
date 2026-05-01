@@ -60,6 +60,11 @@ $suite = @(
     Args = @("-ResetLastProject")
   },
   @{
+    Name = "scale-key-workflow"
+    Script = "scale-key-workflow.rgsim"
+    Args = @("-ResetLastProject")
+  },
+  @{
     Name = "lofi-sample-pack"
     Script = "lofi-sample-pack.rgsim"
     Args = @("-SeedLofiFixture")

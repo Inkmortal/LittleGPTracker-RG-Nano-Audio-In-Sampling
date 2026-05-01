@@ -162,7 +162,7 @@ flowchart LR
 | --- | --- |
 | D-pad | Move phrase cursor. |
 | `A` | Preview notes/instruments and paste last value. |
-| `A + D-pad` | Edit note, instrument, command, or parameter value. |
+| `A + D-pad` | Edit note, instrument, command, or parameter value. Note-column edits follow the Project `Key:` and `Scale:` settings when scale stepping is active, but stored notes remain ordinary notes and can still be changed outside the key. |
 | `A + Up/Down` on command columns | Open command selector. |
 | `B + D-pad` | Warp to neighboring phrases or phrase rows in chain. |
 | `B + A` | Cut current phrase position. |

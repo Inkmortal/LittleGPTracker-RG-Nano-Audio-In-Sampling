@@ -110,6 +110,9 @@ expect_view song
 route song.to_project
 wait 120
 expect_view project
+expect_screen_text Key:
+expect_screen_text Scale:
+expect_screen_text Notes:
 dump_state audit project settings render
 screenshot audit-13-project.bmp
 

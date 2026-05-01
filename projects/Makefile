@@ -264,7 +264,7 @@ COMMONFILES := \
 	UIIntVarOffField.o UIIntVarField.o ViewEvent.o I_Action.o\
 	UITempoField.o UIActionField.o \
 	MessageBox.o CommandSelectorModal.o \
-	GrooveView.o UINoteVarField.o UIBigHexVarField.o \
+	GrooveView.o UINoteVarField.o UINoteNameVarField.o UIBigHexVarField.o \
 	SRPUpdaters.o UIStaticField.o \
 	Song.o Chain.o Phrase.o Project.o Scale.o \
 	char.o n_assert.o fixed.o wildcard.o \

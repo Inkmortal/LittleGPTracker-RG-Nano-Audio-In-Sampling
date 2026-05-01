@@ -1,0 +1,36 @@
+# Scale key workflow:
+# Project Key offsets scale-constrained note entry while preserving the
+# existing A+d-pad phrase editing shortcut.
+route boot.new_project_random
+expect_view song
+
+sim_set_key 2
+sim_set_scale 21
+sim_set_song_chain 0 0 0
+sim_set_chain_phrase 0 0 0 0
+sim_set_phrase_note 0 0 60 0
+
+route song.to_chain
+wait 120
+expect_view chain
+route chain.to_phrase
+wait 120
+expect_view phrase
+expect_screen_text C  3
+
+route combo.a.right
+wait 120
+expect_screen_text C# 3
+
+route phrase.to_chain
+wait 120
+route chain.to_song
+wait 120
+route song.to_project
+wait 120
+expect_view project
+expect_screen_text Key: D
+expect_screen_text Scale: Ionian mode (major)
+expect_size 240 240
+expect_no_error
+quit

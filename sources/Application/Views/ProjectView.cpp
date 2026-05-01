@@ -9,6 +9,7 @@
 #include "BaseClasses/UIActionField.h"
 #include "BaseClasses/UIField.h"
 #include "BaseClasses/UIIntVarField.h"
+#include "BaseClasses/UINoteNameVarField.h"
 #include "BaseClasses/UIStaticField.h"
 #include "BaseClasses/UITempoField.h"
 #include "Services/Midi/MidiService.h"
@@ -153,6 +154,13 @@ ProjectView::ProjectView(GUIWindow &w,ViewData *data):FieldView(w,data) {
     UIIntVarField *f2=new UIIntVarField(position,*v,"Transpose: %3.2d",-48,48,0x1,0xC) ;
 	T_SimpleList<UIField>::Insert(f2) ;
 
+    Variable *noteNames = project_->FindVariable(VAR_NOTE_NAMES);
+    v = project_->FindVariable(VAR_SCALE_KEY);
+    position._y += 1;
+    field =
+        new UINoteNameVarField(position, *v, noteNames, "Key: %s", 0, 11, 1, 1);
+    T_SimpleList<UIField>::Insert(field);
+
     v = project_->FindVariable(VAR_SCALE);
 	// if scale name is not found, set the default chromatic scale
 	if (v->GetInt() < 0) {
@@ -163,7 +171,7 @@ ProjectView::ProjectView(GUIWindow &w,ViewData *data):FieldView(w,data) {
         new UIIntVarField(position, *v, "Scale: %s", 0, scaleCount - 1, 1, 10);
     T_SimpleList<UIField>::Insert(field);
 
-    v = project_->FindVariable(VAR_NOTE_NAMES);
+    v = noteNames;
     position._y += 1;
     field =
         new UIIntVarField(position, *v, "Notes: %s", 0, 1, 1, 1);
