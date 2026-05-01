@@ -3,6 +3,7 @@
 `RGNANO_SIM` is a desktop SDL build that keeps the RG Nano app contract:
 
 - 240x240 logical screen
+- 240x240 SDL surface by default, matching the RG Nano pixel dimensions
 - RG Nano button names and compact key layout
 - desktop audio output through the Windows SDL/W32 backend
 - event logging through `DUMPEVENT`
@@ -74,10 +75,16 @@ up m
 # SDL BMP screenshot
 screenshot smoke-song.bmp
 
+# fail unless the SDL surface is exactly 240x240
+expect_size 240 240
+
+# fail unless the screen has at least two distinct pixel values
+expect_colors 2
+
 quit
 ```
 
-Screenshots are captured from the SDL surface, so they are available to automated tests without a camera or physical RG Nano.
+Screenshots and assertions are captured from the SDL surface, so they are available to automated tests without a camera or physical RG Nano.
 
 The canonical smoke test is:
 

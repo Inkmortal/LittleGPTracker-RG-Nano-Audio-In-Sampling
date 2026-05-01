@@ -238,6 +238,7 @@ void SDLEventManager::LoadSimScript()
 		std::istringstream iss(line);
 		SimCommand command;
 		command.value=0;
+		command.value2=0;
 		iss >> command.op;
 		if (command.op.empty()) {
 			continue;
@@ -253,6 +254,8 @@ void SDLEventManager::LoadSimScript()
 			iss >> command.arg;
 		} else if (command.op=="expect_colors") {
 			iss >> command.value;
+		} else if (command.op=="expect_size") {
+			iss >> command.value >> command.value2;
 		}
 		simCommands_.push_back(command);
 	}
@@ -306,16 +309,23 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 			Trace::Log("RGNANO_SIM","press %s",command.arg.c_str());
 			return;
 		}
-		Trace::Error("RGNANO_SIM unknown key %s", command.arg.c_str());
+		FailSimScript("unknown key in press command");
+		return;
 	} else if (command.op=="down") {
 		int key=GetKeyCode(command.arg.c_str());
 		if (key>0) {
 			keyboardCS_->SetKey(key,true);
+		} else {
+			FailSimScript("unknown key in down command");
+			return;
 		}
 	} else if (command.op=="up") {
 		int key=GetKeyCode(command.arg.c_str());
 		if (key>0) {
 			keyboardCS_->SetKey(key,false);
+		} else {
+			FailSimScript("unknown key in up command");
+			return;
 		}
 	} else if (command.op=="screenshot") {
 		SaveSimScreenshot(window,command.arg);
@@ -323,15 +333,30 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 		PostQuitMessage();
 	} else if (command.op=="expect_colors") {
 		if (!ExpectSimScreenColors(window,command.value)) {
-			simScriptFailed_=true;
-			PostQuitMessage();
+			FailSimScript("screen color assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_size") {
+		if (!ExpectSimScreenSize(window,command.value,command.value2)) {
+			FailSimScript("screen size assertion failed");
+			return;
 		}
 	} else if (command.op=="log") {
 		Trace::Log("RGNANO_SIM","%s",command.arg.c_str());
+	} else {
+		FailSimScript("unknown script command");
+		return;
 	}
 
 	simCommandIndex_++;
 	simNextCommandTime_=now+40;
+}
+
+void SDLEventManager::FailSimScript(const char *message)
+{
+	simScriptFailed_=true;
+	Trace::Error("RGNANO_SIM %s",message);
+	PostQuitMessage();
 }
 
 void SDLEventManager::SaveSimScreenshot(SDLGUIWindowImp *window, const std::string &path)
@@ -345,6 +370,21 @@ void SDLEventManager::SaveSimScreenshot(SDLGUIWindowImp *window, const std::stri
 	} else {
 		Trace::Error("RGNANO_SIM failed screenshot %s",path.c_str());
 	}
+}
+
+bool SDLEventManager::ExpectSimScreenSize(SDLGUIWindowImp *window, int width, int height)
+{
+	if (!window) {
+		Trace::Error("RGNANO_SIM expect_size has no window");
+		return false;
+	}
+	SDL_Surface *surface=window->GetSurface();
+	if (!surface) {
+		Trace::Error("RGNANO_SIM expect_size has no screen surface");
+		return false;
+	}
+	Trace::Log("RGNANO_SIM","expect_size found %dx%d, expected %dx%d",surface->w,surface->h,width,height);
+	return surface->w==width && surface->h==height;
 }
 
 bool SDLEventManager::ExpectSimScreenColors(SDLGUIWindowImp *window, int minColors)

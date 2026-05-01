@@ -3,7 +3,7 @@
 	<SAMPLELIB value="./rgnano-sim-data/samples"/>
 	<AUDIOAPI value="MMSYSTEM"/>
 	<AUDIOBUFFERSIZE value="512"/>
-	<SCREENMULT value="2"/>
+	<SCREENMULT value="1"/>
 	<CHANNELMODE value="SPLIT"/>
 	<DUMPEVENT value="YES"/>
 	<KEY_A value="a"/>

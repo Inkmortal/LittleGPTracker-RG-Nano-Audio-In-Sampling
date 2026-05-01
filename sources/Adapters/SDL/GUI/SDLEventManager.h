@@ -52,6 +52,7 @@ private:
 		std::string op;
 		std::string arg;
 		int value;
+		int value2;
 	};
 	std::vector<SimCommand> simCommands_;
 	size_t simCommandIndex_;
@@ -62,6 +63,8 @@ private:
 	void LoadSimScript();
 	void ProcessSimScript(SDLGUIWindowImp *window);
 	void SaveSimScreenshot(SDLGUIWindowImp *window, const std::string &path);
+	void FailSimScript(const char *message);
+	bool ExpectSimScreenSize(SDLGUIWindowImp *window, int width, int height);
 	bool ExpectSimScreenColors(SDLGUIWindowImp *window, int minColors);
 	int CountSurfaceColors(SDL_Surface *surface, int maxColors);
 	Uint32 ReadSurfacePixel(SDL_Surface *surface, int x, int y);
