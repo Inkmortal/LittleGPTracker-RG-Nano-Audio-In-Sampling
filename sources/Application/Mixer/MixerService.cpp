@@ -183,6 +183,20 @@ int MixerService::GetMasterWaveformSample(int index) {
     return out_->GetWaveformSample(index);
 }
 
+int MixerService::GetMasterWaveformMin(int index) {
+    if (!out_) {
+        return 0;
+    }
+    return out_->GetWaveformMin(index);
+}
+
+int MixerService::GetMasterWaveformMax(int index) {
+    if (!out_) {
+        return 0;
+    }
+    return out_->GetWaveformMax(index);
+}
+
 void MixerService::toggleRendering(bool enable) {
     isRendering_ = enable;
     switch (mode_) {

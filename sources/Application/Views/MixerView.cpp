@@ -293,14 +293,7 @@ void MixerView::OnPlayerUpdate(PlayerEventType ,unsigned int tick) {
 } ;
 
 void MixerView::drawWaveform() {
-    GUITextProperties props;
-    GUIPoint pos;
     MixerService *mixer = MixerService::GetInstance();
-
-    SetColor(CD_NORMAL);
-    pos._x = 3;
-    pos._y = 55;
-    DrawString(pos._x, pos._y, "scope", props);
 
 #if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
     SDLGUIWindowImp *imp = (SDLGUIWindowImp *)w_.GetImpWindow();
@@ -314,20 +307,19 @@ void MixerView::drawWaveform() {
     SetColor(CD_HILITE2);
     for (int col = 0; col < width; col++) {
         int sampleIndex = (col * columns) / width;
-        int nextIndex = ((col + 1) * columns) / width;
-        if (nextIndex >= columns) {
-            nextIndex = columns - 1;
+        int minSample = mixer->GetMasterWaveformMin(sampleIndex);
+        int maxSample = mixer->GetMasterWaveformMax(sampleIndex);
+        int top = mid - ((maxSample * (height / 2 - 2)) / 100);
+        int bottom = mid - ((minSample * (height / 2 - 2)) / 100);
+        if (top < y) top = y;
+        if (top >= y + height) top = y + height - 1;
+        if (bottom < y) bottom = y;
+        if (bottom >= y + height) bottom = y + height - 1;
+        if (bottom < top) {
+            int swap=top;
+            top=bottom;
+            bottom=swap;
         }
-        int sample = mixer->GetMasterWaveformSample(sampleIndex);
-        int nextSample = mixer->GetMasterWaveformSample(nextIndex);
-        int waveY = mid - ((sample * (height / 2 - 2)) / 100);
-        int nextY = mid - ((nextSample * (height / 2 - 2)) / 100);
-        if (waveY < y) waveY = y;
-        if (waveY >= y + height) waveY = y + height - 1;
-        if (nextY < y) nextY = y;
-        if (nextY >= y + height) nextY = y + height - 1;
-        int top = waveY < nextY ? waveY : nextY;
-        int bottom = waveY > nextY ? waveY : nextY;
         GUIRect r(x + col, top, x + col + 1, bottom + 1);
         imp->DrawRect(r);
     }
@@ -336,6 +328,8 @@ void MixerView::drawWaveform() {
     GUIRect center(x, mid, x + width, mid + 1);
     imp->DrawRect(center);
 #else
+    GUITextProperties props;
+    GUIPoint pos;
     pos._x = 3;
     pos._y = 72;
     DrawString(pos._x, pos._y, "scope unavailable", props);

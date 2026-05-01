@@ -55,6 +55,8 @@ public:
     int GetBusPeakPercent(int bus) ;
     int GetMasterPeakPercent() ;
     int GetMasterWaveformSample(int index) ;
+    int GetMasterWaveformMin(int index) ;
+    int GetMasterWaveformMax(int index) ;
 	
 	virtual void Execute(FourCC id,float value) ;
 

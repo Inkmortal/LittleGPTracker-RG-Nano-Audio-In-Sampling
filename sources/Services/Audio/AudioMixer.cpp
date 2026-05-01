@@ -19,6 +19,8 @@ AudioMixer::AudioMixer(const char *name):
 	peakPercent_ = 0 ;
     for (int i=0; i<WAVEFORM_SIZE; i++) {
         waveform_[i]=0;
+        waveformMin_[i]=0;
+        waveformMax_[i]=0;
     }
 	
 	// Precalculate constant values for softclipping algorithm
@@ -133,6 +135,8 @@ bool AudioMixer::Render(fixed *buffer,int samplecount) {
          }
          for (int i=0; i<WAVEFORM_SIZE; i++) {
              waveform_[i]=(waveform_[i]*3)/4;
+             waveformMin_[i]=(waveformMin_[i]*3)/4;
+             waveformMax_[i]=(waveformMax_[i]*3)/4;
          }
      }
     if (enableRendering_&&writer_) {
@@ -167,27 +171,57 @@ int AudioMixer::GetWaveformSample(int index) {
     return waveform_[index];
 }
 
+int AudioMixer::GetWaveformMin(int index) {
+    if (index<0 || index>=WAVEFORM_SIZE) {
+        return 0;
+    }
+    return waveformMin_[index];
+}
+
+int AudioMixer::GetWaveformMax(int index) {
+    if (index<0 || index>=WAVEFORM_SIZE) {
+        return 0;
+    }
+    return waveformMax_[index];
+}
+
 void AudioMixer::updateWaveform(fixed *buffer,int samplecount,int peak) {
     if (!buffer || samplecount<=0 || peak<=0) {
         return;
     }
-    int step=samplecount/WAVEFORM_SIZE;
-    if (step<1) {
-        step=1;
-    }
-    for (int i=0; i<WAVEFORM_SIZE; i++) {
-        int frame=i*step;
-        if (frame>=samplecount) {
-            frame=samplecount-1;
-        }
+    fixed minSample=0;
+    fixed maxSample=0;
+    for (int frame=0; frame<samplecount; frame++) {
         fixed left=buffer[frame*2];
         fixed right=buffer[frame*2+1];
         fixed mono=(left+right)/2;
-        int sample=(int)(((long long)mono*100)/peak);
-        if (sample>100) sample=100;
-        if (sample<-100) sample=-100;
-        waveform_[i]=sample;
+        if (frame==0 || mono<minSample) {
+            minSample=mono;
+        }
+        if (frame==0 || mono>maxSample) {
+            maxSample=mono;
+        }
     }
+
+    fixed midpoint=(minSample+maxSample)/2;
+    int sample=(int)(((long long)midpoint*100)/peak);
+    int minValue=(int)(((long long)minSample*100)/peak);
+    int maxValue=(int)(((long long)maxSample*100)/peak);
+    if (sample>100) sample=100;
+    if (sample<-100) sample=-100;
+    if (minValue>100) minValue=100;
+    if (minValue<-100) minValue=-100;
+    if (maxValue>100) maxValue=100;
+    if (maxValue<-100) maxValue=-100;
+
+    for (int i=0; i<WAVEFORM_SIZE-1; i++) {
+        waveform_[i]=waveform_[i+1];
+        waveformMin_[i]=waveformMin_[i+1];
+        waveformMax_[i]=waveformMax_[i+1];
+    }
+    waveform_[WAVEFORM_SIZE-1]=sample;
+    waveformMin_[WAVEFORM_SIZE-1]=minValue;
+    waveformMax_[WAVEFORM_SIZE-1]=maxValue;
 }
 
 fixed AudioMixer::hardClip(fixed sample) {

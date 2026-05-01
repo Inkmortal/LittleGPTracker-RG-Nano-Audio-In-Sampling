@@ -25,8 +25,10 @@ public:
     virtual void SetMasterVolume(int volume) ;
 	virtual bool Clipped() ;
 	int GetPeakPercent() ;
-	static const int WAVEFORM_SIZE = 32 ;
+	static const int WAVEFORM_SIZE = 48 ;
 	int GetWaveformSample(int index) ;
+	int GetWaveformMin(int index) ;
+	int GetWaveformMax(int index) ;
 	
 private:
   fixed hardClip(fixed sample);
@@ -44,5 +46,7 @@ private:
   bool clipped_;
   int peakPercent_;
   int waveform_[WAVEFORM_SIZE];
+  int waveformMin_[WAVEFORM_SIZE];
+  int waveformMax_[WAVEFORM_SIZE];
 } ;
 #endif
