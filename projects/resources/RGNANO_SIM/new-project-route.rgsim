@@ -1,14 +1,6 @@
 # Source-derived boot route:
 # Load -> New -> NewProjectDialog -> Random -> Ok -> loaded project.
-wait 500
-press r 80
-press a 80
-wait 200
-press d 80
-press a 80
-press r 80
-press a 80
-wait 1000
+route boot.new_project_random
 screenshot new-project-route.bmp
 expect_size 240 240
 expect_colors 4

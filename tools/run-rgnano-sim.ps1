@@ -10,6 +10,8 @@ param(
 $root = Split-Path -Parent $PSScriptRoot
 $resourceDir = Join-Path $root "projects\resources\RGNANO_SIM"
 $exeFullPath = Resolve-Path -LiteralPath $ExePath -ErrorAction SilentlyContinue
+$routeHelpers = Join-Path $PSScriptRoot "rgnano-sim-routes.ps1"
+. $routeHelpers
 
 if (-not $exeFullPath) {
   throw "Simulator executable not found: $ExePath. Build it with: cd projects; make PLATFORM=RGNANO_SIM"
@@ -87,7 +89,17 @@ if ($ResetLastProject) {
 
 $args = @()
 if ($Script) {
-  $args += "-RGNANOSIM_SCRIPT=$Script"
+  $scriptToRun = $Script
+  $scriptText = Get-Content -LiteralPath $Script -Raw
+  if ($scriptText -match '(?m)^\s*route\s+') {
+    $expandedScript = Join-Path $exeDir "rgnano-sim-expanded.rgsim"
+    Expand-RGNanoSimScript -ScriptPath $Script -OutputPath $expandedScript
+    if (-not (Test-Path -LiteralPath $expandedScript)) {
+      throw "Failed to expand RG Nano simulator script: $Script"
+    }
+    $scriptToRun = $expandedScript
+  }
+  $args += "-RGNANOSIM_SCRIPT=$scriptToRun"
 }
 $args += "-RGNANOSIM_LOG=$(Join-Path $exeDir 'rgnano-sim.log')"
 if ($Skin -or -not $Script) {

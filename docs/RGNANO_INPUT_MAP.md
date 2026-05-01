@@ -227,3 +227,5 @@ The simulator should not need hand-written one-off probes for every screen. The 
 2. Use this source-derived map to generate deterministic navigation routes.
 3. Add assertions at the output boundaries: view marker pixels/screenshots, logs, imported files, saved project files, and audio callbacks.
 4. Test on hardware only after the simulator route proves the workflow.
+
+`tools\rgnano-sim-routes.ps1` is the first route-helper layer. Scripts can use `route from.to` commands such as `route project.to_song`, `route song.to_chain`, `route phrase.to_instrument`, and `route instrument.open_sample_import`; the runner expands them into the exact held-button events described above.

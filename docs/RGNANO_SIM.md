@@ -113,6 +113,19 @@ quit
 
 Screenshots and assertions are captured from the SDL surface, so they are available to automated tests without a camera or physical RG Nano.
 
+Scripts can also use source-derived route helpers. The PowerShell runner expands these before launching the simulator, so the C++ simulator still receives ordinary button events:
+
+```text
+route boot.new_project_random
+route project.to_song
+route song.to_chain
+route chain.to_phrase
+route phrase.to_instrument
+route instrument.open_sample_import
+```
+
+Route helpers live in `tools\rgnano-sim-routes.ps1`. They are intentionally small and explicit, so routes like `phrase.to_table` remain tied to the source map instead of hidden in test-specific scripts.
+
 The canonical smoke test is:
 
 ```powershell
