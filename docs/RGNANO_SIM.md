@@ -150,7 +150,6 @@ expect_play_mode song
 expect_play_mode phrase
 expect_streaming_sample rgnano-test-tone.wav
 expect_playing_channel 0 00
-expect_screen_text wave
 expect_skin_frame_clean
 
 # write current view, cursor/model state, highlighted text, and full 40x30 text screen to the log

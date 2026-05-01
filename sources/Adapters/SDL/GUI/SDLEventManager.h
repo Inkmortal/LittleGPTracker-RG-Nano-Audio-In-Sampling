@@ -73,6 +73,7 @@ private:
 	void SetSimKey(SDLGUIWindowImp *window, int key, bool pressed);
 	int GetSimButtonAt(int x, int y);
 	void SaveSimScreenshot(SDLGUIWindowImp *window, const std::string &path);
+	void SaveSimAppScreenshot(SDLGUIWindowImp *window, const std::string &path);
 	void FailSimScript(const char *message);
 	bool ExpectSimFile(const std::string &path);
 	bool ExpectSimProjectSample(const std::string &sampleName);

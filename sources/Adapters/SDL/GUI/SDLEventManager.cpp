@@ -466,7 +466,7 @@ bool SDLEventManager::AddSimScriptLine(const std::string &line, const char *scri
 		if (command.value<=0) {
 			command.value=80;
 		}
-	} else if (command.op=="down" || command.op=="up" || command.op=="screenshot" || command.op=="log" || command.op=="expect_file" || command.op=="expect_project_sample" || command.op=="expect_view" || command.op=="expect_player_running" || command.op=="expect_play_mode" || command.op=="sim_set_note_names") {
+	} else if (command.op=="down" || command.op=="up" || command.op=="screenshot" || command.op=="screenshot_app" || command.op=="log" || command.op=="expect_file" || command.op=="expect_project_sample" || command.op=="expect_view" || command.op=="expect_player_running" || command.op=="expect_play_mode" || command.op=="sim_set_note_names") {
 		iss >> command.arg;
 	} else if (command.op=="expect_screen_text" || command.op=="expect_selected_text" || command.op=="expect_streaming_sample" || command.op=="dump_state") {
 		std::getline(iss,command.arg);
@@ -617,6 +617,8 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 		return;
 	} else if (command.op=="screenshot") {
 		SaveSimScreenshot(window,command.arg);
+	} else if (command.op=="screenshot_app") {
+		SaveSimAppScreenshot(window,command.arg);
 	} else if (command.op=="quit") {
 		PostQuitMessage();
 	} else if (command.op=="expect_file") {
@@ -896,6 +898,46 @@ void SDLEventManager::SaveSimScreenshot(SDLGUIWindowImp *window, const std::stri
 	} else {
 		Trace::Error("RGNANO_SIM failed screenshot %s",path.c_str());
 	}
+}
+
+void SDLEventManager::SaveSimAppScreenshot(SDLGUIWindowImp *window, const std::string &path)
+{
+	if (!window || path.empty()) {
+		return;
+	}
+	window->Flush();
+	RenderPowerMenu(window->GetSurface(),window);
+	RenderDebugScreen(window->GetSurface(),window);
+
+	SDL_Surface *surface=window->GetSurface();
+	if (!surface) {
+		Trace::Error("RGNANO_SIM failed app screenshot %s: no surface",path.c_str());
+		return;
+	}
+	int scale=window->GetScale();
+	SDL_Rect src;
+	src.x=window->IsRGNanoSkinEnabled()?window->GetAppAnchorX():0;
+	src.y=window->IsRGNanoSkinEnabled()?window->GetAppAnchorY():0;
+	src.w=240*scale;
+	src.h=240*scale;
+	SDL_Surface *app=SDL_CreateRGBSurface(SDL_SWSURFACE,src.w,src.h,surface->format->BitsPerPixel,
+		surface->format->Rmask,surface->format->Gmask,surface->format->Bmask,surface->format->Amask);
+	if (!app) {
+		Trace::Error("RGNANO_SIM failed app screenshot %s: cannot allocate crop",path.c_str());
+		return;
+	}
+	SDL_Rect dst;
+	dst.x=0;
+	dst.y=0;
+	dst.w=src.w;
+	dst.h=src.h;
+	SDL_BlitSurface(surface,&src,app,&dst);
+	if (SDL_SaveBMP(app,path.c_str())==0) {
+		Trace::Log("RGNANO_SIM","Saved app screenshot %s",path.c_str());
+	} else {
+		Trace::Error("RGNANO_SIM failed app screenshot %s",path.c_str());
+	}
+	SDL_FreeSurface(app);
 }
 
 bool SDLEventManager::ExpectSimFile(const std::string &path)

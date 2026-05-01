@@ -23,9 +23,8 @@ expect_play_mode song
 route song.to_mixer
 wait 400
 expect_view mixer
-expect_screen_text wave
-expect_screen_text *
 screenshot mixer-waveform-playing.bmp
+screenshot_app mixer-waveform-screen.bmp
 expect_skin_frame_clean
 expect_audio_activity 64
 expect_audio_capture_bytes 90000

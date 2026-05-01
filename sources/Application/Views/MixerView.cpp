@@ -2,6 +2,9 @@
 #include "Application/Mixer/MixerService.h"
 #include "Application/Model/Mixer.h"
 #include "Application/Utils/char.h"
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+#include "Adapters/SDL/GUI/SDLGUIWindowImp.h"
+#endif
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -294,36 +297,47 @@ void MixerView::drawWaveform() {
     GUIPoint pos;
     MixerService *mixer = MixerService::GetInstance();
 
-    const int x = 3;
-    const int y = 8;
-    const int width = 24;
-    const int height = 9;
-    const int mid = height / 2;
+    SetColor(CD_NORMAL);
+    pos._x = 3;
+    pos._y = 55;
+    DrawString(pos._x, pos._y, "scope", props);
+
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+    SDLGUIWindowImp *imp = (SDLGUIWindowImp *)w_.GetImpWindow();
+    const int x = 24;
+    const int y = 72;
+    const int width = 176;
+    const int height = 48;
+    const int mid = y + (height / 2);
+    const int columns = AudioMixer::WAVEFORM_SIZE;
+
+    SetColor(CD_HILITE2);
+    for (int col = 0; col < width; col++) {
+        int sampleIndex = (col * columns) / width;
+        int nextIndex = ((col + 1) * columns) / width;
+        if (nextIndex >= columns) {
+            nextIndex = columns - 1;
+        }
+        int sample = mixer->GetMasterWaveformSample(sampleIndex);
+        int nextSample = mixer->GetMasterWaveformSample(nextIndex);
+        int waveY = mid - ((sample * (height / 2 - 2)) / 100);
+        int nextY = mid - ((nextSample * (height / 2 - 2)) / 100);
+        if (waveY < y) waveY = y;
+        if (waveY >= y + height) waveY = y + height - 1;
+        if (nextY < y) nextY = y;
+        if (nextY >= y + height) nextY = y + height - 1;
+        int top = waveY < nextY ? waveY : nextY;
+        int bottom = waveY > nextY ? waveY : nextY;
+        GUIRect r(x + col, top, x + col + 1, bottom + 1);
+        imp->DrawRect(r);
+    }
 
     SetColor(CD_NORMAL);
-    pos._x = x;
-    pos._y = y - 1;
-    DrawString(pos._x, pos._y, "wave", props);
-
-    char grid[9][25];
-    for (int row = 0; row < height; row++) {
-        for (int col = 0; col < width; col++) {
-            grid[row][col] = (row == mid) ? '-' : ' ';
-        }
-        grid[row][width] = 0;
-    }
-
-    for (int col = 0; col < width; col++) {
-        int sample = mixer->GetMasterWaveformSample((col * AudioMixer::WAVEFORM_SIZE) / width);
-        int waveY = mid - ((sample * mid) / 100);
-        if (waveY < 0) waveY = 0;
-        if (waveY >= height) waveY = height - 1;
-        grid[waveY][col] = '*';
-    }
-
-    for (int row = 0; row < height; row++) {
-        pos._x = x;
-        pos._y = y + row;
-        DrawString(pos._x, pos._y, grid[row], props);
-    }
+    GUIRect center(x, mid, x + width, mid + 1);
+    imp->DrawRect(center);
+#else
+    pos._x = 3;
+    pos._y = 72;
+    DrawString(pos._x, pos._y, "scope unavailable", props);
+#endif
 }
