@@ -78,6 +78,10 @@ private:
 	bool ExpectSimNoError();
 	bool ExpectSimView(const std::string &viewName);
 	bool ExpectSimSelectedText(const std::string &needle);
+	bool ExpectSimPlayerRunning(const std::string &expected);
+	bool ExpectSimPlayMode(const std::string &modeName);
+	bool ExpectSimStreamingSample(const std::string &needle);
+	bool ExpectSimPlayingChannel(int channel, const std::string &instrument);
 	bool ExpectSimAudioActivity(int minPeak);
 	bool ExpectSimAudioSilence(int maxPeak);
 	bool ExpectSimAudioCaptureBytes(int minBytes);

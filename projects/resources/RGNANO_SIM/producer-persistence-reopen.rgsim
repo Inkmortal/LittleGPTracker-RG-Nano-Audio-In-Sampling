@@ -34,6 +34,10 @@ expect_phrase_row_count 6 2
 reset_audio_stats
 start_audio_capture producer-persistence-reopen.wav
 press s 80
+wait 120
+expect_player_running yes
+expect_play_mode song
+expect_playing_channel 0 00
 wait 3000
 expect_audio_activity 64
 expect_audio_capture_bytes 240000

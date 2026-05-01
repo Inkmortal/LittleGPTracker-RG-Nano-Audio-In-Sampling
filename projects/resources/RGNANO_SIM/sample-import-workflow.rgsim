@@ -20,6 +20,9 @@ wait 120
 expect_view instrument
 route instrument.open_sample_import
 route sample_import.to_first_file
+press a 80
+wait 120
+expect_streaming_sample rgnano-test-tone.wav
 route sample_import.quick_import_selected
 expect_project_sample rgnano-test-tone.wav
 screenshot sample-import-workflow.bmp

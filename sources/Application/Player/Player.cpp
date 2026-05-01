@@ -5,12 +5,14 @@
 #include "Application/Instruments/CommandList.h"
 #include "Application/Instruments/I_Instrument.h"
 #include "Application/Utils/char.h"
+#include "System/Console/Trace.h"
 #include "System/Console/n_assert.h"
 #include "Application/Player/TablePlayback.h"
 #include "Application/Model/Groove.h"
 #include <math.h>
 #include <string.h>
 #include "Services/Midi/MidiService.h"
+#include <sstream>
 
 // Private constructor - Singleton
 
@@ -25,6 +27,10 @@ Player::Player() {
 	sequencerMode_=SM_SONG ;
 	lastPercentage_=0 ;
 	retrigAllImmediate_=false ;
+#ifdef PLATFORM_RGNANO_SIM
+	simStreaming_=false ;
+	simStreamingPath_="" ;
+#endif
 
 	for (int i=0;i<SONG_CHANNEL_COUNT;i++) {
 		instrumentOnChannel_[i][0] = ' ';
@@ -57,6 +63,10 @@ bool Player::Init(Project *project,ViewData *viewData) {
 }
 
 void Player::Reset() {
+#ifdef PLATFORM_RGNANO_SIM
+	simStreaming_=false ;
+	simStreamingPath_="" ;
+#endif
 	viewData_=0 ;
 	project_=0 ;
 	mixer_->RemoveObserver(*this) ;
@@ -1181,11 +1191,115 @@ unsigned int PlayerEvent::GetTickCount() {
 } ;
 
 void Player::StartStreaming(const Path &path) {
+#ifdef PLATFORM_RGNANO_SIM
+	simStreaming_=true ;
+	simStreamingPath_=path.GetPath() ;
+	Trace::Log("RGNANO_SIM_PLAYER","stream_start path=%s",simStreamingPath_.c_str());
+#endif
 	mixer_->StartStreaming(path) ;
 }
 void Player::StopStreaming() {
 	mixer_->StopStreaming() ;
+#ifdef PLATFORM_RGNANO_SIM
+	if (simStreaming_) {
+		Trace::Log("RGNANO_SIM_PLAYER","stream_stop path=%s",simStreamingPath_.c_str());
+	}
+	simStreaming_=false ;
+	simStreamingPath_="" ;
+#endif
 }
+
+#ifdef PLATFORM_RGNANO_SIM
+static const char *SimPlayModeName(PlayMode mode) {
+	switch (mode) {
+		case PM_SONG: return "song";
+		case PM_CHAIN: return "chain";
+		case PM_PHRASE: return "phrase";
+		case PM_LIVE: return "live";
+		case PM_AUDITION: return "audition";
+		default: return "unknown";
+	}
+}
+
+static const char *SimSequencerModeName(SequencerMode mode) {
+	switch (mode) {
+		case SM_SONG: return "song";
+		case SM_LIVE: return "live";
+		default: return "unknown";
+	}
+}
+
+static const char *SimQueueModeName(QueueingMode mode) {
+	switch (mode) {
+		case QM_NONE: return "none";
+		case QM_CHAINSTART: return "chain-start";
+		case QM_PHRASESTART: return "phrase-start";
+		case QM_CHAINSTOP: return "chain-stop";
+		case QM_PHRASESTOP: return "phrase-stop";
+		case QM_TICKSTART: return "tick-start";
+		default: return "unknown";
+	}
+}
+
+std::string Player::GetSimDebugSummary() {
+	std::ostringstream out;
+	out << "player(running=" << (isRunning_ ? "yes" : "no")
+		<< " mode=" << SimPlayModeName(mode_)
+		<< " viewMode=" << (viewData_ ? SimPlayModeName(viewData_->playMode_) : "none")
+		<< " sequencer=" << SimSequencerModeName(sequencerMode_);
+	if (isRunning_) {
+		out << " time=" << GetPlayTime();
+	}
+	out << " streaming=" << (simStreaming_ ? "yes" : "no");
+	if (simStreaming_) {
+		out << " streamPath=\"" << simStreamingPath_ << "\"";
+	}
+	out << ")";
+	if (viewData_) {
+		out << " channels=[";
+		bool any=false;
+		for (int i=0;i<SONG_CHANNEL_COUNT;i++) {
+			bool playing=IsChannelPlaying(i);
+			QueueingMode queue=liveQueueingMode_[i];
+			if (playing || queue!=QM_NONE) {
+				if (any) {
+					out << "; ";
+				}
+				out << i << ":";
+				out << (playing ? "play" : "idle");
+				out << " song=" << viewData_->songPlayPos_[i]
+					<< " chain=";
+				if (viewData_->currentPlayChain_[i]==0xFF) out << "--"; else out << (int)viewData_->currentPlayChain_[i];
+				out << "/" << viewData_->chainPlayPos_[i]
+					<< " phrase=";
+				if (viewData_->currentPlayPhrase_[i]==0xFF) out << "--"; else out << (int)viewData_->currentPlayPhrase_[i];
+				out << "/" << viewData_->phrasePlayPos_[i]
+					<< " note=" << GetPlayedNote(i) << GetPlayedOctive(i)
+					<< " inst=" << GetPlayedInstrument(i);
+				if (queue!=QM_NONE) {
+					out << " queue=" << SimQueueModeName(queue)
+						<< "@" << (int)liveQueuePosition_[i]
+						<< "/" << (int)liveQueueChainPosition_[i];
+				}
+				any=true;
+			}
+		}
+		if (!any) {
+			out << "none";
+		}
+		out << "]";
+	}
+	return out.str();
+}
+
+std::string Player::GetSimStreamingPath() const {
+	return simStreamingPath_;
+}
+
+bool Player::IsSimStreaming() const {
+	return simStreaming_;
+}
+#endif
 
 std::string Player::GetAudioAPI() {
 	AudioOut *out=mixer_->GetAudioOut() ;

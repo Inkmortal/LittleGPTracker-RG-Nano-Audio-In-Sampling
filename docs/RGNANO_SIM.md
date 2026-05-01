@@ -131,6 +131,14 @@ expect_screen_text 1######
 # fail unless the currently inverted/highlighted screen text contains a phrase
 expect_selected_text Import
 
+# fail unless LGPT's native player/preview state matches the intended workflow
+expect_player_running yes
+expect_player_running no
+expect_play_mode song
+expect_play_mode phrase
+expect_streaming_sample rgnano-test-tone.wav
+expect_playing_channel 0 00
+
 # write current view, cursor/model state, highlighted text, and full 40x30 text screen to the log
 dump_state sample import open
 
@@ -220,13 +228,13 @@ The first source-derived music workflow creates a new project, creates a chain, 
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\basic-music-workflow.rgsim -ResetLastProject -ArtifactsDir .\sim-artifacts
 ```
 
-The uploaded-sample workflow seeds the simulator sample library, imports the selected WAV into the active project, and asserts the project sample exists:
+The uploaded-sample workflow seeds the simulator sample library, uses the native `Listen` action to preview the selected WAV, imports it into the active project, and asserts the project sample exists:
 
 ```powershell
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\sample-import-workflow.rgsim -ResetLastProject -SeedSampleFixture -ArtifactsDir .\sim-artifacts
 ```
 
-The demo-song workflow drives the real RG Nano controls to create a song, chain, and phrase, enters an 8-step melodic pattern, imports the seeded WAV onto instrument `00`, starts playback, writes a listenable `demo-song-workflow.wav`, asserts measured audio activity, and verifies the Chain view activity meter in the unused sidebar space:
+The demo-song workflow drives the real RG Nano controls to create a song, chain, and phrase, enters an 8-step melodic pattern, imports the seeded WAV onto instrument `00`, starts native phrase playback, asserts the player mode/channel state, writes a listenable `demo-song-workflow.wav`, asserts measured audio activity, and verifies the Chain view activity meter in the unused sidebar space:
 
 ```powershell
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\demo-song-workflow.rgsim -ResetLastProject -SeedSampleFixture -Skin -ArtifactsDir .\sim-artifacts

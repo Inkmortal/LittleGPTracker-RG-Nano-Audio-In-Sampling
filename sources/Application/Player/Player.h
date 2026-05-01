@@ -76,6 +76,12 @@ public:
 	void StartStreaming(const Path &path) ;
 	void StopStreaming() ;
 
+#ifdef PLATFORM_RGNANO_SIM
+	std::string GetSimDebugSummary() ;
+	std::string GetSimStreamingPath() const ;
+	bool IsSimStreaming() const ;
+#endif
+
 	// Channel data
 	
 	bool IsChannelPlaying(int channel) ;
@@ -153,6 +159,11 @@ private:
 
 	bool retrigAllImmediate_ ;
 	unsigned char retrigPos_ ;
+
+#ifdef PLATFORM_RGNANO_SIM
+	bool simStreaming_ ;
+	std::string simStreamingPath_ ;
+#endif
 	
 } ;
 

@@ -5,6 +5,7 @@
 #include "Application/Instruments/InstrumentBank.h"
 #include "Application/Instruments/SampleInstrument.h"
 #include "Application/Instruments/SamplePool.h"
+#include "Application/Player/Player.h"
 #include "Application/Persistency/PersistencyService.h"
 #include "System/FileSystem/FileSystem.h"
 #include "UIFramework/BasicDatas/GUIEvent.h"
@@ -28,6 +29,10 @@ bool SDLEventManager::showDebugScreen_=false ;
 int SDLEventManager::debugScreenSelection_=0;
 bool SDLEventManager::menuInputHeld_[SDLK_LAST]={false};
 int SDLEventManager::powerMenuKey_=SDLK_POWER;
+
+#ifdef PLATFORM_RGNANO_SIM
+static ViewData *GetSimViewData();
+#endif
 
 SDLEventManager::SDLEventManager() 
 {
@@ -323,9 +328,9 @@ void SDLEventManager::LoadSimScript()
 			if (command.value<=0) {
 				command.value=80;
 			}
-		} else if (command.op=="down" || command.op=="up" || command.op=="screenshot" || command.op=="log" || command.op=="expect_file" || command.op=="expect_project_sample" || command.op=="expect_view") {
+		} else if (command.op=="down" || command.op=="up" || command.op=="screenshot" || command.op=="log" || command.op=="expect_file" || command.op=="expect_project_sample" || command.op=="expect_view" || command.op=="expect_player_running" || command.op=="expect_play_mode") {
 			iss >> command.arg;
-		} else if (command.op=="expect_screen_text" || command.op=="expect_selected_text" || command.op=="dump_state") {
+		} else if (command.op=="expect_screen_text" || command.op=="expect_selected_text" || command.op=="expect_streaming_sample" || command.op=="dump_state") {
 			std::getline(iss,command.arg);
 			if (!command.arg.empty() && command.arg[0]==' ') {
 				command.arg.erase(0,1);
@@ -357,6 +362,8 @@ void SDLEventManager::LoadSimScript()
 		} else if (command.op=="expect_tempo") {
 			iss >> command.value;
 		} else if (command.op=="expect_instrument_sample") {
+			iss >> command.value >> command.arg;
+		} else if (command.op=="expect_playing_channel") {
 			iss >> command.value >> command.arg;
 		} else if (command.op=="sim_set_tempo") {
 			iss >> command.value;
@@ -509,6 +516,26 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 	} else if (command.op=="expect_selected_text") {
 		if (!ExpectSimSelectedText(command.arg)) {
 			FailSimScript("selected text assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_player_running") {
+		if (!ExpectSimPlayerRunning(command.arg)) {
+			FailSimScript("player running assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_play_mode") {
+		if (!ExpectSimPlayMode(command.arg)) {
+			FailSimScript("play mode assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_streaming_sample") {
+		if (!ExpectSimStreamingSample(command.arg)) {
+			FailSimScript("streaming sample assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_playing_channel") {
+		if (!ExpectSimPlayingChannel(command.value,command.arg)) {
+			FailSimScript("playing channel assertion failed");
 			return;
 		}
 	} else if (command.op=="expect_audio_activity") {
@@ -803,6 +830,88 @@ bool SDLEventManager::ExpectSimSelectedText(const std::string &needle)
 		Trace::Error("RGNANO_SIM expected selected text %s",needle.c_str());
 	}
 	return found;
+}
+
+static const char *SimExpectedPlayModeName(PlayMode mode)
+{
+	switch (mode) {
+		case PM_SONG: return "song";
+		case PM_CHAIN: return "chain";
+		case PM_PHRASE: return "phrase";
+		case PM_LIVE: return "live";
+		case PM_AUDITION: return "audition";
+		default: return "unknown";
+	}
+}
+
+bool SDLEventManager::ExpectSimPlayerRunning(const std::string &expected)
+{
+	Player *player=Player::GetInstance();
+	bool actual=player && player->IsRunning();
+	bool wantRunning=expected.empty() || expected=="yes" || expected=="true" || expected=="1" || expected=="running";
+	bool wantStopped=expected=="no" || expected=="false" || expected=="0" || expected=="stopped";
+	if (!wantRunning && !wantStopped) {
+		Trace::Error("RGNANO_SIM expect_player_running invalid expected=%s",expected.c_str());
+		return false;
+	}
+	bool matches=actual==wantRunning;
+	Trace::Log("RGNANO_SIM","expect_player_running actual=%s expected=%s => %s",actual?"yes":"no",wantRunning?"yes":"no",matches?"match":"mismatch");
+	if (!matches && player) {
+		Trace::Log("RGNANO_SIM_PLAYER","%s",player->GetSimDebugSummary().c_str());
+	}
+	return matches;
+}
+
+bool SDLEventManager::ExpectSimPlayMode(const std::string &modeName)
+{
+	ViewData *viewData=GetSimViewData();
+	if (!viewData || modeName.empty()) {
+		Trace::Error("RGNANO_SIM expect_play_mode invalid state or mode=%s",modeName.c_str());
+		return false;
+	}
+	const char *actual=SimExpectedPlayModeName(viewData->playMode_);
+	bool matches=modeName==actual;
+	Trace::Log("RGNANO_SIM","expect_play_mode actual=%s expected=%s => %s",actual,modeName.c_str(),matches?"match":"mismatch");
+	if (!matches) {
+		Player *player=Player::GetInstance();
+		if (player) {
+			Trace::Log("RGNANO_SIM_PLAYER","%s",player->GetSimDebugSummary().c_str());
+		}
+	}
+	return matches;
+}
+
+bool SDLEventManager::ExpectSimStreamingSample(const std::string &needle)
+{
+	Player *player=Player::GetInstance();
+	if (!player) {
+		Trace::Error("RGNANO_SIM expect_streaming_sample has no player");
+		return false;
+	}
+	std::string path=player->GetSimStreamingPath();
+	bool matches=player->IsSimStreaming() && !needle.empty() && path.find(needle)!=std::string::npos;
+	Trace::Log("RGNANO_SIM","expect_streaming_sample actual=%s streaming=%s expected=%s => %s",path.c_str(),player->IsSimStreaming()?"yes":"no",needle.c_str(),matches?"match":"mismatch");
+	if (!matches) {
+		Trace::Log("RGNANO_SIM_PLAYER","%s",player->GetSimDebugSummary().c_str());
+	}
+	return matches;
+}
+
+bool SDLEventManager::ExpectSimPlayingChannel(int channel, const std::string &instrument)
+{
+	Player *player=Player::GetInstance();
+	if (!player || channel<0 || channel>=SONG_CHANNEL_COUNT) {
+		Trace::Error("RGNANO_SIM expect_playing_channel invalid channel=%d",channel);
+		return false;
+	}
+	bool playing=player->IsChannelPlaying(channel);
+	std::string actualInstrument=player->GetPlayedInstrument(channel);
+	bool matches=playing && (instrument.empty() || actualInstrument.find(instrument)!=std::string::npos);
+	Trace::Log("RGNANO_SIM","expect_playing_channel channel=%d playing=%s inst=%s expectedInst=%s => %s",channel,playing?"yes":"no",actualInstrument.c_str(),instrument.c_str(),matches?"match":"mismatch");
+	if (!matches) {
+		Trace::Log("RGNANO_SIM_PLAYER","%s",player->GetSimDebugSummary().c_str());
+	}
+	return matches;
 }
 
 bool SDLEventManager::ExpectSimAudioActivity(int minPeak)
@@ -1164,6 +1273,11 @@ void SDLEventManager::LogSimState(const char *label, bool includeScreen)
 		return;
 	}
 	std::string summary=appWindow->GetSimDebugSummary();
+	Player *player=Player::GetInstance();
+	if (player) {
+		summary += " ";
+		summary += player->GetSimDebugSummary();
+	}
 	if (showPowerMenu_) {
 		summary += showExitConfirm_ ?
 			(exitConfirmSelection_==0 ? " overlay=power-confirm selected=Yes" : " overlay=power-confirm selected=No") :
