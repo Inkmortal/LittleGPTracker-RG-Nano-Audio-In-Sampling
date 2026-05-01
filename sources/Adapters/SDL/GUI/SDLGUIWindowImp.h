@@ -46,6 +46,7 @@ public: // Added functionality
 	int GetAppAnchorX() const { return appAnchorX_; }
 	int GetAppAnchorY() const { return appAnchorY_; }
 	int GetScale() const { return mult_; }
+	void SetRGNanoButtonPressed(int key, bool pressed);
 protected:
 	void prepareFonts() ;
 	void prepareFullFonts() ;
@@ -55,7 +56,10 @@ protected:
   void transform(const GUIPoint &srcPoint, int *x, int *y);
 #ifdef PLATFORM_RGNANO_SIM
 	void DrawRGNanoSkin() ;
-	void DrawRGNanoButton(int x, int y, int w, int h, Uint32 color) ;
+	void DrawRGNanoControls() ;
+	void DrawRGNanoButton(int x, int y, int w, int h, Uint32 color, Uint32 pressedColor, int key, const char *label) ;
+	void DrawRGNanoLabel(int x, int y, const char *text, Uint32 color) ;
+	void DrawRGNanoGlyph(int x, int y, char c, Uint32 color) ;
 #endif
 #ifdef _SHOW_GP2X_
 	void drawGP2X() ;
@@ -80,5 +84,8 @@ private:
 	int appAnchorY_ ;
 	int mult_ ;
 	bool rgnanoSkin_ ;
+#ifdef PLATFORM_RGNANO_SIM
+	bool rgnanoButtonPressed_[SDLK_LAST] ;
+#endif
 } ;
 #endif

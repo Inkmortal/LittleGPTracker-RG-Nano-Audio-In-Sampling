@@ -31,7 +31,7 @@ Or use the helper:
 .\tools\run-rgnano-sim.ps1
 ```
 
-Running without a script opens the RG Nano skin by default. The skin has a 240x240 tracker screen, a device body, and clickable simulated controls. Scripted smoke tests keep the exact bare 240x240 SDL surface unless you pass `-Skin`.
+Running without a script opens the RG Nano skin by default. The skin has a 240x240 tracker screen, a colored RG Nano-inspired body, clickable simulated controls, top shoulder buttons, USB-C detail, and side power/SD-card hints. Scripted smoke tests keep the exact bare 240x240 SDL surface unless you pass `-Skin`.
 
 ```powershell
 .\tools\run-rgnano-sim.ps1 -Skin
@@ -49,6 +49,8 @@ Running without a script opens the RG Nano skin by default. The skin has a 240x2
 | Right | `r` |
 | A | `a` |
 | B | `b` |
+| X | `x` |
+| Y | `y` |
 | L | `m` |
 | R | `n` |
 | Start | `s` |

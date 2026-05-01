@@ -65,6 +65,9 @@ SDLGUIWindowImp::SDLGUIWindowImp(GUICreateWindowParams &p)
   cacheFonts_=sdlP.cacheFonts_ ;
   framebuffer_=sdlP.framebuffer_ ;
   rgnanoSkin_=false ;
+#ifdef PLATFORM_RGNANO_SIM
+  memset(rgnanoButtonPressed_,0,sizeof(rgnanoButtonPressed_));
+#endif
   
   // By default if we are not running a framebuffer device
   // we assumed it's windowed
@@ -158,7 +161,7 @@ SDLGUIWindowImp::SDLGUIWindowImp(GUICreateWindowParams &p)
 #ifdef PLATFORM_RGNANO_SIM
   if (rgnanoSkin_) {
 	screenRect_._bottomRight._x=360;
-	screenRect_._bottomRight._y=520;
+	screenRect_._bottomRight._y=560;
   } else {
 	screenRect_._bottomRight._x=windowed_?appWidth*mult_:screenWidth;
 	screenRect_._bottomRight._y=windowed_?appHeight*mult_:screenHeight;
@@ -179,7 +182,7 @@ SDLGUIWindowImp::SDLGUIWindowImp(GUICreateWindowParams &p)
 #ifdef PLATFORM_RGNANO_SIM
 	if (rgnanoSkin_) {
 		appAnchorX_=60;
-		appAnchorY_=44;
+		appAnchorY_=66;
 	}
 #endif
 
@@ -700,6 +703,7 @@ void SDLGUIWindowImp::Flush()
 #ifndef BUFFERED
 #ifdef PLATFORM_RGNANO_SIM
     if (rgnanoSkin_) {
+        DrawRGNanoControls();
         SDL_UpdateRect(screen_, 0, 0, screenRect_.Width(),screenRect_.Height());
         updateCount_=0;
         return;
@@ -722,39 +726,124 @@ void SDLGUIWindowImp::Flush()
 }
 
 #ifdef PLATFORM_RGNANO_SIM
-void SDLGUIWindowImp::DrawRGNanoButton(int x, int y, int w, int h, Uint32 color)
+void SDLGUIWindowImp::SetRGNanoButtonPressed(int key, bool pressed)
+{
+	if (key>=0 && key<SDLK_LAST) {
+		rgnanoButtonPressed_[key]=pressed;
+	}
+}
+
+void SDLGUIWindowImp::DrawRGNanoButton(int x, int y, int w, int h, Uint32 color, Uint32 pressedColor, int key, const char *label)
 {
 	SDL_Rect rect;
+	Uint32 drawColor=color;
+	if (key>=0 && key<SDLK_LAST && rgnanoButtonPressed_[key]) {
+		drawColor=pressedColor;
+	}
+
+	rect.x=x+2;
+	rect.y=y+2;
+	rect.w=w;
+	rect.h=h;
+	SDL_FillRect(screen_,&rect,SDL_MapRGB(screen_->format,10,10,14));
+
 	rect.x=x;
 	rect.y=y;
 	rect.w=w;
 	rect.h=h;
-	SDL_FillRect(screen_,&rect,color);
+	SDL_FillRect(screen_,&rect,drawColor);
+
+	if (label && label[0]) {
+		Uint32 labelColor=SDL_MapRGB(screen_->format,238,242,247);
+		int len=(int)strlen(label);
+		DrawRGNanoLabel(x+(w-(len*5-1))/2,y+(h-7)/2,label,labelColor);
+	}
+}
+
+void SDLGUIWindowImp::DrawRGNanoLabel(int x, int y, const char *text, Uint32 color)
+{
+	if (!text) {
+		return;
+	}
+	for (int i=0;text[i];i++) {
+		DrawRGNanoGlyph(x+i*5,y,text[i],color);
+	}
+}
+
+void SDLGUIWindowImp::DrawRGNanoGlyph(int x, int y, char c, Uint32 color)
+{
+	const char *rows[5] = {"000","000","000","000","000"};
+	switch (c) {
+		case 'A': { static const char *r[5]={"111","101","111","101","101"}; memcpy(rows,r,sizeof(rows)); break; }
+		case 'B': { static const char *r[5]={"110","101","110","101","110"}; memcpy(rows,r,sizeof(rows)); break; }
+		case 'D': { static const char *r[5]={"110","101","101","101","110"}; memcpy(rows,r,sizeof(rows)); break; }
+		case 'E': { static const char *r[5]={"111","100","110","100","111"}; memcpy(rows,r,sizeof(rows)); break; }
+		case 'G': { static const char *r[5]={"111","100","101","101","111"}; memcpy(rows,r,sizeof(rows)); break; }
+		case 'I': { static const char *r[5]={"111","010","010","010","111"}; memcpy(rows,r,sizeof(rows)); break; }
+		case 'L': { static const char *r[5]={"100","100","100","100","111"}; memcpy(rows,r,sizeof(rows)); break; }
+		case 'M': { static const char *r[5]={"101","111","111","101","101"}; memcpy(rows,r,sizeof(rows)); break; }
+		case 'O': { static const char *r[5]={"111","101","101","101","111"}; memcpy(rows,r,sizeof(rows)); break; }
+		case 'P': { static const char *r[5]={"110","101","110","100","100"}; memcpy(rows,r,sizeof(rows)); break; }
+		case 'R': { static const char *r[5]={"110","101","110","101","101"}; memcpy(rows,r,sizeof(rows)); break; }
+		case 'S': { static const char *r[5]={"111","100","111","001","111"}; memcpy(rows,r,sizeof(rows)); break; }
+		case 'T': { static const char *r[5]={"111","010","010","010","010"}; memcpy(rows,r,sizeof(rows)); break; }
+		case 'U': { static const char *r[5]={"101","101","101","101","111"}; memcpy(rows,r,sizeof(rows)); break; }
+		case 'X': { static const char *r[5]={"101","101","010","101","101"}; memcpy(rows,r,sizeof(rows)); break; }
+		case 'Y': { static const char *r[5]={"101","101","010","010","010"}; memcpy(rows,r,sizeof(rows)); break; }
+		case 'C': { static const char *r[5]={"111","100","100","100","111"}; memcpy(rows,r,sizeof(rows)); break; }
+		case '1': { static const char *r[5]={"010","110","010","010","111"}; memcpy(rows,r,sizeof(rows)); break; }
+		case '2': { static const char *r[5]={"111","001","111","100","111"}; memcpy(rows,r,sizeof(rows)); break; }
+		case '-': { static const char *r[5]={"000","000","111","000","000"}; memcpy(rows,r,sizeof(rows)); break; }
+		default: break;
+	}
+	SDL_Rect pixel;
+	pixel.w=1;
+	pixel.h=1;
+	for (int row=0;row<5;row++) {
+		for (int col=0;col<3;col++) {
+			if (rows[row][col]=='1') {
+				pixel.x=x+col;
+				pixel.y=y+row;
+				SDL_FillRect(screen_,&pixel,color);
+			}
+		}
+	}
 }
 
 void SDLGUIWindowImp::DrawRGNanoSkin()
 {
-	Uint32 body=SDL_MapRGB(screen_->format,38,42,48);
-	Uint32 bevel=SDL_MapRGB(screen_->format,68,74,84);
-	Uint32 screenBezel=SDL_MapRGB(screen_->format,12,14,18);
-	Uint32 button=SDL_MapRGB(screen_->format,25,28,34);
-	Uint32 accent=SDL_MapRGB(screen_->format,86,96,110);
+	Uint32 shadow=SDL_MapRGB(screen_->format,17,8,28);
+	Uint32 body=SDL_MapRGB(screen_->format,84,54,146);
+	Uint32 bevel=SDL_MapRGB(screen_->format,127,91,196);
+	Uint32 screenBezel=SDL_MapRGB(screen_->format,18,16,26);
 	SDL_Rect rect;
 
-	rect.x=18;
-	rect.y=14;
+	rect.x=0;
+	rect.y=0;
+	rect.w=360;
+	rect.h=560;
+	SDL_FillRect(screen_,&rect,SDL_MapRGB(screen_->format,25,10,38));
+
+	rect.x=20;
+	rect.y=30;
 	rect.w=324;
-	rect.h=492;
+	rect.h=506;
+	SDL_FillRect(screen_,&rect,shadow);
+
+	rect.x=18;
+	rect.y=24;
+	rect.w=324;
+	rect.h=506;
 	SDL_FillRect(screen_,&rect,body);
 
 	rect.x=26;
-	rect.y=22;
+	rect.y=32;
 	rect.w=308;
-	rect.h=476;
+	rect.h=490;
 	SDL_FillRect(screen_,&rect,bevel);
 
-	rect.x=40;
-	rect.y=34;
+	rect.x=42;
+	rect.y=54;
 	rect.w=280;
 	rect.h=264;
 	SDL_FillRect(screen_,&rect,screenBezel);
@@ -765,16 +854,71 @@ void SDLGUIWindowImp::DrawRGNanoSkin()
 	rect.h=appHeight*mult_+4;
 	SDL_FillRect(screen_,&rect,SDL_MapRGB(screen_->format,0,0,0));
 
-	DrawRGNanoButton(74,344,28,28,button);
-	DrawRGNanoButton(74,404,28,28,button);
-	DrawRGNanoButton(44,374,28,28,button);
-	DrawRGNanoButton(104,374,28,28,button);
-	DrawRGNanoButton(246,356,34,34,button);
-	DrawRGNanoButton(284,394,34,34,button);
-	DrawRGNanoButton(98,464,58,16,accent);
-	DrawRGNanoButton(204,464,58,16,accent);
-	DrawRGNanoButton(44,306,72,14,accent);
-	DrawRGNanoButton(244,306,72,14,accent);
+	DrawRGNanoControls();
+}
+
+void SDLGUIWindowImp::DrawRGNanoControls()
+{
+	Uint32 button=SDL_MapRGB(screen_->format,34,31,45);
+	Uint32 buttonPress=SDL_MapRGB(screen_->format,255,77,145);
+	Uint32 faceBlue=SDL_MapRGB(screen_->format,43,158,255);
+	Uint32 facePink=SDL_MapRGB(screen_->format,255,82,166);
+	Uint32 faceGreen=SDL_MapRGB(screen_->format,51,214,162);
+	Uint32 faceYellow=SDL_MapRGB(screen_->format,255,207,82);
+	Uint32 accent=SDL_MapRGB(screen_->format,219,210,255);
+	Uint32 highlight=SDL_MapRGB(screen_->format,166,132,226);
+	Uint32 port=SDL_MapRGB(screen_->format,10,11,18);
+	Uint32 text=SDL_MapRGB(screen_->format,239,235,255);
+	SDL_Rect rect;
+
+	rect.x=44;
+	rect.y=28;
+	rect.w=76;
+	rect.h=16;
+	SDL_FillRect(screen_,&rect,button);
+	DrawRGNanoLabel(76,34,"L",text);
+
+	rect.x=240;
+	rect.y=28;
+	rect.w=76;
+	rect.h=16;
+	SDL_FillRect(screen_,&rect,button);
+	DrawRGNanoLabel(277,34,"R",text);
+
+	rect.x=156;
+	rect.y=28;
+	rect.w=48;
+	rect.h=14;
+	SDL_FillRect(screen_,&rect,port);
+
+	rect.x=342;
+	rect.y=158;
+	rect.w=8;
+	rect.h=56;
+	SDL_FillRect(screen_,&rect,facePink);
+	rect.x=346;
+	rect.y=246;
+	rect.w=5;
+	rect.h=70;
+	SDL_FillRect(screen_,&rect,port);
+
+	DrawRGNanoLabel(122,326,"LITTLE GP",text);
+
+	DrawRGNanoButton(76,374,28,28,button,buttonPress,SDLK_u,"");
+	DrawRGNanoButton(76,434,28,28,button,buttonPress,SDLK_d,"");
+	DrawRGNanoButton(46,404,28,28,button,buttonPress,SDLK_l,"");
+	DrawRGNanoButton(106,404,28,28,button,buttonPress,SDLK_r,"");
+	DrawRGNanoButton(76,404,28,28,SDL_MapRGB(screen_->format,57,61,78),buttonPress,0,"");
+
+	DrawRGNanoButton(250,372,30,30,faceYellow,buttonPress,SDLK_y,"Y");
+	DrawRGNanoButton(286,408,30,30,facePink,buttonPress,SDLK_b,"B");
+	DrawRGNanoButton(214,408,30,30,faceBlue,buttonPress,SDLK_x,"X");
+	DrawRGNanoButton(250,444,30,30,faceGreen,buttonPress,SDLK_a,"A");
+
+	DrawRGNanoButton(88,498,62,18,accent,buttonPress,SDLK_s,"START");
+	DrawRGNanoButton(210,498,62,18,accent,buttonPress,SDLK_q,"SELECT");
+	DrawRGNanoButton(44,334,72,16,highlight,buttonPress,SDLK_m,"L1");
+	DrawRGNanoButton(244,334,72,16,highlight,buttonPress,SDLK_n,"R1");
 }
 #endif
 

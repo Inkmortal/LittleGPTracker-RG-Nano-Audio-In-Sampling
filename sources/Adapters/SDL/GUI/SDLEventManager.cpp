@@ -153,6 +153,11 @@ int SDLEventManager::MainLoop()
 					}
 
 					keyboardCS_->SetKey((int)event.key.keysym.sym,true) ;
+#ifdef PLATFORM_RGNANO_SIM
+					if (sdlWindow->IsRGNanoSkinEnabled()) {
+						sdlWindow->SetRGNanoButtonPressed((int)event.key.keysym.sym,true);
+					}
+#endif
 					break ;
 
 				case SDL_KEYUP:
@@ -161,6 +166,11 @@ int SDLEventManager::MainLoop()
 						Trace::Log("EVENT","key(%s):%d",keyname_[event.key.keysym.sym],0) ;
 					}
 					keyboardCS_->SetKey((int)event.key.keysym.sym,false) ;
+#ifdef PLATFORM_RGNANO_SIM
+					if (sdlWindow->IsRGNanoSkinEnabled()) {
+						sdlWindow->SetRGNanoButtonPressed((int)event.key.keysym.sym,false);
+					}
+#endif
 					break ;
 
 
@@ -292,6 +302,9 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 
 	if (simPendingReleaseKey_>0) {
 		keyboardCS_->SetKey(simPendingReleaseKey_,false);
+		if (window && window->IsRGNanoSkinEnabled()) {
+			window->SetRGNanoButtonPressed(simPendingReleaseKey_,false);
+		}
 		Trace::Log("RGNANO_SIM","auto up key:%d",simPendingReleaseKey_);
 		simPendingReleaseKey_=0;
 		simCommandIndex_++;
@@ -316,6 +329,9 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 		int key=GetKeyCode(command.arg.c_str());
 		if (key>0) {
 			keyboardCS_->SetKey(key,true);
+			if (window && window->IsRGNanoSkinEnabled()) {
+				window->SetRGNanoButtonPressed(key,true);
+			}
 			simPendingReleaseKey_=key;
 			simNextCommandTime_=now+(unsigned long)command.value;
 			Trace::Log("RGNANO_SIM","press %s",command.arg.c_str());
@@ -327,6 +343,9 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 		int key=GetKeyCode(command.arg.c_str());
 		if (key>0) {
 			keyboardCS_->SetKey(key,true);
+			if (window && window->IsRGNanoSkinEnabled()) {
+				window->SetRGNanoButtonPressed(key,true);
+			}
 		} else {
 			FailSimScript("unknown key in down command");
 			return;
@@ -335,6 +354,9 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 		int key=GetKeyCode(command.arg.c_str());
 		if (key>0) {
 			keyboardCS_->SetKey(key,false);
+			if (window && window->IsRGNanoSkinEnabled()) {
+				window->SetRGNanoButtonPressed(key,false);
+			}
 		} else {
 			FailSimScript("unknown key in up command");
 			return;
@@ -373,6 +395,7 @@ bool SDLEventManager::HandleSimMouse(SDLGUIWindowImp *window, SDL_Event &event)
 		int key=GetSimButtonAt(event.button.x,event.button.y);
 		if (key>0) {
 			keyboardCS_->SetKey(key,true);
+			window->SetRGNanoButtonPressed(key,true);
 			simMouseKey_=key;
 			Trace::Log("RGNANO_SIM","mouse down key:%d",key);
 			return true;
@@ -380,6 +403,7 @@ bool SDLEventManager::HandleSimMouse(SDLGUIWindowImp *window, SDL_Event &event)
 	} else if (event.type==SDL_MOUSEBUTTONUP) {
 		if (simMouseKey_>0) {
 			keyboardCS_->SetKey(simMouseKey_,false);
+			window->SetRGNanoButtonPressed(simMouseKey_,false);
 			Trace::Log("RGNANO_SIM","mouse up key:%d",simMouseKey_);
 			simMouseKey_=0;
 			return true;
@@ -398,16 +422,18 @@ int SDLEventManager::GetSimButtonAt(int x, int y)
 		int key;
 	};
 	ButtonRect buttons[] = {
-		{74,344,28,28,SDLK_u},
-		{74,404,28,28,SDLK_d},
-		{44,374,28,28,SDLK_l},
-		{104,374,28,28,SDLK_r},
-		{246,356,34,34,SDLK_a},
-		{284,394,34,34,SDLK_b},
-		{98,464,58,16,SDLK_s},
-		{204,464,58,16,SDLK_q},
-		{44,306,72,14,SDLK_m},
-		{244,306,72,14,SDLK_n}
+		{76,374,28,28,SDLK_u},
+		{76,434,28,28,SDLK_d},
+		{46,404,28,28,SDLK_l},
+		{106,404,28,28,SDLK_r},
+		{250,444,30,30,SDLK_a},
+		{286,408,30,30,SDLK_b},
+		{214,408,30,30,SDLK_x},
+		{250,372,30,30,SDLK_y},
+		{88,498,62,18,SDLK_s},
+		{210,498,62,18,SDLK_q},
+		{44,334,72,16,SDLK_m},
+		{244,334,72,16,SDLK_n}
 	};
 	for (int i=0;i<(int)(sizeof(buttons)/sizeof(buttons[0]));i++) {
 		if (x>=buttons[i].x && x<buttons[i].x+buttons[i].w &&
