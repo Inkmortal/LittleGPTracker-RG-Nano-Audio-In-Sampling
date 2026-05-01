@@ -917,8 +917,8 @@ void SDLGUIWindowImp::DrawRGNanoControls()
 
 	DrawRGNanoButton(88,498,62,18,accent,buttonPress,SDLK_s,"START");
 	DrawRGNanoButton(210,498,62,18,accent,buttonPress,SDLK_q,"SELECT");
-	DrawRGNanoButton(44,334,72,16,highlight,buttonPress,SDLK_m,"L1");
-	DrawRGNanoButton(244,334,72,16,highlight,buttonPress,SDLK_n,"R1");
+	DrawRGNanoButton(44,334,72,16,highlight,buttonPress,SDLK_m,"L");
+	DrawRGNanoButton(244,334,72,16,highlight,buttonPress,SDLK_n,"R");
 }
 #endif
 
