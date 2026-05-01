@@ -760,6 +760,44 @@ void SDLGUIWindowImp::DrawRGNanoButton(int x, int y, int w, int h, Uint32 color,
 	}
 }
 
+void SDLGUIWindowImp::DrawRGNanoShoulder(int x, int y, bool rightSide, Uint32 color, Uint32 pressedColor, int key, const char *label)
+{
+	Uint32 drawColor=color;
+	if (key>=0 && key<SDLK_LAST && rgnanoButtonPressed_[key]) {
+		drawColor=pressedColor;
+	}
+
+	SDL_Rect rect;
+	Uint32 shadow=SDL_MapRGB(screen_->format,10,10,14);
+
+	rect.x=x+2;
+	rect.y=y+2;
+	rect.w=88;
+	rect.h=22;
+	SDL_FillRect(screen_,&rect,shadow);
+	rect.x=rightSide ? x+66+2 : x+2;
+	rect.y=y+2;
+	rect.w=22;
+	rect.h=42;
+	SDL_FillRect(screen_,&rect,shadow);
+
+	rect.x=x;
+	rect.y=y;
+	rect.w=88;
+	rect.h=22;
+	SDL_FillRect(screen_,&rect,drawColor);
+	rect.x=rightSide ? x+66 : x;
+	rect.y=y;
+	rect.w=22;
+	rect.h=42;
+	SDL_FillRect(screen_,&rect,drawColor);
+
+	if (label && label[0]) {
+		Uint32 labelColor=SDL_MapRGB(screen_->format,238,242,247);
+		DrawRGNanoLabel(x+42,y+8,label,labelColor);
+	}
+}
+
 void SDLGUIWindowImp::DrawRGNanoLabel(int x, int y, const char *text, Uint32 color)
 {
 	if (!text) {
@@ -870,8 +908,8 @@ void SDLGUIWindowImp::DrawRGNanoControls()
 	Uint32 text=SDL_MapRGB(screen_->format,239,235,255);
 	SDL_Rect rect;
 
-	DrawRGNanoButton(34,16,86,24,button,buttonPress,SDLK_m,"L");
-	DrawRGNanoButton(240,16,86,24,button,buttonPress,SDLK_n,"R");
+	DrawRGNanoShoulder(18,16,false,button,buttonPress,SDLK_m,"L");
+	DrawRGNanoShoulder(254,16,true,button,buttonPress,SDLK_n,"R");
 
 	rect.x=156;
 	rect.y=28;

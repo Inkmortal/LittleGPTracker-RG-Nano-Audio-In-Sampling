@@ -58,6 +58,7 @@ protected:
 	void DrawRGNanoSkin() ;
 	void DrawRGNanoControls() ;
 	void DrawRGNanoButton(int x, int y, int w, int h, Uint32 color, Uint32 pressedColor, int key, const char *label) ;
+	void DrawRGNanoShoulder(int x, int y, bool rightSide, Uint32 color, Uint32 pressedColor, int key, const char *label) ;
 	void DrawRGNanoLabel(int x, int y, const char *text, Uint32 color) ;
 	void DrawRGNanoGlyph(int x, int y, char c, Uint32 color) ;
 #endif
