@@ -151,6 +151,7 @@ screenshot mixer-waveform-minute-start.bmp
 screenshot_app mixer-waveform-minute-start-screen.bmp
 expect_skin_frame_clean
 wait 30000
+dump_state mixer-waveform-mid
 screenshot mixer-waveform-minute-mid.bmp
 screenshot_app mixer-waveform-minute-mid-screen.bmp
 expect_screens_differ mixer-waveform-minute-start-screen.bmp mixer-waveform-minute-mid-screen.bmp

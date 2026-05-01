@@ -18,11 +18,14 @@ protected:
 	void onStart() ;
 	void onStop() ;
 	void updateCursor(int dx,int dy)  ;
+    void drawChannelMeters(bool force=false) ;
+    void drawChannelWaveform(int bus, int x, int y, int width, int height, bool selected) ;
     void drawWaveform(bool force=false) ;
 private:
-    static const int WAVEFORM_DRAW_COLUMNS = 176 ;
+    static const int WAVEFORM_DRAW_COLUMNS = 224 ;
 	const char *song_ ;
     unsigned int lastWaveformDrawMs_ ;
+    char lastChannelNote_[SONG_CHANNEL_COUNT][3] ;
     bool waveformPrimed_ ;
     int waveformLineTop_[WAVEFORM_DRAW_COLUMNS] ;
     int waveformLineBottom_[WAVEFORM_DRAW_COLUMNS] ;
