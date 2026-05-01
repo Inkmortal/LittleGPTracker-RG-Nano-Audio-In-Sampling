@@ -53,7 +53,7 @@ Sources used for comparison:
 | View navigation | R+D-pad graph | M8 uses a consistent shifted directional view map plus mini-map | Add a tiny quick-nav overlay or debug/map screen instead of always-visible mini-map. |
 | Song/chain/phrase | Present | M8 makes the hierarchy explicit and fast | Keep LGPT structure; improve screen labels and route hints. |
 | Tables/groove | Present | M8 tables/modulation are central to movement | Make table/instrument-table access clearer and test command editing. |
-| Project scale/key | Global `Key:` and `Scale:` exist | M8 has a dedicated Scale View and scale/key workflow | Keep the project-level controls as the tiny-screen default; later add a compact Scale screen or per-section key map for modulation-heavy songs. |
+| Project scale/key | Global `Key:` and `Scale:` exist | M8 has a dedicated Scale View and scale/key workflow | Keep the project-level controls as the tiny-screen default. Future thought: M8-style parity should probably use a phrase/table command such as `SCA`/`KEY` for per-track or time-position scale/key changes, not a separate song-row key map. |
 | Note spelling | Project `Notes:` setting supports sharps/flats | M8 keeps musical context visible while editing | Keep this as a simple Project setting; later add automatic spelling from key/scale. |
 | Render | Project render field exists | M8 has a dedicated Render View and render-to-sample workflow | Add a producer-friendly render flow and simulator assertion. |
 | Instrument engines | Sample instruments exist | M8 has Wavsynth, Macrosynth, Sampler, FM Synth, Hypersynth, MIDI Out, and External Instrument | Start native and incremental: wavetable/simple synth, then FM or macro-style engines. |
