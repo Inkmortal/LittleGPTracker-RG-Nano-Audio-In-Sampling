@@ -866,24 +866,12 @@ void SDLGUIWindowImp::DrawRGNanoControls()
 	Uint32 faceGreen=SDL_MapRGB(screen_->format,51,214,162);
 	Uint32 faceYellow=SDL_MapRGB(screen_->format,255,207,82);
 	Uint32 accent=SDL_MapRGB(screen_->format,219,210,255);
-	Uint32 highlight=SDL_MapRGB(screen_->format,166,132,226);
 	Uint32 port=SDL_MapRGB(screen_->format,10,11,18);
 	Uint32 text=SDL_MapRGB(screen_->format,239,235,255);
 	SDL_Rect rect;
 
-	rect.x=44;
-	rect.y=28;
-	rect.w=76;
-	rect.h=16;
-	SDL_FillRect(screen_,&rect,button);
-	DrawRGNanoLabel(76,34,"L",text);
-
-	rect.x=240;
-	rect.y=28;
-	rect.w=76;
-	rect.h=16;
-	SDL_FillRect(screen_,&rect,button);
-	DrawRGNanoLabel(277,34,"R",text);
+	DrawRGNanoButton(34,16,86,24,button,buttonPress,SDLK_m,"L");
+	DrawRGNanoButton(240,16,86,24,button,buttonPress,SDLK_n,"R");
 
 	rect.x=156;
 	rect.y=28;
@@ -916,8 +904,6 @@ void SDLGUIWindowImp::DrawRGNanoControls()
 
 	DrawRGNanoButton(88,498,62,18,accent,buttonPress,SDLK_s,"START");
 	DrawRGNanoButton(210,498,62,18,accent,buttonPress,SDLK_q,"SELECT");
-	DrawRGNanoButton(44,334,72,16,highlight,buttonPress,SDLK_m,"L");
-	DrawRGNanoButton(244,334,72,16,highlight,buttonPress,SDLK_n,"R");
 }
 #endif
 

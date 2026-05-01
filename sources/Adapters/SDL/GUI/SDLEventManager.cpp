@@ -581,8 +581,8 @@ int SDLEventManager::GetSimButtonAt(int x, int y)
 		{250,372,30,30,SDLK_y},
 		{88,498,62,18,SDLK_s},
 		{210,498,62,18,SDLK_q},
-		{44,334,72,16,SDLK_m},
-		{244,334,72,16,SDLK_n}
+		{34,16,86,24,SDLK_m},
+		{240,16,86,24,SDLK_n}
 	};
 	for (int i=0;i<(int)(sizeof(buttons)/sizeof(buttons[0]));i++) {
 		if (x>=buttons[i].x && x<buttons[i].x+buttons[i].w &&
