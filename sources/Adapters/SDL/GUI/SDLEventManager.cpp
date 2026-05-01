@@ -26,6 +26,7 @@ SDLEventManager::SDLEventManager()
 	simNextCommandTime_=0;
 	simPendingReleaseKey_=0;
 	simScriptActive_=false;
+	simScriptFailed_=false;
 #endif
 }
 
@@ -208,7 +209,11 @@ int SDLEventManager::MainLoop()
 		SDL_Delay(10);
 #endif
 	}
+#ifdef PLATFORM_RGNANO_SIM
+	return simScriptFailed_ ? 1 : 0;
+#else
 	return 0 ;
+#endif
 } ;
 
 #ifdef PLATFORM_RGNANO_SIM
@@ -246,6 +251,8 @@ void SDLEventManager::LoadSimScript()
 			}
 		} else if (command.op=="down" || command.op=="up" || command.op=="screenshot" || command.op=="log") {
 			iss >> command.arg;
+		} else if (command.op=="expect_colors") {
+			iss >> command.value;
 		}
 		simCommands_.push_back(command);
 	}
@@ -314,6 +321,11 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 		SaveSimScreenshot(window,command.arg);
 	} else if (command.op=="quit") {
 		PostQuitMessage();
+	} else if (command.op=="expect_colors") {
+		if (!ExpectSimScreenColors(window,command.value)) {
+			simScriptFailed_=true;
+			PostQuitMessage();
+		}
 	} else if (command.op=="log") {
 		Trace::Log("RGNANO_SIM","%s",command.arg.c_str());
 	}
@@ -332,6 +344,80 @@ void SDLEventManager::SaveSimScreenshot(SDLGUIWindowImp *window, const std::stri
 		Trace::Log("RGNANO_SIM","Saved screenshot %s",path.c_str());
 	} else {
 		Trace::Error("RGNANO_SIM failed screenshot %s",path.c_str());
+	}
+}
+
+bool SDLEventManager::ExpectSimScreenColors(SDLGUIWindowImp *window, int minColors)
+{
+	if (!window) {
+		Trace::Error("RGNANO_SIM expect_colors has no window");
+		return false;
+	}
+	if (minColors<=0) {
+		minColors=2;
+	}
+	window->Flush();
+	int colorCount=CountSurfaceColors(window->GetSurface(),minColors);
+	Trace::Log("RGNANO_SIM","expect_colors found %d colors, expected at least %d",colorCount,minColors);
+	if (colorCount<minColors) {
+		Trace::Error("RGNANO_SIM screen color assertion failed");
+		return false;
+	}
+	return true;
+}
+
+int SDLEventManager::CountSurfaceColors(SDL_Surface *surface, int maxColors)
+{
+	if (!surface || maxColors<=0) {
+		return 0;
+	}
+	std::vector<Uint32> colors;
+	if (SDL_MUSTLOCK(surface)) {
+		if (SDL_LockSurface(surface)<0) {
+			Trace::Error("RGNANO_SIM failed to lock screen surface");
+			return 0;
+		}
+	}
+	for (int y=0;y<surface->h;y++) {
+		for (int x=0;x<surface->w;x++) {
+			Uint32 pixel=ReadSurfacePixel(surface,x,y);
+			bool seen=false;
+			for (size_t i=0;i<colors.size();i++) {
+				if (colors[i]==pixel) {
+					seen=true;
+					break;
+				}
+			}
+			if (!seen) {
+				colors.push_back(pixel);
+				if ((int)colors.size()>=maxColors) {
+					if (SDL_MUSTLOCK(surface)) {
+						SDL_UnlockSurface(surface);
+					}
+					return (int)colors.size();
+				}
+			}
+		}
+	}
+	if (SDL_MUSTLOCK(surface)) {
+		SDL_UnlockSurface(surface);
+	}
+	return (int)colors.size();
+}
+
+Uint32 SDLEventManager::ReadSurfacePixel(SDL_Surface *surface, int x, int y)
+{
+	int bpp=surface->format->BytesPerPixel;
+	Uint8 *p=(Uint8 *)surface->pixels + y*surface->pitch + x*bpp;
+	switch (bpp) {
+		case 1: return *p;
+		case 2: return *(Uint16 *)p;
+		case 3:
+			if (SDL_BYTEORDER == SDL_BIG_ENDIAN) {
+				return p[0]<<16 | p[1]<<8 | p[2];
+			}
+			return p[0] | p[1]<<8 | p[2]<<16;
+		default: return *(Uint32 *)p;
 	}
 }
 #endif

@@ -1,4 +1,4 @@
-# Contributing
+﻿# Contributing
 
 This fork is public and open for experiments, forks, issues, and pull requests under the repository's license terms.
 
@@ -6,16 +6,33 @@ The main purpose of this repository is to publish source for the RG Nano audio-i
 
 By submitting a pull request, you confirm that you have the right to contribute the code and that your contribution can be distributed under this repository's license terms.
 
-## Before Opening a Pull Request
+## Branch & Merge Strategy
 
-- Prefer focused changes, especially around RG Nano behavior, simulator support, docs, or build reliability.
-- Do not include secrets, device-specific private data, generated binaries, logs, or local config files.
-- Run the relevant build or smoke test when possible:
+- **master** is the integration branch. It may contain unstable/experimental features.
+- **Pull Requests** should target `master`.
+- **Releases** follow the upstream release candidate workflow:
+  - release candidates: `1.2.0-bacon0`, `1.2.0-bacon2`, etc.
+  - stable releases: `v1.2.0` after a testing period.
+- Users should prefer tagged releases. `master` may contain unfinished experimental work.
+
+## Pull Request Requirements
+
+Before submitting a PR, please check:
+
+- [ ] Version bumped in `sources/Application/Model/Project.h` when appropriate.
+- [ ] Documentation updated for behavior or workflow changes.
+- [ ] CHANGELOG updated when the change is user-facing.
+- [ ] Commit history is understandable. Squash-friendly PRs are preferred.
+- [ ] Testing is described in the PR.
+
+For RG Nano simulator changes, run:
 
 ```powershell
 .\run.ps1 -Task dev -NoSetup
 .\run.ps1 -Task smoke -NoSetup
 ```
+
+Do not include secrets, device-specific private data, generated binaries, logs, copied runtime DLLs, or local config files.
 
 ## Support
 

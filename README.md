@@ -1,20 +1,46 @@
-# LittleGPTracker RG Nano Audio-In/Sampling Fork
+# LittleGPTracker RG Nano Audio-In/Sampling
 
-![Piggy](https://github.com/user-attachments/assets/827fc87f-7751-48ae-9de1-60a5d9a3b5c2)
+![Piggy](https://avatars.githubusercontent.com/u/180156201?s=400&u=ebb53bdea61a025edce0c3782ac75b532dd65dd7&v=4)
 
-This repository is an experimental RG Nano-focused fork of **Little Piggy Tracker** / **LittleGPTracker**, a music tracker optimized for portable game consoles.
+This is an experimental **LittleGPTracker / Little Piggy Tracker** fork focused on making the **Anbernic RG Nano** useful as a pocket-sized music workstation.
 
-The goal of this fork is to turn the RG Nano into a tiny, practical music-production device: tracker sequencing, sample-based composition, RG Nano UI/audio improvements, and a desktop simulator so changes can be tested before copying builds to hardware.
+The immediate goal is not to clone Dirtywave M8 firmware. It is to build a native RG Nano tracker workflow that feels serious on the actual device: compose with LGPT-style tracker sequencing, import and manage samples, refine the 240x240 interface, and test changes through a desktop simulator before copying builds to hardware.
+
+The longer-term target is a tiny on-the-go production setup where the RG Nano can act as the final arrangement and production box for sketches made on small devices such as a PO-33, chord/synth gadgets, or prepared sample packs.
 
 ## Current Focus
 
-- RG Nano builds and packaging
-- audio input / sampling workflow experiments
-- sample import and project workflow improvements
-- 240x240 tracker UI refinements
-- RG Nano simulator build for scripted desktop smoke tests
+- native RG Nano builds and OPK packaging
+- RG Nano-friendly project, song, instrument, and sample workflows
+- audio input / sampling experiments where the hardware and OS allow it
+- sample upload/import workflow for cases where live recording is not available
+- 240x240 UI refinements for the RG Nano screen
+- desktop `RGNANO_SIM` build for scripted smoke tests and screenshot capture
+
+## Current Status
+
+- Public experimental fork, not a polished release.
+- RG Nano-specific code exists for packaging, UI layout, audio capture experiments, and simulator support.
+- The simulator can build on Windows with MSYS2/MinGW, run scripted input, write logs, and capture SDL screenshots.
+- Hardware testing is still required before treating any build as performance-ready.
 
 For the simulator, see [docs/RGNANO_SIM.md](docs/RGNANO_SIM.md).
+
+## Quick Start
+
+Build the simulator:
+
+```powershell
+.\run.ps1 -Task dev -NoSetup
+```
+
+Run the simulator smoke test:
+
+```powershell
+.\run.ps1 -Task smoke -NoSetup
+```
+
+The smoke test boots the RG Nano simulator, waits for the project screen, captures `smoke-boot.bmp`, and exits.
 
 ## About This Fork
 
@@ -30,35 +56,25 @@ See [LICENSE](LICENSE). In short:
 - this project carries GPLv3 terms for the current fork
 - this is free/open-source software, so forks, experiments, and redistribution are welcome under the actual license terms
 
-All implemented features have been tested not to break old
-projects but make sure to backup your old cherished work
-just to be safe &#9829;
+Back up your tracker projects and samples before testing experimental builds on hardware.
 
 ## Releases
 
-### Upstream Builds
-
 Latest upstream Little Piggy Tracker releases:
 
-- [Releases](https://github.com/djdiskmachine/LittleGPTracker/releases)
+- [djdiskmachine/LittleGPTracker releases](https://github.com/djdiskmachine/LittleGPTracker/releases)
 
 RG Nano builds from this fork are experimental. Check this repository's releases or build from source when no release is available.
 
-### 2006 Builds
-
-Fetch archived OG builds here:
+Archived 2006 builds:
 
 - [Stable & Ghetto](https://github.com/NinjasCL-archive/LittleGPTracker/releases/tag/v1)
 
-## Community
-
-Join our [Discord server](https://discord.gg/e4N2VM7sz6)
-
 ## Documentation
 
-All the relevant documentation can be found in [Docs](docs) directory.
+General Little Piggy Tracker documentation lives in [docs](docs).
 
-Recommended reading to get you started:
+Recommended reading:
 
 - [What is Little Piggy Tracker](docs/wiki/What-is-LittlePiggyTracker.md)
 - [Quick-Start Guide](docs/wiki/quick_start_guide.md)
@@ -66,25 +82,8 @@ Recommended reading to get you started:
 - [Tips and Tricks](docs/wiki/tips_and_tricks.md)
 - [RG Nano Simulator](docs/RGNANO_SIM.md)
 
-## Features per platform
+## Platform Notes
 
-| Platform    | MIDI_Possible | MIDI_enabled | Soundfonts | Note                                 |
-|-------------|---------------|--------------|------------|--------------------------------------|
-| PSP         | NO            | NO           | YES        | [See notes](projects/resources/PSP/INSTALL_HOW_TO.txt) |
-| DEB         | YES           | YES          | YES        |                                      |
-| X64         | YES           | YES          | NO         |                                      |
-| X86         | YES           | YES          | YES        |                                      |
-| STEAM       | YES           | YES          | NO         |                                      |
-| MIYOO       | NO            | NO           | YES        | Port by [Nine-H](https://ninethehacker.xyz) |
-| W32         | YES           | YES          | YES        | Built in VS2008 with love            |
-| RASPI       | YES           | YES          | YES        | Versatile platform                   |
-| CHIP        | YES           | YES          | YES        | [See notes](projects/resources/CHIP/INSTALL_HOW_TO.txt) |
-| BITTBOY     | MAYBE         | NO           | YES        |                                      |
-| GARLIC      | MAYBE         | NO           | YES        | Port by [Simotek](http://simotek.net)|
-| GARLICPLUS  | MAYBE         | NO           | YES        | Port by [Simotek](http://simotek.net)|
-| RG35XXPLUS  | MAYBE         | NO           | YES        | Port by [Simotek](http://simotek.net)|
-| MACOS       | YES           | YES          | NO         | Port by [clsource](https://genserver.social/clsource) |
+This fork inherits upstream platform support for desktop and handheld builds. The RG Nano-specific work is experimental and may move faster than upstream release branches.
 
-
-* **Soundfont library is currently not ported for 64bit OS**
-* **MIDI functionality __greatly__ depends on kernel support, please feature request your favourite OS maintainer =)**
+The upstream tracker also supports platforms such as Windows, macOS, Linux, PSP, Miyoo Mini, RG35XX Plus, and other handheld targets. MIDI, SoundFont, and PrintFX support vary by platform and depend on the OS/audio stack.

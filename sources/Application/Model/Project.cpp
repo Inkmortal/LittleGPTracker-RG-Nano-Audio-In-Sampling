@@ -20,25 +20,30 @@ Project::Project()
 ,midiDeviceList_(0),
 tempoNudge_(0)
 {
-
-	WatchedVariable *tempo=new WatchedVariable("tempo",VAR_TEMPO,138) ;
-	this->Insert(tempo) ;
-	Variable *masterVolume=new Variable("master",VAR_MASTERVOL,100) ;
-	this->Insert(masterVolume) ;
-	Variable *wrap=new Variable("wrap",VAR_WRAP,false) ;
-	this->Insert(wrap) ;
-	Variable *transpose=new Variable("transpose",VAR_TRANSPOSE,0) ;
-	this->Insert(transpose) ;
+    WatchedVariable *tempo = new WatchedVariable("tempo", VAR_TEMPO, 138);
+    this->Insert(tempo);
+    Variable *masterVolume = new Variable("master", VAR_MASTERVOL, 100, 100);
+    this->Insert(masterVolume) ;
+    Variable *pregain =
+        new Variable("pregain", VAR_PREGAIN, 100, 200);
+    this->Insert(pregain);
     Variable *softclip =
         new Variable("softclip", VAR_SOFTCLIP, softclipStates, 5, 0);
     this->Insert(softclip);
-    Variable *clipAttenuation =
-        new Variable("clipAttenuation", VAR_CLIP_ATTENUATION, 100);
-    this->Insert(clipAttenuation);
+    Variable *softclipGain = new Variable("softclipGain", VAR_SOFTCLIP_GAIN,
+                                          softclipGainStates, 2, 0);
+    this->Insert(softclipGain);
+	Variable *wrap=new Variable("wrap", VAR_WRAP, false);
+	this->Insert(wrap);
+	Variable *transpose=new Variable("transpose", VAR_TRANSPOSE, 0);
+	this->Insert(transpose);
     Variable *scale =
         new Variable("scale", VAR_SCALE, scaleNames, scaleCount, 0);
     this->Insert(scale);
     scale->SetInt(0);
+    Variable *renderMode =
+        new Variable("renderMode", VAR_RENDER, renderModes, MAX_RENDER_MODE, 0);
+    this->Insert(renderMode);
 
 // Reload the midi device list
 
@@ -96,8 +101,20 @@ int Project::GetSoftclip() {
 	return v->GetInt();
 }
 
-int Project::GetAttenuation() {
-    Variable *v = FindVariable(VAR_CLIP_ATTENUATION);
+int Project::GetSoftclipGain() {
+    Variable *v = FindVariable(VAR_SOFTCLIP_GAIN);
+    NAssert(v);
+	return v->GetBool();
+}
+
+int Project::GetPregain() {
+    Variable *v = FindVariable(VAR_PREGAIN);
+    NAssert(v);
+	return v->GetInt();
+}
+
+int Project::GetRenderMode() {
+    Variable *v = FindVariable(VAR_RENDER);
     NAssert(v);
 	return v->GetInt();
 }
@@ -227,10 +244,7 @@ void Project::Purge() {
  
 void Project::PurgeInstruments(bool removeFromDisk) {
 
-	bool used[MAX_INSTRUMENT_COUNT] ;
-	for (int i=0;i<MAX_INSTRUMENT_COUNT;i++) {
-		used[i]=false ;
-	}
+    bool used[MAX_INSTRUMENT_COUNT] = {false};
 
     unsigned char *data=song_->phrase_->instr_ ;
 
@@ -258,34 +272,33 @@ void Project::PurgeInstruments(bool removeFromDisk) {
 
 		// clear used flag
 
-		bool iUsed[MAX_PIG_SAMPLES] ;
-		for (int i=0;i<MAX_PIG_SAMPLES;i++) {
-			iUsed[i]=false ;
-		}
+        bool used[MAX_PIG_SAMPLES] = {false};
 
-		// flag all samples actually used
+        // flag all samples actually used
 
-		for (int i=0;i<MAX_INSTRUMENT_COUNT;i++) {
-			I_Instrument *instrument=bank->GetInstrument(i) ;
+        for (int i = 0; i < MAX_INSTRUMENT_COUNT; i++) {
+            I_Instrument *instrument=bank->GetInstrument(i) ;
 			if (instrument->GetType()==IT_SAMPLE) {
 				SampleInstrument *si=(SampleInstrument *)instrument ;
 				int index=si->GetSampleIndex() ;
-				if (index>=0) iUsed[index]=true ;
-			};
-		}
+                if (index >= 0)
+                    used[index] = true;
+            };
+        }
 
-		// Now effectively purge all unused sample from disk
+        // Now effectively purge all unused sample from disk
 
-		int purged=0 ;
-		SamplePool *sp=SamplePool::GetInstance() ;
-		for (int i=0;i<MAX_PIG_SAMPLES;i++) {
-			if ((!iUsed[i])&&(sp->GetSource(i-purged))) {
-				sp->PurgeSample(i-purged) ;
-				purged++;
-			} ;
-		} ;
-	}
-} ;
+        int purged = 0;
+        SamplePool *sp = SamplePool::GetInstance();
+        for (int i = 0; i < MAX_PIG_SAMPLES; i++) {
+            if ((!used[i])&&(sp->GetSource(i-purged))) {
+                sp->PurgeSample(i - purged);
+                Trace::Debug("Purged sample [%d]", i - purged);
+        		purged++;
+				}
+        }
+    }
+}
 
 void Project::RestoreContent(TiXmlElement *element) {
 

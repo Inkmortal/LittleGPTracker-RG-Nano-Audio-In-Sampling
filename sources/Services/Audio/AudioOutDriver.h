@@ -8,6 +8,8 @@
 class AudioDriver ;
 
 #define MIX_BUFFER_SIZE 40000
+#define MAX_POSITIVE_FIXED i2fp(32767)
+#define MAX_NEGATIVE_FIXED i2fp(-32768)
 
 class AudioOutDriver: public AudioOut,protected I_Observer {
   public:
@@ -19,10 +21,8 @@ class AudioOutDriver: public AudioOut,protected I_Observer {
     virtual bool Start() ;
     virtual void Stop() ;
 
-    virtual void Trigger() ;
-    virtual void SetSoftclip(int clip, int attenuation);
-
-    virtual bool Clipped() ;
+    virtual void Trigger();
+    virtual void SetMasterVolume(int volume);
 
     virtual int GetPlayedBufferPercentage() ;
 
@@ -39,20 +39,12 @@ class AudioOutDriver: public AudioOut,protected I_Observer {
 
     virtual void Update(Observable &o,I_ObservableData *d) ;
 
-    void prepareMixBuffers() ;
-    void mixToPrimary() ;
-    void clipToMix() ;
-    fixed hardClip(fixed sample);
-    fixed softClip(fixed sample);
+    void prepareMixBuffers();
+    void clipToMix();
 
   private:
-    AudioDriver *driver_ ;
-    bool clipped_ ;
-    bool hasSound_ ;
-    int softclip_ ;
-    int attenuation_;
-    fixed maxPositiveFixed_;
-    fixed maxNegativeFixed_;
+    AudioDriver *driver_;
+    bool hasSound_;
 
     fixed *primarySoundBuffer_ ;
     short *mixBuffer_ ;

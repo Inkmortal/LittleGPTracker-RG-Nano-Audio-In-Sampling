@@ -58,9 +58,13 @@ private:
 	unsigned long simNextCommandTime_;
 	int simPendingReleaseKey_;
 	bool simScriptActive_;
+	bool simScriptFailed_;
 	void LoadSimScript();
 	void ProcessSimScript(SDLGUIWindowImp *window);
 	void SaveSimScreenshot(SDLGUIWindowImp *window, const std::string &path);
+	bool ExpectSimScreenColors(SDLGUIWindowImp *window, int minColors);
+	int CountSurfaceColors(SDL_Surface *surface, int maxColors);
+	Uint32 ReadSurfacePixel(SDL_Surface *surface, int x, int y);
 #endif
 } ;
 #endif

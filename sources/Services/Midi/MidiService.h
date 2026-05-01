@@ -2,89 +2,84 @@
 #ifndef _MIDI_SERVICE_H_
 #define _MIDI_SERVICE_H_
 
-#include <string>
-#include "Foundation/T_Factory.h"
 #include "Foundation/Observable.h"
-#include "System/Timer/Timer.h"
-#include "System/Process/SysMutex.h"
-#include "MidiOutDevice.h"
-#include "MidiInDevice.h"
+#include "Foundation/T_Factory.h"
 #include "MidiInDevice.h"
 #include "MidiInMerger.h"
+#include "MidiOutDevice.h"
+#include "System/Process/SysMutex.h"
+#include "System/Timer/Timer.h"
+#include <string>
 
 #define MIDI_MAX_BUFFERS 20
 
-class MidiService
-:public T_Factory<MidiService>
-,public T_SimpleList<MidiOutDevice>
-,public I_Observer
-{
+class MidiService : public T_Factory<MidiService>,
+                    public T_SimpleList<MidiOutDevice>,
+                    public I_Observer {
 
-public:
-	MidiService() ;
-	virtual ~MidiService() ;
+  public:
+    MidiService();
+    virtual ~MidiService();
 
-	bool Init() ;
-	void Close() ;
-	bool Start() ;
-	void Stop() ;
+    bool Init();
+    void Close();
+    bool Start();
+    void Stop();
 
-	void SelectDevice(const std::string &name) ;
+    void SelectDevice(const std::string &name);
 
-	I_Iterator<MidiInDevice> *GetInIterator() ;
+    I_Iterator<MidiInDevice> *GetInIterator();
 
-	//! player notification
+    //! player notification
 
-	void OnPlayerStart() ;
-	void OnPlayerStop() ;
+    void OnPlayerStart();
+    void OnPlayerStop();
 
-	//! Queues a MidiMessage to the current time chunk
+    //! Queues a MidiMessage to the current time chunk
 
-	void QueueMessage(MidiMessage &) ;
+    void QueueMessage(MidiMessage &);
 
-	//! Time chunk trigger
+    //! Time chunk trigger
 
-	void Trigger() ;
-  void AdvancePlayQueue();
+    void Trigger();
+    void AdvancePlayQueue();
+    //! Flush current queue to the output
 
-	//! Flush current queue to the output
+    void Flush();
 
-	void Flush() ;
-  
+  protected:
+    T_SimpleList<MidiInDevice> inList_;
 
-protected:
+    virtual void Update(Observable &o, I_ObservableData *d);
+    void onAudioTick();
 
-	T_SimpleList<MidiInDevice> inList_ ;
+    //! start the selected midi device
 
-  virtual void Update(Observable &o,I_ObservableData *d) ;
-  void onAudioTick();
+    void startDevice();
 
-	//! start the selected midi device
+    //! stop the selected midi device
 
-	void startDevice() ;
+    void stopDevice();
 
-	//! stop the selected midi device
+    //! build the list of available drivers
 
-	void stopDevice() ;
+    virtual void buildDriverList() = 0;
 
-	//! build the list of available drivers
+  private:
+    void flushOutQueue();
 
-	virtual void buildDriverList()=0 ;
+  private:
+    std::string deviceName_;
+    MidiOutDevice *device_;
 
-private:
-  void flushOutQueue();
-private:
-	std::string deviceName_ ;
-	MidiOutDevice *device_ ;
+    T_SimpleList<MidiMessage> *queues_[MIDI_MAX_BUFFERS];
+    int currentPlayQueue_;
+    int currentOutQueue_;
 
-	T_SimpleList<MidiMessage> *queues_[MIDI_MAX_BUFFERS] ;
-	int currentPlayQueue_ ;
-	int currentOutQueue_ ;
-
-	MidiInMerger *merger_ ;
-	int midiDelay_ ;
-  int tickToFlush_ ;
-	bool sendSync_ ;
-    SysMutex queueMutex_ ;    
-} ;
+    MidiInMerger *merger_;
+    int midiDelay_;
+    int tickToFlush_;
+    bool sendSync_;
+    SysMutex queueMutex_;
+};
 #endif
