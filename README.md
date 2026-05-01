@@ -22,21 +22,13 @@ This repository is a fork of [djdiskmachine/LittleGPTracker](https://github.com/
 
 That upstream work made this RG Nano experiment possible. This fork keeps the upstream license notices and adds project-specific RG Nano changes on top.
 
-## Public Repository Policy
-
-This repository is public so users can inspect the source, build the RG Nano version, follow development, and preserve the legal freedoms granted by the upstream licenses.
-
-This particular fork is maintainer-directed. Issues are disabled, and unsolicited pull requests are not the preferred way to propose changes. If you want to experiment heavily, please do it in your own fork, as permitted by the license. Changes may or may not be accepted back here.
-
-No extra trademark, endorsement, warranty, or support rights are granted by this fork.
-
 ## License
 
 See [LICENSE](LICENSE). In short:
 
 - the original LittleGPTracker lineage includes BSD 3-Clause terms
 - this project carries GPLv3 terms for the current fork
-- because this is free/open-source software, public redistribution and forks cannot be prohibited beyond the actual license terms
+- this is free/open-source software, so forks, experiments, and redistribution are welcome under the actual license terms
 
 All implemented features have been tested not to break old
 projects but make sure to backup your old cherished work
