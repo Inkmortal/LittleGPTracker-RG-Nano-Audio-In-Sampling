@@ -319,7 +319,7 @@ void SDLEventManager::LoadSimScript()
 			}
 		} else if (command.op=="down" || command.op=="up" || command.op=="screenshot" || command.op=="log" || command.op=="expect_file" || command.op=="expect_project_sample" || command.op=="expect_view") {
 			iss >> command.arg;
-		} else if (command.op=="expect_screen_text") {
+		} else if (command.op=="expect_screen_text" || command.op=="expect_selected_text" || command.op=="dump_state") {
 			std::getline(iss,command.arg);
 			if (!command.arg.empty() && command.arg[0]==' ') {
 				command.arg.erase(0,1);
@@ -403,9 +403,19 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 	}
 
 	SimCommand &command=simCommands_[simCommandIndex_];
+	std::string stateLabel="before #";
+	std::ostringstream commandLabel;
+	commandLabel << simCommandIndex_ << " " << command.op;
+	if (!command.arg.empty()) {
+		commandLabel << " " << command.arg;
+	}
+	stateLabel += commandLabel.str();
+	LogSimState(stateLabel.c_str(),false);
+
 	if (command.op=="wait") {
 		simCommandIndex_++;
 		simNextCommandTime_=now+(unsigned long)command.value;
+		LogSimState("after wait scheduled",false);
 		return;
 	}
 
@@ -488,6 +498,11 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 	} else if (command.op=="expect_view") {
 		if (!ExpectSimView(command.arg)) {
 			FailSimScript("view assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_selected_text") {
+		if (!ExpectSimSelectedText(command.arg)) {
+			FailSimScript("selected text assertion failed");
 			return;
 		}
 	} else if (command.op=="expect_audio_activity") {
@@ -577,6 +592,8 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 		}
 	} else if (command.op=="log") {
 		Trace::Log("RGNANO_SIM","%s",command.arg.c_str());
+	} else if (command.op=="dump_state") {
+		LogSimState(command.arg.empty() ? "dump_state" : command.arg.c_str(),true);
 	} else {
 		FailSimScript("unknown script command");
 		return;
@@ -584,6 +601,7 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 
 	simCommandIndex_++;
 	simNextCommandTime_=now+40;
+	LogSimState("after command",false);
 }
 
 bool SDLEventManager::HandleSimMouse(SDLGUIWindowImp *window, SDL_Event &event)
@@ -661,6 +679,7 @@ int SDLEventManager::GetSimButtonAt(int x, int y)
 
 void SDLEventManager::FailSimScript(const char *message)
 {
+	LogSimState("failure",true);
 	simScriptFailed_=true;
 	Trace::Error("RGNANO_SIM %s",message);
 	PostQuitMessage();
@@ -755,6 +774,29 @@ bool SDLEventManager::ExpectSimView(const std::string &viewName)
 		Trace::Error("RGNANO_SIM expected view %s but found %s",viewName.c_str(),current);
 	}
 	return matches;
+}
+
+bool SDLEventManager::ExpectSimSelectedText(const std::string &needle)
+{
+	GUIWindow *guiWindow=Application::GetInstance()->GetWindow();
+	AppWindow *appWindow=(AppWindow *)guiWindow;
+	std::string selected=appWindow ? appWindow->GetSimSelectionSummary() : "";
+	if (showPowerMenu_) {
+		selected += showExitConfirm_ ?
+			(exitConfirmSelection_==0 ? "; powerConfirm=Yes" : "; powerConfirm=No") :
+			(powerMenuSelection_==0 ? "; powerMenu=Exit" : "; powerMenu=Debug");
+	}
+	if (showDebugScreen_) {
+		const char *debugItems[]={"Audio Input Monitor","System Info","Exit Debug"};
+		selected += "; debug=";
+		selected += debugItems[debugScreenSelection_];
+	}
+	bool found=!needle.empty() && selected.find(needle)!=std::string::npos;
+	Trace::Log("RGNANO_SIM","expect_selected_text %s in %s => %s",needle.c_str(),selected.c_str(),found?"found":"missing");
+	if (!found) {
+		Trace::Error("RGNANO_SIM expected selected text %s",needle.c_str());
+	}
+	return found;
 }
 
 bool SDLEventManager::ExpectSimAudioActivity(int minPeak)
@@ -1104,6 +1146,36 @@ Uint32 SDLEventManager::ReadSurfacePixel(SDL_Surface *surface, int x, int y)
 			}
 			return p[0] | p[1]<<8 | p[2]<<16;
 		default: return *(Uint32 *)p;
+	}
+}
+
+void SDLEventManager::LogSimState(const char *label, bool includeScreen)
+{
+	GUIWindow *guiWindow=Application::GetInstance()->GetWindow();
+	AppWindow *appWindow=(AppWindow *)guiWindow;
+	if (!appWindow) {
+		Trace::Log("RGNANO_SIM_STATE","%s appWindow=(null)",label?label:"state");
+		return;
+	}
+	std::string summary=appWindow->GetSimDebugSummary();
+	if (showPowerMenu_) {
+		summary += showExitConfirm_ ?
+			(exitConfirmSelection_==0 ? " overlay=power-confirm selected=Yes" : " overlay=power-confirm selected=No") :
+			(powerMenuSelection_==0 ? " overlay=power-menu selected=Exit" : " overlay=power-menu selected=Debug");
+	}
+	if (showDebugScreen_) {
+		const char *debugItems[]={"Audio Input Monitor","System Info","Exit Debug"};
+		summary += " overlay=debug selected=";
+		summary += debugItems[debugScreenSelection_];
+	}
+	Trace::Log("RGNANO_SIM_STATE","%s %s",label?label:"state",summary.c_str());
+	if (includeScreen) {
+		std::string dump=appWindow->GetSimScreenDump();
+		std::istringstream lines(dump);
+		std::string line;
+		while (std::getline(lines,line)) {
+			Trace::Log("RGNANO_SIM_SCREEN","%s",line.c_str());
+		}
 	}
 }
 #endif

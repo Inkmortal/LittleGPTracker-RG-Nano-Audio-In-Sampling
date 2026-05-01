@@ -14,6 +14,7 @@
 #include "System/Console/Trace.h"
 #include "UIFramework/Interfaces/I_GUIWindowFactory.h"
 #include "Views/UIController.h"
+#include <sstream>
 #include <string.h>
 
 AppWindow *instance = 0;
@@ -571,6 +572,115 @@ bool AppWindow::ScreenContains(const char *needle) const {
         }
     }
     return false;
+}
+
+std::string AppWindow::GetSimSelectionSummary() const {
+    std::ostringstream out;
+    bool any = false;
+    for (int y = 0; y < 30; y++) {
+        int x = 0;
+        while (x < 40) {
+            int index = x + 40 * y;
+            if ((_charScreenProp[index] & PROP_INVERT) == 0) {
+                x++;
+                continue;
+            }
+            int start = x;
+            std::string text;
+            while (x < 40 && (_charScreenProp[x + 40 * y] & PROP_INVERT) != 0) {
+                text += (char)_charScreen[x + 40 * y];
+                x++;
+            }
+            while (!text.empty() && text[text.size() - 1] == ' ') {
+                text.erase(text.size() - 1);
+            }
+            while (!text.empty() && text[0] == ' ') {
+                text.erase(0, 1);
+            }
+            if (!text.empty()) {
+                if (any) {
+                    out << "; ";
+                }
+                out << "r" << y << "c" << start << "=\"" << text << "\"";
+                any = true;
+            }
+        }
+    }
+    if (!any) {
+        out << "(none)";
+    }
+    return out.str();
+}
+
+std::string AppWindow::GetSimScreenDump() const {
+    std::ostringstream out;
+    for (int y = 0; y < 30; y++) {
+        char row[41];
+        memcpy(row, _charScreen + y * 40, 40);
+        row[40] = 0;
+        int end = 39;
+        while (end >= 0 && row[end] == ' ') {
+            row[end] = 0;
+            end--;
+        }
+        out << y;
+        if (y < 10) {
+            out << " ";
+        }
+        out << "| " << row << "\n";
+    }
+    out << "selected: " << GetSimSelectionSummary();
+    return out.str();
+}
+
+std::string AppWindow::GetSimDebugSummary() const {
+    std::ostringstream out;
+    out << "view=" << GetCurrentViewName();
+    if (_viewData) {
+        int songAbsRow = _viewData->songOffset_ + _viewData->songY_;
+        out << " song(row=" << songAbsRow
+            << " screenY=" << _viewData->songY_
+            << " ch=" << _viewData->songX_;
+        if (_viewData->song_) {
+            unsigned char songValue = *(_viewData->GetCurrentSongPointer());
+            out << " cell=";
+            if (songValue == 0xFF) {
+                out << "--";
+            } else {
+                char buffer[8];
+                sprintf(buffer, "%02X", songValue);
+                out << buffer;
+            }
+        }
+        out << ")";
+        out << " chain(current=" << _viewData->currentChain_
+            << " row=" << _viewData->chainRow_
+            << " col=" << _viewData->chainCol_;
+        if (_viewData->song_) {
+            unsigned char chainValue = *(_viewData->GetCurrentChainPointer());
+            out << " cell=";
+            if (chainValue == 0xFF) {
+                out << "--";
+            } else {
+                char buffer[8];
+                sprintf(buffer, "%02X", chainValue);
+                out << buffer;
+            }
+        }
+        out << ")";
+        out << " phrase(current=" << _viewData->currentPhrase_
+            << " row=" << _viewData->phraseCurPos_ << ")";
+        out << " instrument=" << _viewData->currentInstrument_;
+        out << " table=" << _viewData->currentTable_;
+        out << " groove=" << _viewData->currentGroove_;
+        out << " mixer(row=" << _viewData->mixerRow_
+            << " col=" << _viewData->mixerCol_ << ")";
+        out << " playMode=" << _viewData->playMode_;
+    } else {
+        out << " project=(none)";
+    }
+    out << " selected=" << GetSimSelectionSummary();
+    return out.str();
 }
 #endif
 

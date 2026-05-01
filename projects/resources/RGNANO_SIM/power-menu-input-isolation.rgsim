@@ -2,6 +2,7 @@
 # Select stays KEY_SELECT=q; Power is KEY_POWER=p in the simulator.
 route boot.new_project_random
 expect_view song
+dump_state after boot
 reset_audio_stats
 press q 80
 wait 120
@@ -10,6 +11,8 @@ expect_audio_silence 0
 press p 80
 wait 160
 expect_view song
+expect_selected_text Exit
+dump_state power menu open
 expect_audio_silence 0
 press p 80
 wait 120

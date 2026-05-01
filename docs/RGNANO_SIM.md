@@ -128,6 +128,12 @@ expect_view song
 # fail unless visible text is present in the current 40x30 character screen
 expect_screen_text 1######
 
+# fail unless the currently inverted/highlighted screen text contains a phrase
+expect_selected_text Import
+
+# write current view, cursor/model state, highlighted text, and full 40x30 text screen to the log
+dump_state sample import open
+
 # fail unless tracker model data matches what the script programmed
 expect_song_chain 0 0 00
 expect_chain_phrase 0 0 00
@@ -166,6 +172,8 @@ quit
 ```
 
 Screenshots and assertions are captured from the SDL surface, so they are available to automated tests without a camera or physical RG Nano.
+
+Every scripted command now logs a concise `RGNANO_SIM_STATE` line with the active view, tracker cursor/model coordinates, and highlighted text. Use `dump_state <label>` when a flow needs a full `RGNANO_SIM_SCREEN` dump of the 40x30 character screen, including selection/highlight segments. On script failure the simulator writes the full dump automatically.
 
 Scripts can also use source-derived route helpers. The PowerShell runner expands these before launching the simulator, so the C++ simulator still receives ordinary button events:
 

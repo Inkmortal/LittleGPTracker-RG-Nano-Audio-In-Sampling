@@ -77,6 +77,7 @@ private:
 	bool ExpectSimLog(const std::string &needle);
 	bool ExpectSimNoError();
 	bool ExpectSimView(const std::string &viewName);
+	bool ExpectSimSelectedText(const std::string &needle);
 	bool ExpectSimAudioActivity(int minPeak);
 	bool ExpectSimAudioSilence(int maxPeak);
 	bool ExpectSimAudioCaptureBytes(int minBytes);
@@ -96,6 +97,7 @@ private:
 	bool ExpectSimScreenColors(SDLGUIWindowImp *window, int minColors);
 	int CountSurfaceColors(SDL_Surface *surface, int maxColors);
 	Uint32 ReadSurfacePixel(SDL_Surface *surface, int x, int y);
+	void LogSimState(const char *label, bool includeScreen);
 #endif
 } ;
 #endif

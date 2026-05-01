@@ -17,6 +17,7 @@
 #include "System/Process/SysMutex.h"
 #include "System/io/Status.h"
 #include "UIFramework/SimpleBaseClasses/GUIWindow.h"
+#include <string>
 
 #define PROP_INVERT 0x80
 
@@ -39,6 +40,9 @@ class AppWindow : public GUIWindow, I_Observer, Status {
     const char *GetCurrentViewName() const;
     ViewData *GetViewData() const;
     bool ScreenContains(const char *needle) const;
+    std::string GetSimDebugSummary() const;
+    std::string GetSimScreenDump() const;
+    std::string GetSimSelectionSummary() const;
 #endif
 
   protected: // GUIWindow implementation
