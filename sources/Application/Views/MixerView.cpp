@@ -307,21 +307,37 @@ void MixerView::drawWaveform() {
     SetColor(CD_HILITE2);
     for (int col = 0; col < width; col++) {
         int sampleIndex = (col * columns) / width;
+        int nextIndex = ((col + 1) * columns) / width;
+        if (nextIndex >= columns) {
+            nextIndex = columns - 1;
+        }
+        int sample = mixer->GetMasterWaveformSample(sampleIndex);
+        int nextSample = mixer->GetMasterWaveformSample(nextIndex);
         int minSample = mixer->GetMasterWaveformMin(sampleIndex);
         int maxSample = mixer->GetMasterWaveformMax(sampleIndex);
-        int top = mid - ((maxSample * (height / 2 - 2)) / 100);
-        int bottom = mid - ((minSample * (height / 2 - 2)) / 100);
-        if (top < y) top = y;
-        if (top >= y + height) top = y + height - 1;
-        if (bottom < y) bottom = y;
-        if (bottom >= y + height) bottom = y + height - 1;
-        if (bottom < top) {
-            int swap=top;
-            top=bottom;
-            bottom=swap;
+        int waveY = mid - ((sample * (height / 2 - 2)) / 100);
+        int nextY = mid - ((nextSample * (height / 2 - 2)) / 100);
+        if (waveY < y) waveY = y;
+        if (waveY >= y + height) waveY = y + height - 1;
+        if (nextY < y) nextY = y;
+        if (nextY >= y + height) nextY = y + height - 1;
+        int lineTop = waveY < nextY ? waveY : nextY;
+        int lineBottom = waveY > nextY ? waveY : nextY;
+        GUIRect wave(x + col, lineTop, x + col + 1, lineBottom + 1);
+        imp->DrawRect(wave);
+
+        if ((col % 4)==0) {
+            int top = mid - ((maxSample * (height / 2 - 2)) / 100);
+            int bottom = mid - ((minSample * (height / 2 - 2)) / 100);
+            if (top < y) top = y;
+            if (top >= y + height) top = y + height - 1;
+            if (bottom < y) bottom = y;
+            if (bottom >= y + height) bottom = y + height - 1;
+            GUIRect upper(x + col, top, x + col + 1, top + 1);
+            GUIRect lower(x + col, bottom, x + col + 1, bottom + 1);
+            imp->DrawRect(upper);
+            imp->DrawRect(lower);
         }
-        GUIRect r(x + col, top, x + col + 1, bottom + 1);
-        imp->DrawRect(r);
     }
 
     SetColor(CD_NORMAL);
