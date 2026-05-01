@@ -908,7 +908,6 @@ void SDLGUIWindowImp::DrawRGNanoControls()
 	DrawRGNanoButton(76,434,28,28,button,buttonPress,SDLK_d,"");
 	DrawRGNanoButton(46,404,28,28,button,buttonPress,SDLK_l,"");
 	DrawRGNanoButton(106,404,28,28,button,buttonPress,SDLK_r,"");
-	DrawRGNanoButton(76,404,28,28,SDL_MapRGB(screen_->format,57,61,78),buttonPress,0,"");
 
 	DrawRGNanoButton(250,372,30,30,faceYellow,buttonPress,SDLK_y,"Y");
 	DrawRGNanoButton(286,408,30,30,facePink,buttonPress,SDLK_b,"B");
