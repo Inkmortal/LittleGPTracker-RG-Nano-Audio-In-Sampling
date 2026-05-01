@@ -16,7 +16,7 @@
  #include "Application/Commands/EventDispatcher.h"
 #endif
 
-#ifdef PLATFORM_RGNANO
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
  #include "SDLEventManager.h"
 #endif
 
@@ -685,11 +685,11 @@ void SDLGUIWindowImp::Unlock()
 
 void SDLGUIWindowImp::Flush()
 {
-#ifdef PLATFORM_RGNANO
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
     // Render power menu overlay if active
-    SDLEventManager::GetInstance()->RenderPowerMenu(screen_);
+    SDLEventManager::GetInstance()->RenderPowerMenu(screen_,this);
     // Render debug screen overlay if active
-    SDLEventManager::GetInstance()->RenderDebugScreen(screen_);
+    SDLEventManager::GetInstance()->RenderDebugScreen(screen_,this);
 #endif
 
 #ifdef BUFFERED

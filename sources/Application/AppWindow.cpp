@@ -720,9 +720,8 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
         case VT_GROOVE:
             _currentView = _grooveView;
             break;
-            /*			case VT_MIXER:
-                        _currentView=_mixerView ;
-            */
+        case VT_MIXER:
+            _currentView = _mixerView;
             break;
         }
         _currentView->SetFocus(*vt);

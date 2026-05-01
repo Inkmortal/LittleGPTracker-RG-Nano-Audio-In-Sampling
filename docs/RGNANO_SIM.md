@@ -183,11 +183,13 @@ Screenshots and assertions are captured from the SDL surface, so they are availa
 
 Every scripted command now logs a concise `RGNANO_SIM_STATE` line with the active view, tracker cursor/model coordinates, and highlighted text. Use `dump_state <label>` when a flow needs a full `RGNANO_SIM_SCREEN` dump of the 40x30 character screen, including selection/highlight segments. On script failure the simulator writes the full dump automatically.
 
-Scripts can also use source-derived route helpers. The PowerShell runner expands these before launching the simulator, so the C++ simulator still receives ordinary button events:
+Scripts can also use source-derived route helpers. The C++ simulator expands these routes into ordinary button events before executing the script:
 
 ```text
 route boot.new_project_random
 route project.to_song
+route song.to_mixer
+route mixer.to_song
 route song.to_chain
 route chain.to_phrase
 route phrase.to_instrument
@@ -196,7 +198,7 @@ route sample_import.to_first_file
 route sample_import.import_selected
 ```
 
-Route helpers live in `tools\rgnano-sim-routes.ps1`. They are intentionally small and explicit, so routes like `phrase.to_table` remain tied to the source map instead of hidden in test-specific scripts.
+Route helpers are built into the simulator and mirrored in `tools\rgnano-sim-routes.ps1` for older runner flows. They are intentionally small and explicit, so routes like `phrase.to_table` remain tied to the source map instead of hidden in test-specific scripts.
 
 The canonical smoke test is:
 
@@ -244,4 +246,10 @@ The producer navigation tour exercises the main RG Nano view routes after creati
 
 ```powershell
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\producer-navigation-tour.rgsim -ResetLastProject -Skin -ArtifactsDir .\sim-artifacts
+```
+
+The producer screen audit walks every core producer-facing view, captures a screenshot for each, and writes `dump_state` logs with the active view, cursor, selected text, and player state:
+
+```powershell
+.\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\producer-screen-audit.rgsim -ResetLastProject -SeedSampleFixture -Skin -ArtifactsDir .\sim-artifacts-screen-audit
 ```

@@ -192,7 +192,7 @@ void MixerView::DrawView() {
 	
 	std::ostringstream os;
 
-	os << ((player->GetSequencerMode()==SM_SONG)?"Song":"Live") ;
+	os << "Mixer " << ((player->GetSequencerMode()==SM_SONG)?"Song":"Live") ;
 
 	std::string buffer(os.str());
 

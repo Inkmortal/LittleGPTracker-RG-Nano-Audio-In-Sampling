@@ -8,6 +8,7 @@
 #include "Application/Player/Player.h"
 #include "Application/Persistency/PersistencyService.h"
 #include "System/FileSystem/FileSystem.h"
+#include "UIFramework/BasicDatas/FontConfig.h"
 #include "UIFramework/BasicDatas/GUIEvent.h"
 #include "SDLGUIWindowImp.h"
 #include "Application/Model/Config.h"
@@ -29,6 +30,25 @@ bool SDLEventManager::showDebugScreen_=false ;
 int SDLEventManager::debugScreenSelection_=0;
 bool SDLEventManager::menuInputHeld_[SDLK_LAST]={false};
 int SDLEventManager::powerMenuKey_=SDLK_POWER;
+
+static void DrawSimOverlayText(SDL_Surface *screen, const char *text, int x, int y, Uint32 color, int scale)
+{
+	if (!screen || !text) return;
+	if (scale < 1) scale = 1;
+	for (int i=0;text[i];i++) {
+		unsigned int fontID=(unsigned char)text[i];
+		if (fontID < FONT_COUNT) {
+			for (int row=0;row<8;row++) {
+				for (int col=0;col<8;col++) {
+					if (font[fontID*8 + row*FONT_WIDTH + col] == 0) {
+						SDL_Rect pixel = { Sint16(x + i*8*scale + col*scale), Sint16(y + row*scale), Uint16(scale), Uint16(scale) };
+						SDL_FillRect(screen,&pixel,color);
+					}
+				}
+			}
+		}
+	}
+}
 
 #ifdef PLATFORM_RGNANO_SIM
 static ViewData *GetSimViewData();
@@ -292,6 +312,197 @@ int SDLEventManager::MainLoop()
 #ifdef PLATFORM_RGNANO_SIM
 #include "Services/Audio/AudioDriver.h"
 
+bool SDLEventManager::AppendSimRoute(const std::string &routeName, const char *scriptPath, int lineNumber)
+{
+	std::vector<std::string> lines;
+
+	if (routeName=="combo.r.up") {
+		lines.push_back("down n"); lines.push_back("press u 80"); lines.push_back("up n");
+	} else if (routeName=="combo.r.down") {
+		lines.push_back("down n"); lines.push_back("press d 80"); lines.push_back("up n");
+	} else if (routeName=="combo.r.left") {
+		lines.push_back("down n"); lines.push_back("press l 80"); lines.push_back("up n");
+	} else if (routeName=="combo.r.right") {
+		lines.push_back("down n"); lines.push_back("press r 80"); lines.push_back("up n");
+	} else if (routeName=="combo.r.start") {
+		lines.push_back("down n"); lines.push_back("press s 80"); lines.push_back("up n");
+	} else if (routeName=="combo.l.up") {
+		lines.push_back("down m"); lines.push_back("press u 80"); lines.push_back("up m");
+	} else if (routeName=="combo.l.down") {
+		lines.push_back("down m"); lines.push_back("press d 80"); lines.push_back("up m");
+	} else if (routeName=="combo.l.left") {
+		lines.push_back("down m"); lines.push_back("press l 80"); lines.push_back("up m");
+	} else if (routeName=="combo.l.right") {
+		lines.push_back("down m"); lines.push_back("press r 80"); lines.push_back("up m");
+	} else if (routeName=="combo.l.start") {
+		lines.push_back("down m"); lines.push_back("press s 80"); lines.push_back("up m");
+	} else if (routeName=="combo.a.up") {
+		lines.push_back("down a"); lines.push_back("press u 80"); lines.push_back("up a");
+	} else if (routeName=="combo.a.down") {
+		lines.push_back("down a"); lines.push_back("press d 80"); lines.push_back("up a");
+	} else if (routeName=="combo.a.left") {
+		lines.push_back("down a"); lines.push_back("press l 80"); lines.push_back("up a");
+	} else if (routeName=="combo.a.right") {
+		lines.push_back("down a"); lines.push_back("press r 80"); lines.push_back("up a");
+	} else if (routeName=="combo.b.up") {
+		lines.push_back("down b"); lines.push_back("press u 80"); lines.push_back("up b");
+	} else if (routeName=="combo.b.down") {
+		lines.push_back("down b"); lines.push_back("press d 80"); lines.push_back("up b");
+	} else if (routeName=="combo.b.left") {
+		lines.push_back("down b"); lines.push_back("press l 80"); lines.push_back("up b");
+	} else if (routeName=="combo.b.right") {
+		lines.push_back("down b"); lines.push_back("press r 80"); lines.push_back("up b");
+	} else if (routeName=="boot.new_project_random") {
+		lines.push_back("wait 500");
+		lines.push_back("press r 80");
+		lines.push_back("press a 80");
+		lines.push_back("wait 200");
+		lines.push_back("press d 80");
+		lines.push_back("press a 80");
+		lines.push_back("press r 80");
+		lines.push_back("press a 80");
+		lines.push_back("wait 1000");
+	} else if (routeName=="project.to_song") {
+		lines.push_back("route combo.r.down");
+	} else if (routeName=="song.to_project") {
+		lines.push_back("route combo.r.up");
+	} else if (routeName=="song.to_mixer") {
+		lines.push_back("route combo.r.down");
+	} else if (routeName=="song.to_chain") {
+		lines.push_back("route combo.r.right");
+	} else if (routeName=="mixer.to_song") {
+		lines.push_back("route combo.r.up");
+	} else if (routeName=="chain.to_song") {
+		lines.push_back("route combo.r.left");
+	} else if (routeName=="chain.to_phrase") {
+		lines.push_back("route combo.r.right");
+	} else if (routeName=="phrase.to_chain") {
+		lines.push_back("route combo.r.left");
+	} else if (routeName=="phrase.to_instrument") {
+		lines.push_back("route combo.r.right");
+	} else if (routeName=="phrase.to_table") {
+		lines.push_back("route combo.r.down");
+	} else if (routeName=="phrase.to_groove") {
+		lines.push_back("route combo.r.up");
+	} else if (routeName=="groove.to_phrase") {
+		lines.push_back("route combo.r.down");
+	} else if (routeName=="instrument.to_phrase") {
+		lines.push_back("route combo.r.left");
+	} else if (routeName=="instrument.to_table") {
+		lines.push_back("route combo.r.down");
+	} else if (routeName=="table.to_parent") {
+		lines.push_back("route combo.r.up");
+	} else if (routeName=="table.to_instrument_table") {
+		lines.push_back("route combo.r.right");
+	} else if (routeName=="instrument_table.to_table") {
+		lines.push_back("route combo.r.left");
+	} else if (routeName=="instrument.open_sample_import") {
+		lines.push_back("press a 80");
+		lines.push_back("press a 80");
+		lines.push_back("wait 300");
+	} else if (routeName=="sample_import.to_import") {
+		lines.push_back("press r 80");
+	} else if (routeName=="sample_import.to_first_file") {
+		lines.push_back("press d 80");
+		lines.push_back("wait 120");
+	} else if (routeName=="sample_import.import_selected") {
+		lines.push_back("press r 80");
+		lines.push_back("press a 80");
+		lines.push_back("wait 500");
+	} else if (routeName=="sample_import.quick_import_selected") {
+		lines.push_back("down s");
+		lines.push_back("press r 80");
+		lines.push_back("up s");
+		lines.push_back("wait 500");
+	} else if (routeName=="sample_import.exit") {
+		lines.push_back("press r 80");
+		lines.push_back("press r 80");
+		lines.push_back("press r 80");
+		lines.push_back("press a 80");
+		lines.push_back("wait 200");
+	} else {
+		Trace::Error("RGNANO_SIM unknown route %s at %s:%d",routeName.c_str(),scriptPath,lineNumber);
+		return false;
+	}
+
+	Trace::Log("RGNANO_SIM","route %s expanded to %d commands",routeName.c_str(),(int)lines.size());
+	for (size_t i=0;i<lines.size();i++) {
+		if (!AddSimScriptLine(lines[i],scriptPath,lineNumber)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool SDLEventManager::AddSimScriptLine(const std::string &line, const char *scriptPath, int lineNumber)
+{
+	if (line.empty() || line[0]=='#') {
+		return true;
+	}
+	std::istringstream iss(line);
+	SimCommand command;
+	command.arg="";
+	command.arg2="";
+	command.arg3="";
+	command.value=0;
+	command.value2=0;
+	iss >> command.op;
+	if (command.op.empty()) {
+		return true;
+	}
+	if (command.op=="route") {
+		iss >> command.arg;
+		if (command.arg.empty()) {
+			Trace::Error("RGNANO_SIM route missing name at %s:%d",scriptPath,lineNumber);
+			return false;
+		}
+		return AppendSimRoute(command.arg,scriptPath,lineNumber);
+	}
+	if (command.op=="wait") {
+		iss >> command.value;
+	} else if (command.op=="press") {
+		iss >> command.arg >> command.value;
+		if (command.value<=0) {
+			command.value=80;
+		}
+	} else if (command.op=="down" || command.op=="up" || command.op=="screenshot" || command.op=="log" || command.op=="expect_file" || command.op=="expect_project_sample" || command.op=="expect_view" || command.op=="expect_player_running" || command.op=="expect_play_mode") {
+		iss >> command.arg;
+	} else if (command.op=="expect_screen_text" || command.op=="expect_selected_text" || command.op=="expect_streaming_sample" || command.op=="dump_state") {
+		std::getline(iss,command.arg);
+		if (!command.arg.empty() && command.arg[0]==' ') {
+			command.arg.erase(0,1);
+		}
+	} else if (command.op=="click") {
+		iss >> command.value >> command.value2 >> command.arg;
+		if (command.arg.empty()) {
+			command.arg="80";
+		}
+	} else if (command.op=="expect_log") {
+		iss >> command.arg;
+		std::getline(iss,command.arg2);
+		if (!command.arg2.empty() && command.arg2[0]==' ') {
+			command.arg2.erase(0,1);
+		}
+	} else if (command.op=="expect_no_error" || command.op=="reset_audio_stats" || command.op=="end_audio_capture" || command.op=="sim_save_project" || command.op=="quit") {
+	} else if (command.op=="expect_colors" || command.op=="expect_audio_activity" || command.op=="expect_audio_silence" || command.op=="expect_audio_capture_bytes" || command.op=="expect_tempo" || command.op=="sim_set_tempo") {
+		iss >> command.value;
+	} else if (command.op=="start_audio_capture") {
+		iss >> command.arg;
+	} else if (command.op=="expect_song_chain" || command.op=="expect_chain_phrase") {
+		iss >> command.value >> command.value2 >> command.arg;
+	} else if (command.op=="expect_phrase_row_count" || command.op=="expect_size") {
+		iss >> command.value >> command.value2;
+	} else if (command.op=="expect_instrument_sample" || command.op=="expect_playing_channel" || command.op=="sim_import_sample_to_instrument") {
+		iss >> command.value >> command.arg;
+	} else if (command.op=="sim_set_song_chain") {
+		iss >> command.value >> command.value2 >> command.arg;
+	} else if (command.op=="sim_set_chain_phrase" || command.op=="sim_set_phrase_note") {
+		iss >> command.value >> command.value2 >> command.arg >> command.arg2;
+	}
+	simCommands_.push_back(command);
+	return true;
+}
+
 void SDLEventManager::LoadSimScript()
 {
 	const char *scriptPath=Config::GetInstance()->GetValue("RGNANOSIM_SCRIPT");
@@ -306,80 +517,13 @@ void SDLEventManager::LoadSimScript()
 	}
 
 	std::string line;
+	int lineNumber=0;
 	while (std::getline(file,line)) {
-		if (line.empty() || line[0]=='#') {
-			continue;
+		lineNumber++;
+		if (!AddSimScriptLine(line,scriptPath,lineNumber)) {
+			simScriptFailed_=true;
+			break;
 		}
-		std::istringstream iss(line);
-		SimCommand command;
-		command.arg="";
-		command.arg2="";
-		command.arg3="";
-		command.value=0;
-		command.value2=0;
-		iss >> command.op;
-		if (command.op.empty()) {
-			continue;
-		}
-		if (command.op=="wait") {
-			iss >> command.value;
-		} else if (command.op=="press") {
-			iss >> command.arg >> command.value;
-			if (command.value<=0) {
-				command.value=80;
-			}
-		} else if (command.op=="down" || command.op=="up" || command.op=="screenshot" || command.op=="log" || command.op=="expect_file" || command.op=="expect_project_sample" || command.op=="expect_view" || command.op=="expect_player_running" || command.op=="expect_play_mode") {
-			iss >> command.arg;
-		} else if (command.op=="expect_screen_text" || command.op=="expect_selected_text" || command.op=="expect_streaming_sample" || command.op=="dump_state") {
-			std::getline(iss,command.arg);
-			if (!command.arg.empty() && command.arg[0]==' ') {
-				command.arg.erase(0,1);
-			}
-		} else if (command.op=="click") {
-			iss >> command.value >> command.value2 >> command.arg;
-			if (command.arg.empty()) {
-				command.arg="80";
-			}
-		} else if (command.op=="expect_log") {
-			iss >> command.arg;
-			std::getline(iss,command.arg2);
-			if (!command.arg2.empty() && command.arg2[0]==' ') {
-				command.arg2.erase(0,1);
-			}
-		} else if (command.op=="expect_no_error" || command.op=="reset_audio_stats" || command.op=="end_audio_capture") {
-		} else if (command.op=="expect_colors") {
-			iss >> command.value;
-		} else if (command.op=="expect_audio_activity" || command.op=="expect_audio_silence") {
-			iss >> command.value;
-		} else if (command.op=="start_audio_capture") {
-			iss >> command.arg;
-		} else if (command.op=="expect_audio_capture_bytes") {
-			iss >> command.value;
-		} else if (command.op=="expect_song_chain" || command.op=="expect_chain_phrase") {
-			iss >> command.value >> command.value2 >> command.arg;
-		} else if (command.op=="expect_phrase_row_count") {
-			iss >> command.value >> command.value2;
-		} else if (command.op=="expect_tempo") {
-			iss >> command.value;
-		} else if (command.op=="expect_instrument_sample") {
-			iss >> command.value >> command.arg;
-		} else if (command.op=="expect_playing_channel") {
-			iss >> command.value >> command.arg;
-		} else if (command.op=="sim_set_tempo") {
-			iss >> command.value;
-		} else if (command.op=="sim_import_sample_to_instrument") {
-			iss >> command.value >> command.arg;
-		} else if (command.op=="sim_set_song_chain") {
-			iss >> command.value >> command.value2 >> command.arg;
-		} else if (command.op=="sim_set_chain_phrase") {
-			iss >> command.value >> command.value2 >> command.arg >> command.arg2;
-		} else if (command.op=="sim_set_phrase_note") {
-			iss >> command.value >> command.value2 >> command.arg >> command.arg2;
-		} else if (command.op=="sim_save_project") {
-		} else if (command.op=="expect_size") {
-			iss >> command.value >> command.value2;
-		}
-		simCommands_.push_back(command);
 	}
 
 	simCommandIndex_=0;
@@ -724,6 +868,8 @@ void SDLEventManager::SaveSimScreenshot(SDLGUIWindowImp *window, const std::stri
 		return;
 	}
 	window->Flush();
+	RenderPowerMenu(window->GetSurface(),window);
+	RenderDebugScreen(window->GetSurface(),window);
 	if (SDL_SaveBMP(window->GetSurface(),path.c_str())==0) {
 		Trace::Log("RGNANO_SIM","Saved screenshot %s",path.c_str());
 	} else {
@@ -1327,9 +1473,10 @@ int SDLEventManager::GetKeyCode(const char *key)
 	return -1 ;
 }
 
-void SDLEventManager::RenderPowerMenu(SDL_Surface *screen)
+void SDLEventManager::RenderPowerMenu(SDL_Surface *screen, SDLGUIWindowImp *window)
 {
 	if (!showPowerMenu_ || !screen) return;
+	int scale = window ? window->GetScale() : 1;
 
 	// Darken background
 	SDL_Rect fullScreen = {0, 0, screen->w, screen->h};
@@ -1356,6 +1503,8 @@ void SDLEventManager::RenderPowerMenu(SDL_Surface *screen)
 			SDL_MapRGB(screen->format, 80, 120, 200) :
 			SDL_MapRGB(screen->format, 200, 200, 200);
 		SDL_FillRect(screen, &yesRect, yesColor);
+		DrawSimOverlayText(screen,"Yes",yesRect.x + 10,yesRect.y + 8,
+			SDL_MapRGB(screen->format, exitConfirmSelection_ == 0 ? 255 : 20, exitConfirmSelection_ == 0 ? 255 : 20, exitConfirmSelection_ == 0 ? 255 : 20),scale);
 
 		// No option
 		SDL_Rect noRect = {menuBox.x + 10, itemY + itemHeight + 5, menuWidth - 20, itemHeight};
@@ -1363,6 +1512,8 @@ void SDLEventManager::RenderPowerMenu(SDL_Surface *screen)
 			SDL_MapRGB(screen->format, 80, 120, 200) :
 			SDL_MapRGB(screen->format, 200, 200, 200);
 		SDL_FillRect(screen, &noRect, noColor);
+		DrawSimOverlayText(screen,"No",noRect.x + 10,noRect.y + 8,
+			SDL_MapRGB(screen->format, exitConfirmSelection_ == 1 ? 255 : 20, exitConfirmSelection_ == 1 ? 255 : 20, exitConfirmSelection_ == 1 ? 255 : 20),scale);
 	} else {
 		// Main power menu
 		int menuWidth = 180;
@@ -1384,6 +1535,8 @@ void SDLEventManager::RenderPowerMenu(SDL_Surface *screen)
 			SDL_MapRGB(screen->format, 80, 120, 200) :
 			SDL_MapRGB(screen->format, 200, 200, 200);
 		SDL_FillRect(screen, &exitRect, exitColor);
+		DrawSimOverlayText(screen,"Exit",exitRect.x + 10,exitRect.y + 8,
+			SDL_MapRGB(screen->format, powerMenuSelection_ == 0 ? 255 : 20, powerMenuSelection_ == 0 ? 255 : 20, powerMenuSelection_ == 0 ? 255 : 20),scale);
 
 		// Debug option
 		SDL_Rect debugRect = {menuBox.x + 10, itemY + itemHeight + 5, menuWidth - 20, itemHeight};
@@ -1391,6 +1544,8 @@ void SDLEventManager::RenderPowerMenu(SDL_Surface *screen)
 			SDL_MapRGB(screen->format, 80, 120, 200) :
 			SDL_MapRGB(screen->format, 200, 200, 200);
 		SDL_FillRect(screen, &debugRect, debugColor);
+		DrawSimOverlayText(screen,"Debug",debugRect.x + 10,debugRect.y + 8,
+			SDL_MapRGB(screen->format, powerMenuSelection_ == 1 ? 255 : 20, powerMenuSelection_ == 1 ? 255 : 20, powerMenuSelection_ == 1 ? 255 : 20),scale);
 	}
 }
 
@@ -1517,9 +1672,10 @@ void SDLEventManager::HandleDebugScreenInput(SDLKey key)
 	}
 }
 
-void SDLEventManager::RenderDebugScreen(SDL_Surface *screen)
+void SDLEventManager::RenderDebugScreen(SDL_Surface *screen, SDLGUIWindowImp *window)
 {
 	if (!showDebugScreen_ || !screen) return;
+	int scale = window ? window->GetScale() : 1;
 
 	// Fill entire screen with dark background
 	SDL_Rect fullScreen = {0, 0, screen->w, screen->h};
@@ -1539,6 +1695,7 @@ void SDLEventManager::RenderDebugScreen(SDL_Surface *screen)
 	// Title bar
 	SDL_Rect titleBar = {menuBox.x, menuBox.y, menuWidth, 30};
 	SDL_FillRect(screen, &titleBar, SDL_MapRGB(screen->format, 60, 60, 60));
+	DrawSimOverlayText(screen,"Debug",titleBar.x + 10,titleBar.y + 11,SDL_MapRGB(screen->format, 255, 255, 255),scale);
 
 	// Menu items
 	int itemHeight = 25;
@@ -1556,5 +1713,7 @@ void SDLEventManager::RenderDebugScreen(SDL_Surface *screen)
 			SDL_MapRGB(screen->format, 80, 120, 200) :
 			SDL_MapRGB(screen->format, 200, 200, 200);
 		SDL_FillRect(screen, &itemRect, itemColor);
+		DrawSimOverlayText(screen,items[i],itemRect.x + 6,itemRect.y + 8,
+			SDL_MapRGB(screen->format, debugScreenSelection_ == i ? 255 : 20, debugScreenSelection_ == i ? 255 : 20, debugScreenSelection_ == i ? 255 : 20),scale);
 	}
 }

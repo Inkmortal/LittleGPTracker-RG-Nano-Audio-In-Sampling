@@ -90,6 +90,8 @@ These are the important source-defined view transitions.
 flowchart LR
     Project["Project View"] -- "R + Down" --> Song["Song View"]
     Song -- "R + Up" --> Project
+    Song -- "R + Down" --> Mixer["Mixer View"]
+    Mixer -- "R + Up" --> Song
     Song -- "R + Right, if chain exists" --> Chain["Chain View"]
     Chain -- "R + Left" --> Song
     Chain -- "R + Right, if phrase exists" --> Phrase["Phrase View"]
@@ -126,6 +128,16 @@ flowchart LR
 | Start | Start playback. |
 | L + Start | Start current row. |
 | R + Start | Stop playback. |
+| R + Down | Open Mixer view. |
+
+## Mixer View
+
+| Input | Behavior |
+| --- | --- |
+| Left/Right | Move between mixer channels. |
+| R + Up | Return to Song view. |
+| R + Start | Stop playback. |
+| Start | Start song playback from the current song row. |
 
 ## Chain View
 

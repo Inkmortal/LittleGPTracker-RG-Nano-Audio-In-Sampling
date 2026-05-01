@@ -36,6 +36,11 @@ Player::Player() {
 		instrumentOnChannel_[i][0] = ' ';
 		instrumentOnChannel_[i][1] = ' ';
 		instrumentOnChannel_[i][2] = '\0';
+		liveQueueingMode_[i]=QM_NONE ;
+		liveQueuePosition_[i]=0 ;
+		liveQueueChainPosition_[i]=0 ;
+		timeToLive_[i]=0 ;
+		timeToStart_[i]=0 ;
 	}
 
 } ;
@@ -70,6 +75,13 @@ void Player::Reset() {
 	viewData_=0 ;
 	project_=0 ;
 	mixer_->RemoveObserver(*this) ;
+	for (int i=0;i<SONG_CHANNEL_COUNT;i++) {
+		liveQueueingMode_[i]=QM_NONE ;
+		liveQueuePosition_[i]=0 ;
+		liveQueueChainPosition_[i]=0 ;
+		timeToLive_[i]=0 ;
+		timeToStart_[i]=0 ;
+	}
 	Close() ;
 } ;
 

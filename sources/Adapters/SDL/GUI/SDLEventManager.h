@@ -25,8 +25,8 @@ public:
 	virtual int MainLoop() ;
 	virtual void PostQuitMessage() ;
 	virtual int GetKeyCode(const char *name) ;
-	void RenderPowerMenu(SDL_Surface *screen) ;
-	void RenderDebugScreen(SDL_Surface *screen) ;
+	void RenderPowerMenu(SDL_Surface *screen, SDLGUIWindowImp *window=0) ;
+	void RenderDebugScreen(SDL_Surface *screen, SDLGUIWindowImp *window=0) ;
 
 private:
 	static bool finished_ ;
@@ -66,6 +66,8 @@ private:
 	bool simScriptActive_;
 	bool simScriptFailed_;
 	void LoadSimScript();
+	bool AddSimScriptLine(const std::string &line, const char *scriptPath, int lineNumber);
+	bool AppendSimRoute(const std::string &routeName, const char *scriptPath, int lineNumber);
 	void ProcessSimScript(SDLGUIWindowImp *window);
 	bool HandleSimMouse(SDLGUIWindowImp *window, SDL_Event &event);
 	void SetSimKey(SDLGUIWindowImp *window, int key, bool pressed);

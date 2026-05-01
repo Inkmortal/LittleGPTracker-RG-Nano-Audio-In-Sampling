@@ -37,6 +37,8 @@ function Get-RGNanoSimRoutes {
 
   $routes["project.to_song"] = $routes["combo.r.down"]
   $routes["song.to_project"] = $routes["combo.r.up"]
+  $routes["song.to_mixer"] = $routes["combo.r.down"]
+  $routes["mixer.to_song"] = $routes["combo.r.up"]
   $routes["song.to_chain"] = $routes["combo.r.right"]
   $routes["chain.to_song"] = $routes["combo.r.left"]
   $routes["chain.to_phrase"] = $routes["combo.r.right"]

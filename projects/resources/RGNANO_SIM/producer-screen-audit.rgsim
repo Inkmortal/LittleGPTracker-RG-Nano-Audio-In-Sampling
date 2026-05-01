@@ -1,0 +1,127 @@
+# Producer screen audit:
+# Walk every core producer-facing RG Nano view, capture screenshots, and dump
+# state so cramped or ambiguous screens can be judged from the simulator logs.
+wait 500
+dump_state audit boot project selector
+screenshot audit-00-boot-project.bmp
+press r 80
+press a 80
+wait 200
+dump_state audit new project dialog
+screenshot audit-00-new-project.bmp
+press d 80
+press a 80
+press r 80
+press a 80
+wait 1000
+expect_view song
+dump_state audit song empty project
+screenshot audit-01-song.bmp
+expect_size 240 240
+expect_colors 3
+
+# Mixer must be reachable from Song through the real R+Down shortcut.
+route song.to_mixer
+wait 120
+expect_view mixer
+dump_state audit mixer
+screenshot audit-02-mixer.bmp
+route mixer.to_song
+wait 120
+expect_view song
+
+# Seed the minimum song/chain/phrase/instrument state using real controls.
+press a 80
+expect_song_chain 0 0 00
+dump_state audit song with chain
+screenshot audit-03-song-chain.bmp
+route song.to_chain
+wait 120
+expect_view chain
+dump_state audit chain empty
+screenshot audit-04-chain.bmp
+press a 80
+expect_chain_phrase 0 0 00
+dump_state audit chain with phrase
+screenshot audit-05-chain-phrase.bmp
+route chain.to_phrase
+wait 120
+expect_view phrase
+dump_state audit phrase empty
+screenshot audit-06-phrase.bmp
+press a 80
+expect_phrase_row_count 0 1
+dump_state audit phrase first note
+screenshot audit-07-phrase-note.bmp
+
+# Phrase-adjacent editing screens.
+route phrase.to_table
+wait 120
+expect_view table
+dump_state audit phrase table
+screenshot audit-08-table-phrase.bmp
+route table.to_parent
+wait 120
+expect_view phrase
+route phrase.to_groove
+wait 120
+expect_view groove
+dump_state audit groove
+screenshot audit-09-groove.bmp
+route groove.to_phrase
+wait 120
+expect_view phrase
+
+# Instrument and instrument table.
+route phrase.to_instrument
+wait 120
+expect_view instrument
+dump_state audit instrument sample parameters
+screenshot audit-10-instrument.bmp
+route instrument.to_table
+wait 120
+expect_view table
+dump_state audit instrument table
+screenshot audit-11-table-instrument.bmp
+route table.to_parent
+wait 120
+expect_view instrument
+
+# Sample import/listen modal, assuming rgnano-sim-data/samples exists.
+route instrument.open_sample_import
+wait 120
+dump_state audit sample import
+screenshot audit-12-sample-import.bmp
+expect_selected_text Listen
+route sample_import.exit
+wait 120
+expect_view instrument
+
+# Project/settings/render screen.
+route instrument.to_phrase
+wait 120
+expect_view phrase
+route phrase.to_chain
+wait 120
+expect_view chain
+route chain.to_song
+wait 120
+expect_view song
+route song.to_project
+wait 120
+expect_view project
+dump_state audit project settings render
+screenshot audit-13-project.bmp
+
+# Global power menu overlay should remain separate from tracker controls.
+press p 80
+wait 120
+dump_state audit power menu
+screenshot audit-14-power-menu.bmp
+expect_selected_text Exit
+press p 80
+wait 120
+expect_view project
+
+expect_no_error
+quit
