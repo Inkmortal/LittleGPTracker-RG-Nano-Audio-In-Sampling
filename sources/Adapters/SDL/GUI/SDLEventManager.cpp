@@ -9,6 +9,7 @@
 #include "Application/Views/BaseClasses/ViewEvent.h"
 #include <fstream>
 #include <sstream>
+#include <stdlib.h>
 
 bool SDLEventManager::finished_=false ;
 bool SDLEventManager::dumpEvent_=false ;
@@ -259,6 +260,8 @@ void SDLEventManager::LoadSimScript()
 		}
 		std::istringstream iss(line);
 		SimCommand command;
+		command.arg="";
+		command.arg2="";
 		command.value=0;
 		command.value2=0;
 		iss >> command.op;
@@ -272,8 +275,20 @@ void SDLEventManager::LoadSimScript()
 			if (command.value<=0) {
 				command.value=80;
 			}
-		} else if (command.op=="down" || command.op=="up" || command.op=="screenshot" || command.op=="log") {
+		} else if (command.op=="down" || command.op=="up" || command.op=="screenshot" || command.op=="log" || command.op=="expect_file") {
 			iss >> command.arg;
+		} else if (command.op=="click") {
+			iss >> command.value >> command.value2 >> command.arg;
+			if (command.arg.empty()) {
+				command.arg="80";
+			}
+		} else if (command.op=="expect_log") {
+			iss >> command.arg;
+			std::getline(iss,command.arg2);
+			if (!command.arg2.empty() && command.arg2[0]==' ') {
+				command.arg2.erase(0,1);
+			}
+		} else if (command.op=="expect_no_error") {
 		} else if (command.op=="expect_colors") {
 			iss >> command.value;
 		} else if (command.op=="expect_size") {
@@ -301,10 +316,7 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 	}
 
 	if (simPendingReleaseKey_>0) {
-		keyboardCS_->SetKey(simPendingReleaseKey_,false);
-		if (window && window->IsRGNanoSkinEnabled()) {
-			window->SetRGNanoButtonPressed(simPendingReleaseKey_,false);
-		}
+		SetSimKey(window,simPendingReleaseKey_,false);
 		Trace::Log("RGNANO_SIM","auto up key:%d",simPendingReleaseKey_);
 		simPendingReleaseKey_=0;
 		simCommandIndex_++;
@@ -328,10 +340,7 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 	if (command.op=="press") {
 		int key=GetKeyCode(command.arg.c_str());
 		if (key>0) {
-			keyboardCS_->SetKey(key,true);
-			if (window && window->IsRGNanoSkinEnabled()) {
-				window->SetRGNanoButtonPressed(key,true);
-			}
+			SetSimKey(window,key,true);
 			simPendingReleaseKey_=key;
 			simNextCommandTime_=now+(unsigned long)command.value;
 			Trace::Log("RGNANO_SIM","press %s",command.arg.c_str());
@@ -342,10 +351,7 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 	} else if (command.op=="down") {
 		int key=GetKeyCode(command.arg.c_str());
 		if (key>0) {
-			keyboardCS_->SetKey(key,true);
-			if (window && window->IsRGNanoSkinEnabled()) {
-				window->SetRGNanoButtonPressed(key,true);
-			}
+			SetSimKey(window,key,true);
 		} else {
 			FailSimScript("unknown key in down command");
 			return;
@@ -353,18 +359,45 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 	} else if (command.op=="up") {
 		int key=GetKeyCode(command.arg.c_str());
 		if (key>0) {
-			keyboardCS_->SetKey(key,false);
-			if (window && window->IsRGNanoSkinEnabled()) {
-				window->SetRGNanoButtonPressed(key,false);
-			}
+			SetSimKey(window,key,false);
 		} else {
 			FailSimScript("unknown key in up command");
 			return;
 		}
+	} else if (command.op=="click") {
+		int key=GetSimButtonAt(command.value,command.value2);
+		if (key>0) {
+			SetSimKey(window,key,true);
+			simPendingReleaseKey_=key;
+			simNextCommandTime_=now+(unsigned long)atoi(command.arg.c_str());
+			Trace::Log("RGNANO_SIM","click %d %d",command.value,command.value2);
+			return;
+		}
+		FailSimScript("click missed simulated button");
+		return;
 	} else if (command.op=="screenshot") {
 		SaveSimScreenshot(window,command.arg);
 	} else if (command.op=="quit") {
 		PostQuitMessage();
+	} else if (command.op=="expect_file") {
+		if (!ExpectSimFile(command.arg)) {
+			FailSimScript("file assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_log") {
+		std::string needle=command.arg;
+		if (!command.arg2.empty()) {
+			needle+=" "+command.arg2;
+		}
+		if (!ExpectSimLog(needle)) {
+			FailSimScript("log assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_no_error") {
+		if (!ExpectSimNoError()) {
+			FailSimScript("log error assertion failed");
+			return;
+		}
 	} else if (command.op=="expect_colors") {
 		if (!ExpectSimScreenColors(window,command.value)) {
 			FailSimScript("screen color assertion failed");
@@ -410,6 +443,14 @@ bool SDLEventManager::HandleSimMouse(SDLGUIWindowImp *window, SDL_Event &event)
 		}
 	}
 	return false;
+}
+
+void SDLEventManager::SetSimKey(SDLGUIWindowImp *window, int key, bool pressed)
+{
+	keyboardCS_->SetKey(key,pressed);
+	if (window && window->IsRGNanoSkinEnabled()) {
+		window->SetRGNanoButtonPressed(key,pressed);
+	}
 }
 
 int SDLEventManager::GetSimButtonAt(int x, int y)
@@ -462,6 +503,56 @@ void SDLEventManager::SaveSimScreenshot(SDLGUIWindowImp *window, const std::stri
 	} else {
 		Trace::Error("RGNANO_SIM failed screenshot %s",path.c_str());
 	}
+}
+
+bool SDLEventManager::ExpectSimFile(const std::string &path)
+{
+	if (path.empty()) {
+		Trace::Error("RGNANO_SIM expect_file missing path");
+		return false;
+	}
+	std::ifstream file(path.c_str(),std::ios::binary);
+	bool exists=file.good();
+	Trace::Log("RGNANO_SIM","expect_file %s => %s",path.c_str(),exists?"exists":"missing");
+	return exists;
+}
+
+bool SDLEventManager::ExpectSimLog(const std::string &needle)
+{
+	const char *logPath=Config::GetInstance()->GetValue("RGNANOSIM_LOG");
+	if (!logPath) {
+		logPath="rgnano-sim.log";
+	}
+	std::ifstream file(logPath);
+	if (!file.is_open()) {
+		Trace::Error("RGNANO_SIM expect_log failed to open %s",logPath);
+		return false;
+	}
+	std::stringstream buffer;
+	buffer << file.rdbuf();
+	std::string haystack=buffer.str();
+	bool found=haystack.find(needle)!=std::string::npos;
+	Trace::Log("RGNANO_SIM","expect_log %s in %s => %s",needle.c_str(),logPath,found?"found":"missing");
+	return found;
+}
+
+bool SDLEventManager::ExpectSimNoError()
+{
+	const char *logPath=Config::GetInstance()->GetValue("RGNANOSIM_LOG");
+	if (!logPath) {
+		logPath="rgnano-sim.log";
+	}
+	std::ifstream file(logPath);
+	if (!file.is_open()) {
+		Trace::Error("RGNANO_SIM expect_no_error failed to open %s",logPath);
+		return false;
+	}
+	std::stringstream buffer;
+	buffer << file.rdbuf();
+	std::string haystack=buffer.str();
+	bool clean=haystack.find("[*ERROR*]")==std::string::npos && haystack.find("ERROR") == std::string::npos;
+	Trace::Log("RGNANO_SIM","expect_no_error in %s => %s",logPath,clean?"clean":"error found");
+	return clean;
 }
 
 bool SDLEventManager::ExpectSimScreenSize(SDLGUIWindowImp *window, int width, int height)

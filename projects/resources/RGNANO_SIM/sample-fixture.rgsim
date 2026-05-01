@@ -1,0 +1,11 @@
+# Verify the simulator runner seeded a known-good WAV sample fixture.
+wait 500
+expect_file rgnano-sim-data/samples/rgnano-test-tone.wav
+expect_log Loaded
+click 250 372 100
+wait 100
+screenshot sample-fixture.bmp
+expect_size 240 240
+expect_colors 4
+expect_no_error
+quit

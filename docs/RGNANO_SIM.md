@@ -37,6 +37,7 @@ Running without a script opens the RG Nano skin by default. The skin has a 240x2
 .\tools\run-rgnano-sim.ps1 -Skin
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\smoke.rgsim
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\smoke.rgsim -Skin
+.\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\sample-fixture.rgsim -Skin -SeedSampleFixture -ArtifactsDir .\sim-artifacts
 ```
 
 ## Buttons
@@ -84,8 +85,20 @@ down m
 press q 80
 up m
 
+# click x y duration-ms
+click 250 372 100
+
 # SDL BMP screenshot
 screenshot smoke-song.bmp
+
+# fail unless a file exists
+expect_file rgnano-sim-data/samples/rgnano-test-tone.wav
+
+# fail unless the simulator log contains text
+expect_log Loaded
+
+# fail if the simulator log contains an error marker
+expect_no_error
 
 # fail unless the SDL surface is exactly 240x240
 expect_size 240 240
@@ -102,4 +115,10 @@ The canonical smoke test is:
 
 ```powershell
 .\run.ps1 -Task smoke
+```
+
+The sample fixture smoke test generates a tiny 440 Hz WAV file in `rgnano-sim-data/samples`, verifies it exists, checks the simulator log, exercises a skinned button click, captures a screenshot, and copies logs/screenshots into `sim-artifacts`:
+
+```powershell
+.\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\sample-fixture.rgsim -Skin -SeedSampleFixture -ArtifactsDir .\sim-artifacts
 ```

@@ -51,6 +51,7 @@ private:
 	struct SimCommand {
 		std::string op;
 		std::string arg;
+		std::string arg2;
 		int value;
 		int value2;
 	};
@@ -64,9 +65,13 @@ private:
 	void LoadSimScript();
 	void ProcessSimScript(SDLGUIWindowImp *window);
 	bool HandleSimMouse(SDLGUIWindowImp *window, SDL_Event &event);
+	void SetSimKey(SDLGUIWindowImp *window, int key, bool pressed);
 	int GetSimButtonAt(int x, int y);
 	void SaveSimScreenshot(SDLGUIWindowImp *window, const std::string &path);
 	void FailSimScript(const char *message);
+	bool ExpectSimFile(const std::string &path);
+	bool ExpectSimLog(const std::string &needle);
+	bool ExpectSimNoError();
 	bool ExpectSimScreenSize(SDLGUIWindowImp *window, int width, int height);
 	bool ExpectSimScreenColors(SDLGUIWindowImp *window, int minColors);
 	int CountSurfaceColors(SDL_Surface *surface, int maxColors);
