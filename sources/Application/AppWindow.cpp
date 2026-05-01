@@ -555,6 +555,23 @@ const char *AppWindow::GetCurrentViewName() const {
         return "null";
     return "unknown";
 }
+
+ViewData *AppWindow::GetViewData() const { return _viewData; }
+
+bool AppWindow::ScreenContains(const char *needle) const {
+    if (!needle || !needle[0]) {
+        return false;
+    }
+    char row[41];
+    for (int y = 0; y < 30; y++) {
+        memcpy(row, _charScreen + y * 40, 40);
+        row[40] = 0;
+        if (strstr(row, needle)) {
+            return true;
+        }
+    }
+    return false;
+}
 #endif
 
 void AppWindow::Update(Observable &o, I_ObservableData *d) {

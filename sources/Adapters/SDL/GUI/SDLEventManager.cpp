@@ -266,6 +266,7 @@ void SDLEventManager::LoadSimScript()
 		SimCommand command;
 		command.arg="";
 		command.arg2="";
+		command.arg3="";
 		command.value=0;
 		command.value2=0;
 		iss >> command.op;
@@ -281,6 +282,11 @@ void SDLEventManager::LoadSimScript()
 			}
 		} else if (command.op=="down" || command.op=="up" || command.op=="screenshot" || command.op=="log" || command.op=="expect_file" || command.op=="expect_project_sample" || command.op=="expect_view") {
 			iss >> command.arg;
+		} else if (command.op=="expect_screen_text") {
+			std::getline(iss,command.arg);
+			if (!command.arg.empty() && command.arg[0]==' ') {
+				command.arg.erase(0,1);
+			}
 		} else if (command.op=="click") {
 			iss >> command.value >> command.value2 >> command.arg;
 			if (command.arg.empty()) {
@@ -297,6 +303,10 @@ void SDLEventManager::LoadSimScript()
 			iss >> command.value;
 		} else if (command.op=="expect_audio_activity") {
 			iss >> command.value;
+		} else if (command.op=="expect_song_chain" || command.op=="expect_chain_phrase") {
+			iss >> command.value >> command.value2 >> command.arg;
+		} else if (command.op=="expect_phrase_row_count") {
+			iss >> command.value >> command.value2;
 		} else if (command.op=="expect_size") {
 			iss >> command.value >> command.value2;
 		}
@@ -420,6 +430,26 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 	} else if (command.op=="expect_audio_activity") {
 		if (!ExpectSimAudioActivity(command.value)) {
 			FailSimScript("audio activity assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_screen_text") {
+		if (!ExpectSimScreenText(command.arg)) {
+			FailSimScript("screen text assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_song_chain") {
+		if (!ExpectSimSongChain(command.value,command.value2,command.arg)) {
+			FailSimScript("song chain assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_chain_phrase") {
+		if (!ExpectSimChainPhrase(command.value,command.value2,command.arg)) {
+			FailSimScript("chain phrase assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_phrase_row_count") {
+		if (!ExpectSimPhraseRowCount(command.value,command.value2)) {
+			FailSimScript("phrase row count assertion failed");
 			return;
 		}
 	} else if (command.op=="expect_colors") {
@@ -620,6 +650,80 @@ bool SDLEventManager::ExpectSimAudioActivity(int minPeak)
 		Trace::Error("RGNANO_SIM audio activity assertion failed");
 	}
 	return active;
+}
+
+bool SDLEventManager::ExpectSimScreenText(const std::string &needle)
+{
+	GUIWindow *guiWindow=Application::GetInstance()->GetWindow();
+	AppWindow *appWindow=(AppWindow *)guiWindow;
+	bool found=appWindow && appWindow->ScreenContains(needle.c_str());
+	Trace::Log("RGNANO_SIM","expect_screen_text %s => %s",needle.c_str(),found?"found":"missing");
+	if (!found) {
+		Trace::Error("RGNANO_SIM expected screen text %s",needle.c_str());
+	}
+	return found;
+}
+
+static bool ParseSimExpectedByte(const std::string &expected, unsigned char actual)
+{
+	if (expected=="any") {
+		return actual!=0xFF;
+	}
+	char *end=0;
+	long value=strtol(expected.c_str(),&end,16);
+	return end && *end==0 && value>=0 && value<=0xFF && actual==(unsigned char)value;
+}
+
+bool SDLEventManager::ExpectSimSongChain(int row, int channel, const std::string &expected)
+{
+	GUIWindow *guiWindow=Application::GetInstance()->GetWindow();
+	AppWindow *appWindow=(AppWindow *)guiWindow;
+	ViewData *viewData=appWindow ? appWindow->GetViewData() : 0;
+	if (!viewData || !viewData->song_ || row<0 || row>=SONG_ROW_COUNT || channel<0 || channel>=SONG_CHANNEL_COUNT) {
+		Trace::Error("RGNANO_SIM expect_song_chain invalid args row=%d channel=%d",row,channel);
+		return false;
+	}
+	unsigned char actual=*(viewData->song_->data_ + channel + SONG_CHANNEL_COUNT * row);
+	bool matches=ParseSimExpectedByte(expected,actual);
+	Trace::Log("RGNANO_SIM","expect_song_chain row=%d channel=%d actual=%02X expected=%s => %s",row,channel,actual,expected.c_str(),matches?"match":"mismatch");
+	return matches;
+}
+
+bool SDLEventManager::ExpectSimChainPhrase(int chain, int row, const std::string &expected)
+{
+	GUIWindow *guiWindow=Application::GetInstance()->GetWindow();
+	AppWindow *appWindow=(AppWindow *)guiWindow;
+	ViewData *viewData=appWindow ? appWindow->GetViewData() : 0;
+	if (!viewData || !viewData->song_ || chain<0 || chain>=CHAIN_COUNT || row<0 || row>=16) {
+		Trace::Error("RGNANO_SIM expect_chain_phrase invalid args chain=%d row=%d",chain,row);
+		return false;
+	}
+	unsigned char actual=*(viewData->song_->chain_->data_ + 16 * chain + row);
+	bool matches=ParseSimExpectedByte(expected,actual);
+	Trace::Log("RGNANO_SIM","expect_chain_phrase chain=%d row=%d actual=%02X expected=%s => %s",chain,row,actual,expected.c_str(),matches?"match":"mismatch");
+	return matches;
+}
+
+bool SDLEventManager::ExpectSimPhraseRowCount(int phrase, int minRows)
+{
+	GUIWindow *guiWindow=Application::GetInstance()->GetWindow();
+	AppWindow *appWindow=(AppWindow *)guiWindow;
+	ViewData *viewData=appWindow ? appWindow->GetViewData() : 0;
+	if (!viewData || !viewData->song_ || phrase<0 || phrase>=PHRASE_COUNT || minRows<0) {
+		Trace::Error("RGNANO_SIM expect_phrase_row_count invalid args phrase=%d minRows=%d",phrase,minRows);
+		return false;
+	}
+	int count=0;
+	for (int row=0; row<16; row++) {
+		unsigned char note=*(viewData->song_->phrase_->note_ + 16 * phrase + row);
+		unsigned char instr=*(viewData->song_->phrase_->instr_ + 16 * phrase + row);
+		if (note!=0xFF && instr!=0xFF) {
+			count++;
+		}
+	}
+	bool matches=count>=minRows;
+	Trace::Log("RGNANO_SIM","expect_phrase_row_count phrase=%d count=%d min=%d => %s",phrase,count,minRows,matches?"match":"mismatch");
+	return matches;
 }
 
 bool SDLEventManager::ExpectSimScreenSize(SDLGUIWindowImp *window, int width, int height)

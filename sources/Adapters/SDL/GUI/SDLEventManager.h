@@ -52,6 +52,7 @@ private:
 		std::string op;
 		std::string arg;
 		std::string arg2;
+		std::string arg3;
 		int value;
 		int value2;
 	};
@@ -75,6 +76,10 @@ private:
 	bool ExpectSimNoError();
 	bool ExpectSimView(const std::string &viewName);
 	bool ExpectSimAudioActivity(int minPeak);
+	bool ExpectSimScreenText(const std::string &needle);
+	bool ExpectSimSongChain(int row, int channel, const std::string &expected);
+	bool ExpectSimChainPhrase(int chain, int row, const std::string &expected);
+	bool ExpectSimPhraseRowCount(int phrase, int minRows);
 	bool ExpectSimScreenSize(SDLGUIWindowImp *window, int width, int height);
 	bool ExpectSimScreenColors(SDLGUIWindowImp *window, int minColors);
 	int CountSurfaceColors(SDL_Surface *surface, int maxColors);

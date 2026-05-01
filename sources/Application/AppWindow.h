@@ -37,6 +37,8 @@ class AppWindow : public GUIWindow, I_Observer, Status {
     void SetDirty();
 #ifdef PLATFORM_RGNANO_SIM
     const char *GetCurrentViewName() const;
+    ViewData *GetViewData() const;
+    bool ScreenContains(const char *needle) const;
 #endif
 
   protected: // GUIWindow implementation
