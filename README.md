@@ -4,7 +4,7 @@
 
 This is an experimental **LittleGPTracker / Little Piggy Tracker** fork for the **Anbernic RG Nano**.
 
-The goal is to turn the RG Nano into a tiny, serious tracker workstation: compose with LGPT-style sequencing, import and manage samples, refine the 240x240 interface for the actual device, and test changes through a desktop simulator before copying builds to hardware.
+The goal is to elevate the RG Nano into a tiny, serious tracker workstation comparable in creative ambition to the **Dirtywave M8**: compose with LGPT-style sequencing, import and manage samples, refine the 240x240 interface for the actual device, and test changes through a desktop simulator before copying builds to hardware.
 
 This is not a Dirtywave M8 firmware clone. It is a native RG Nano fork of LGPT aimed at a similar pocket-production role: the Nano acts as the final arrangement and production box for sketches made on small devices such as a PO-33, chord/synth gadgets, or prepared sample packs.
 
