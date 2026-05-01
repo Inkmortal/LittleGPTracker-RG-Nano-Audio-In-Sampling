@@ -16,6 +16,10 @@
  #include "Application/Commands/EventDispatcher.h"
 #endif
 
+#ifdef PLATFORM_RGNANO
+ #include "SDLEventManager.h"
+#endif
+
 SDLGUIWindowImp *instance_ ;
 
 #ifdef _SHOW_GP2X_
@@ -46,7 +50,7 @@ int gp2xAnchorY=90 ;
 
 #endif
 
-#ifdef PLATFORM_RGNANO
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
 unsigned short appWidth = 240;
 unsigned short appHeight = 240;
 #else
@@ -642,6 +646,13 @@ void SDLGUIWindowImp::Unlock()
 
 void SDLGUIWindowImp::Flush()
 {
+#ifdef PLATFORM_RGNANO
+    // Render power menu overlay if active
+    SDLEventManager::GetInstance()->RenderPowerMenu(screen_);
+    // Render debug screen overlay if active
+    SDLEventManager::GetInstance()->RenderDebugScreen(screen_);
+#endif
+
 #ifdef BUFFERED
     // flip front and back buffers in hardware
     SDL_Flip(screen_);

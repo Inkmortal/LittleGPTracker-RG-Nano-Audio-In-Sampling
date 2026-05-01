@@ -1,6 +1,10 @@
 
 #include "W32FileSystem.h"
+#ifdef PLATFORM_RGNANO_SIM
+#include "Adapters/RGNANO_SIM/System/RGNanoSimSystem.h"
+#else
 #include "Adapters/WSDLSystem/WSDLSystem.h"
+#endif
 #include "System/Console/Trace.h"
 #include <windows.h>
 #include <string.h>
@@ -109,7 +113,11 @@ Result W32FileSystem::MakeDir(const char *path) {
 	BOOL success = CreateDirectory(path,NULL) ;
   if (!success)
   {
+#ifdef PLATFORM_RGNANO_SIM
+    std::string error = RGNanoSimSystem::SGetLastErrorString();
+#else
     std::string error = WSDLSystem::SGetLastErrorString();
+#endif
     return Result(error);
   }
   return Result::NoError;

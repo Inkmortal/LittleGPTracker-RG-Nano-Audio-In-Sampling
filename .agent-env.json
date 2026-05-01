@@ -1,0 +1,21 @@
+﻿{
+    "generatedAt":  "2026-03-31T11:18:57.3224899-07:00",
+    "projectRoot":  ".",
+    "useWSL":  false,
+    "defaultApp":  "rgnano-sim",
+    "apps":  [
+                 {
+                     "id":  "rgnano-sim",
+                     "type":  "manual",
+                     "path":  ".",
+                     "setupCommands":  [
+
+                                       ],
+                     "tasks":  {
+                                   "dev":  "powershell -NoProfile -ExecutionPolicy Bypass -File .\\tools\\build-rgnano-sim.ps1",
+                                   "smoke":  "powershell -NoProfile -ExecutionPolicy Bypass -File .\\tools\\run-rgnano-sim.ps1 -Script .\\projects\\resources\\RGNANO_SIM\\smoke.rgsim",
+                                   "info":  "RG Nano simulator: use .\\run.ps1 -Task dev to build, .\\run.ps1 -Task smoke to run scripted smoke test."
+                               }
+                 }
+             ]
+}

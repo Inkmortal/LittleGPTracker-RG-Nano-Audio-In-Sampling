@@ -1,0 +1,4 @@
+# Boot, let initial project screen settle, capture, then quit.
+wait 1000
+screenshot smoke-boot.bmp
+quit

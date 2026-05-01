@@ -1,0 +1,17 @@
+include $(PWD)/rules_base
+
+DEFINES := \
+	-DPLATFORM_RGNANO_SIM \
+	-DCPP_MEMORY \
+	-D_DEBUG \
+	-DDEBUG
+
+TOOLPATH=/mingw32/bin
+PREFIX :=
+
+CFLAGS	:= -mthreads -g -Wall $(INCLUDES) $(DEFINES) -I$(PWD)/../sources -I$(PWD)/../sources/Externals
+CXXFLAGS:= $(CFLAGS) -std=gnu++03
+LDFLAGS := -L../../libs/Wsdl-mingw
+LIBS     :=  -lmingw32 -lSDL -luser32 -lgdi32 -lwinmm -ldxguid
+OUTPUT   := ../lgpt-rgnano-sim
+EXTENSION:= exe

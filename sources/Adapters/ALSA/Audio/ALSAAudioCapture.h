@@ -1,9 +1,14 @@
 #ifndef ALSA_AUDIO_CAPTURE_H
 #define ALSA_AUDIO_CAPTURE_H
 
-#include <alsa/asoundlib.h>
 #include <string>
 #include <vector>
+
+#ifndef PLATFORM_RGNANO_SIM
+#include <alsa/asoundlib.h>
+#else
+typedef void snd_pcm_t;
+#endif
 
 #define MAX_RECORDING_SECONDS 30
 #define WAVEFORM_BUFFER_SIZE 320  // Width of screen for waveform display

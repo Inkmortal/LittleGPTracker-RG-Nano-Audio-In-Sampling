@@ -478,6 +478,35 @@ W32FILES := \
 	GUIFactory.o \
 	WSDLGUIWindowImp.o
 
+RGNANO_SIMDIRS := \
+	../sources/Adapters/RGNANO_SIM/Main \
+	../sources/Adapters/RGNANO_SIM/System \
+	../sources/Adapters/W32FileSystem \
+	../sources/Adapters/W32/Process \
+	../sources/Adapters/W32/Audio \
+	../sources/Adapters/W32/Timer \
+	../sources/Adapters/Dummy/Midi \
+	../sources/Adapters/SDL/Audio \
+	../sources/Adapters/RGNANO_SIM/Audio \
+	../sources/Adapters/SDL/GUI \
+	../sources/System/Process
+
+RGNANO_SIMFILES := \
+	RGNanoSimMain.o \
+	RGNanoSimSystem.o \
+	W32FileSystem.o \
+	W32Process.o \
+	W32AudioDriver.o \
+	W32Audio.o \
+	W32Timer.o \
+	DummyMidi.o \
+	SDLAudioDriver.o \
+	ALSAAudioCapture.o \
+	GUIFactory.o \
+	SDLEventManager.o \
+	SDLGUIWindowImp.o \
+	Process.o
+
 #---------------------------------------------------------------------------------
 # TARGET is the name of the output
 # BUILD is the directory where object files & intermediate files will be placed

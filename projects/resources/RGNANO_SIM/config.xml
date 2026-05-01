@@ -1,0 +1,22 @@
+<CONFIG>
+	<ROOTFOLDER value="./rgnano-sim-data/tracks"/>
+	<SAMPLELIB value="./rgnano-sim-data/samples"/>
+	<AUDIOAPI value="MMSYSTEM"/>
+	<AUDIOBUFFERSIZE value="512"/>
+	<SCREENMULT value="2"/>
+	<CHANNELMODE value="SPLIT"/>
+	<DUMPEVENT value="YES"/>
+	<KEY_A value="a"/>
+	<KEY_B value="b"/>
+	<KEY_LEFT value="l"/>
+	<KEY_RIGHT value="r"/>
+	<KEY_DOWN value="d"/>
+	<KEY_UP value="u"/>
+	<KEY_LSHOULDER value="m"/>
+	<KEY_RSHOULDER value="n"/>
+	<KEY_START value="s"/>
+	<KEY_SELECT value="q"/>
+	<KEYDELAY value="200"/>
+	<KEYREPEAT value="100"/>
+	<FONTTYPE value="0"/>
+</CONFIG>

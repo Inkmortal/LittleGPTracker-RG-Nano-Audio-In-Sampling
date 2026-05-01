@@ -41,6 +41,7 @@ public: // Added functionality
 	void ProcessExpose() ;
 	void ProcessQuit() ;
 	void ProcessUserEvent(SDL_Event &event) ;
+	SDL_Surface* GetSurface() { return screen_; }
 protected:
 	void prepareFonts() ;
 	void prepareFullFonts() ;
