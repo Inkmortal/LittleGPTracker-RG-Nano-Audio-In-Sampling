@@ -1,0 +1,61 @@
+# Producer navigation tour:
+# exercise the core tracker view cycle using RG Nano button routes, after
+# creating enough song/chain/phrase data for each destination to be meaningful.
+route boot.new_project_random
+expect_view song
+press a 80
+expect_song_chain 0 0 00
+route song.to_chain
+wait 120
+expect_view chain
+press a 80
+expect_chain_phrase 0 0 00
+route chain.to_phrase
+wait 120
+expect_view phrase
+press a 80
+expect_phrase_row_count 0 1
+
+route phrase.to_table
+wait 120
+expect_view table
+route table.to_parent
+wait 120
+expect_view phrase
+
+route phrase.to_groove
+wait 120
+expect_view groove
+route groove.to_phrase
+wait 120
+expect_view phrase
+
+route phrase.to_instrument
+wait 120
+expect_view instrument
+route instrument.to_table
+wait 120
+expect_view table
+route table.to_instrument_table
+wait 120
+expect_view table
+route instrument_table.to_table
+wait 120
+expect_view table
+route table.to_parent
+wait 120
+expect_view phrase
+route phrase.to_chain
+wait 120
+expect_view chain
+route chain.to_song
+wait 120
+expect_view song
+route song.to_project
+wait 120
+expect_view project
+screenshot producer-navigation-tour.bmp
+expect_size 240 240
+expect_colors 3
+expect_no_error
+quit

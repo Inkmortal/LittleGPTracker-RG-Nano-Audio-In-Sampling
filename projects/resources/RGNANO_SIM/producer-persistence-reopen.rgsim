@@ -1,0 +1,48 @@
+# Producer persistence reopen:
+# rely on AUTO_LOAD_LAST, confirm saved arrangement/sample bindings survived
+# relaunch, then play and capture audio from the reopened project.
+wait 1200
+expect_view song
+expect_tempo 86
+
+expect_instrument_sample 0 lofi-kick.wav
+expect_instrument_sample 1 lofi-snare.wav
+expect_instrument_sample 2 lofi-hat.wav
+expect_instrument_sample 3 lofi-chord.wav
+expect_instrument_sample 4 wuxia-guzheng.wav
+expect_instrument_sample 5 wuxia-dizi.wav
+expect_instrument_sample 6 wuxia-erhu.wav
+expect_instrument_sample 7 wuxia-drum.wav
+
+expect_project_sample lofi-kick.wav
+expect_project_sample lofi-snare.wav
+expect_project_sample lofi-hat.wav
+expect_project_sample lofi-chord.wav
+expect_project_sample wuxia-guzheng.wav
+expect_project_sample wuxia-dizi.wav
+expect_project_sample wuxia-erhu.wav
+expect_project_sample wuxia-drum.wav
+
+expect_song_chain 0 0 00
+expect_song_chain 0 7 07
+expect_chain_phrase 0 0 00
+expect_chain_phrase 7 0 07
+expect_phrase_row_count 4 4
+expect_phrase_row_count 5 2
+expect_phrase_row_count 6 2
+
+reset_audio_stats
+start_audio_capture producer-persistence-reopen.wav
+press s 80
+wait 3000
+expect_audio_activity 64
+expect_audio_capture_bytes 240000
+end_audio_capture
+route song.to_chain
+wait 120
+expect_view chain
+screenshot producer-persistence-reopen.bmp
+expect_size 240 240
+expect_colors 3
+expect_no_error
+quit

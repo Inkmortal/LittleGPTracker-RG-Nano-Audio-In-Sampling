@@ -52,6 +52,13 @@ The Wuxia/donghua lofi studio workflow imports that palette, programs an 8-chann
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\wuxia-lofi-studio.rgsim -ResetLastProject -SeedLofiFixture -Skin -ArtifactsDir .\sim-artifacts-wuxia-lofi
 ```
 
+The producer persistence pair creates a multi-instrument project, saves it, relaunches through `AUTO_LOAD_LAST`, verifies tempo/song/chain/phrase/sample bindings, and captures audio from the reopened project:
+
+```powershell
+.\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\producer-persistence-create.rgsim -ResetLastProject -SeedLofiFixture -Skin -ArtifactsDir .\sim-artifacts-producer-persist-create
+.\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\producer-persistence-reopen.rgsim -Skin -ArtifactsDir .\sim-artifacts-producer-persist-reopen
+```
+
 ## Buttons
 
 | RG Nano | Simulator key |
@@ -124,6 +131,8 @@ expect_screen_text 1######
 expect_song_chain 0 0 00
 expect_chain_phrase 0 0 00
 expect_phrase_row_count 0 8
+expect_tempo 86
+expect_instrument_sample 4 wuxia-guzheng.wav
 
 # directly program tracker state for long producer workflows
 sim_set_tempo 82
@@ -131,6 +140,7 @@ sim_import_sample_to_instrument 3 wuxia-guzheng.wav
 sim_set_song_chain 0 3 3
 sim_set_chain_phrase 3 0 3 0
 sim_set_phrase_note 3 0 50 3
+sim_save_project
 
 # reset and assert measured non-silent tracker audio output
 reset_audio_stats
@@ -202,4 +212,10 @@ The demo-song workflow drives the real RG Nano controls to create a song, chain,
 
 ```powershell
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\demo-song-workflow.rgsim -ResetLastProject -SeedSampleFixture -Skin -ArtifactsDir .\sim-artifacts
+```
+
+The producer navigation tour exercises the main RG Nano view routes after creating song/chain/phrase state:
+
+```powershell
+.\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\producer-navigation-tour.rgsim -ResetLastProject -Skin -ArtifactsDir .\sim-artifacts
 ```

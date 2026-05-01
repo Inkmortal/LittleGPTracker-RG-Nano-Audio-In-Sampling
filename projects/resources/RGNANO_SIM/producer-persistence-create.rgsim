@@ -1,0 +1,74 @@
+# Producer persistence setup:
+# create a new project, import the full lofi/Wuxia palette, program a compact
+# multi-track arrangement, save it, and verify the save file exists.
+route boot.new_project_random
+expect_view song
+
+sim_set_tempo 86
+sim_import_sample_to_instrument 0 lofi-kick.wav
+sim_import_sample_to_instrument 1 lofi-snare.wav
+sim_import_sample_to_instrument 2 lofi-hat.wav
+sim_import_sample_to_instrument 3 lofi-chord.wav
+sim_import_sample_to_instrument 4 wuxia-guzheng.wav
+sim_import_sample_to_instrument 5 wuxia-dizi.wav
+sim_import_sample_to_instrument 6 wuxia-erhu.wav
+sim_import_sample_to_instrument 7 wuxia-drum.wav
+
+expect_instrument_sample 0 lofi-kick.wav
+expect_instrument_sample 1 lofi-snare.wav
+expect_instrument_sample 2 lofi-hat.wav
+expect_instrument_sample 3 lofi-chord.wav
+expect_instrument_sample 4 wuxia-guzheng.wav
+expect_instrument_sample 5 wuxia-dizi.wav
+expect_instrument_sample 6 wuxia-erhu.wav
+expect_instrument_sample 7 wuxia-drum.wav
+
+sim_set_song_chain 0 0 0
+sim_set_song_chain 0 1 1
+sim_set_song_chain 0 2 2
+sim_set_song_chain 0 3 3
+sim_set_song_chain 0 4 4
+sim_set_song_chain 0 5 5
+sim_set_song_chain 0 6 6
+sim_set_song_chain 0 7 7
+
+sim_set_chain_phrase 0 0 0 0
+sim_set_chain_phrase 1 0 1 0
+sim_set_chain_phrase 2 0 2 0
+sim_set_chain_phrase 3 0 3 0
+sim_set_chain_phrase 4 0 4 0
+sim_set_chain_phrase 5 0 5 0
+sim_set_chain_phrase 6 0 6 0
+sim_set_chain_phrase 7 0 7 0
+
+sim_set_phrase_note 0 0 48 0
+sim_set_phrase_note 0 8 48 0
+sim_set_phrase_note 1 4 50 1
+sim_set_phrase_note 1 12 50 1
+sim_set_phrase_note 2 2 72 2
+sim_set_phrase_note 2 6 72 2
+sim_set_phrase_note 2 10 72 2
+sim_set_phrase_note 2 14 72 2
+sim_set_phrase_note 3 0 45 3
+sim_set_phrase_note 3 8 52 3
+sim_set_phrase_note 4 0 50 4
+sim_set_phrase_note 4 4 53 4
+sim_set_phrase_note 4 8 57 4
+sim_set_phrase_note 4 12 60 4
+sim_set_phrase_note 5 0 74 5
+sim_set_phrase_note 5 8 72 5
+sim_set_phrase_note 6 0 50 6
+sim_set_phrase_note 6 8 57 6
+sim_set_phrase_note 7 0 43 7
+sim_set_phrase_note 7 8 43 7
+
+expect_tempo 86
+expect_song_chain 0 7 07
+expect_chain_phrase 7 0 07
+expect_phrase_row_count 4 4
+sim_save_project
+screenshot producer-persistence-create.bmp
+expect_size 240 240
+expect_colors 3
+expect_no_error
+quit

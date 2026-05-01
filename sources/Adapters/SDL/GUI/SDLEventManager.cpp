@@ -5,6 +5,7 @@
 #include "Application/Instruments/InstrumentBank.h"
 #include "Application/Instruments/SampleInstrument.h"
 #include "Application/Instruments/SamplePool.h"
+#include "Application/Persistency/PersistencyService.h"
 #include "System/FileSystem/FileSystem.h"
 #include "UIFramework/BasicDatas/GUIEvent.h"
 #include "SDLGUIWindowImp.h"
@@ -314,6 +315,10 @@ void SDLEventManager::LoadSimScript()
 			iss >> command.value >> command.value2 >> command.arg;
 		} else if (command.op=="expect_phrase_row_count") {
 			iss >> command.value >> command.value2;
+		} else if (command.op=="expect_tempo") {
+			iss >> command.value;
+		} else if (command.op=="expect_instrument_sample") {
+			iss >> command.value >> command.arg;
 		} else if (command.op=="sim_set_tempo") {
 			iss >> command.value;
 		} else if (command.op=="sim_import_sample_to_instrument") {
@@ -324,6 +329,7 @@ void SDLEventManager::LoadSimScript()
 			iss >> command.value >> command.value2 >> command.arg >> command.arg2;
 		} else if (command.op=="sim_set_phrase_note") {
 			iss >> command.value >> command.value2 >> command.arg >> command.arg2;
+		} else if (command.op=="sim_save_project") {
 		} else if (command.op=="expect_size") {
 			iss >> command.value >> command.value2;
 		}
@@ -481,6 +487,16 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 			FailSimScript("phrase row count assertion failed");
 			return;
 		}
+	} else if (command.op=="expect_tempo") {
+		if (!ExpectSimTempo(command.value)) {
+			FailSimScript("tempo assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_instrument_sample") {
+		if (!ExpectSimInstrumentSample(command.value,command.arg)) {
+			FailSimScript("instrument sample assertion failed");
+			return;
+		}
 	} else if (command.op=="sim_set_tempo") {
 		if (!SimSetTempo(command.value)) {
 			FailSimScript("tempo setup failed");
@@ -504,6 +520,11 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 	} else if (command.op=="sim_set_phrase_note") {
 		if (!SimSetPhraseNote(command.value,command.value2,atoi(command.arg.c_str()),atoi(command.arg2.c_str()))) {
 			FailSimScript("phrase setup failed");
+			return;
+		}
+	} else if (command.op=="sim_save_project") {
+		if (!SimSaveProject()) {
+			FailSimScript("project save failed");
 			return;
 		}
 	} else if (command.op=="expect_colors") {
@@ -803,6 +824,39 @@ static ViewData *GetSimViewData()
 	return appWindow ? appWindow->GetViewData() : 0;
 }
 
+bool SDLEventManager::ExpectSimTempo(int bpm)
+{
+	ViewData *viewData=GetSimViewData();
+	if (!viewData || !viewData->project_) {
+		Trace::Error("RGNANO_SIM expect_tempo has no project");
+		return false;
+	}
+	Variable *tempo=viewData->project_->FindVariable(VAR_TEMPO);
+	if (!tempo) {
+		Trace::Error("RGNANO_SIM expect_tempo missing tempo variable");
+		return false;
+	}
+	int actual=tempo->GetInt();
+	bool matches=(actual==bpm);
+	Trace::Log("RGNANO_SIM","expect_tempo actual=%d expected=%d => %s",actual,bpm,matches?"match":"mismatch");
+	return matches;
+}
+
+bool SDLEventManager::ExpectSimInstrumentSample(int instrument, const std::string &sampleName)
+{
+	ViewData *viewData=GetSimViewData();
+	if (!viewData || !viewData->project_ || instrument<0 || instrument>=MAX_SAMPLEINSTRUMENT_COUNT || sampleName.empty()) {
+		Trace::Error("RGNANO_SIM expect_instrument_sample invalid args instrument=%d sample=%s",instrument,sampleName.c_str());
+		return false;
+	}
+	InstrumentBank *bank=viewData->project_->GetInstrumentBank();
+	SampleInstrument *sampleInstrument=(SampleInstrument *)bank->GetInstrument(instrument);
+	const char *actual=sampleInstrument->GetFileName();
+	bool matches=(actual && sampleName==actual);
+	Trace::Log("RGNANO_SIM","expect_instrument_sample inst=%d actual=%s expected=%s => %s",instrument,actual?actual:"(null)",sampleName.c_str(),matches?"match":"mismatch");
+	return matches;
+}
+
 bool SDLEventManager::SimSetTempo(int bpm)
 {
 	ViewData *viewData=GetSimViewData();
@@ -885,6 +939,18 @@ bool SDLEventManager::SimSetPhraseNote(int phrase, int row, int note, int instru
 	*(viewData->song_->phrase_->instr_ + 16 * phrase + row)=(unsigned char)instrument;
 	viewData->song_->phrase_->SetUsed((unsigned char)phrase);
 	Trace::Log("RGNANO_SIM","sim_set_phrase_note phrase=%02X row=%d note=%d instrument=%02X",phrase,row,note,instrument);
+	return true;
+}
+
+bool SDLEventManager::SimSaveProject()
+{
+	ViewData *viewData=GetSimViewData();
+	if (!viewData || !viewData->project_) {
+		Trace::Error("RGNANO_SIM sim_save_project has no project");
+		return false;
+	}
+	PersistencyService::GetInstance()->Save();
+	Trace::Log("RGNANO_SIM","sim_save_project");
 	return true;
 }
 
