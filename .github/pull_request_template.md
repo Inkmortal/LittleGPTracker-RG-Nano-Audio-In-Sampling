@@ -1,8 +1,10 @@
 # Description
 
-Thank you for contributing to Little Piggy Tracker!
-For fixes, please include a summary of the changes and any related issue.
-For features, please include a detailed description of the new feature and how it works.
+This RG Nano fork is maintainer-directed and is not generally accepting unsolicited changes.
+Small, focused fixes may still be considered.
+
+For fixes, please include a summary of the changes and the RG Nano or simulator behavior affected.
+For features, please include a detailed description of the new feature and how it works on RG Nano hardware or in the simulator.
 
 All PR:s are run through line-by-line clang-format and builds for all supported platforms.
 clang-format can be applied locally on commit by installing pre-commit from repo root:

@@ -1,18 +1,42 @@
-# Little Piggy Tracker
+# LittleGPTracker RG Nano Audio-In/Sampling Fork
 
 ![Piggy](https://github.com/user-attachments/assets/827fc87f-7751-48ae-9de1-60a5d9a3b5c2)
 
-**Little Piggy Tracker** (f.k.a _'LittleGPTracker'_) is a music tracker optimised to run on portable game consoles. It is currently running on Windows, MacOS (intel/arm) & Linux, PSP, Miyoo Mini, and a collection of other retro gaming handhelds.
+This repository is an experimental RG Nano-focused fork of **Little Piggy Tracker** / **LittleGPTracker**, a music tracker optimized for portable game consoles.
 
-It implements the user interface of [littlesounddj](https://www.littlesounddj.com/lsd/index.php) and precedes [M8 tracker](https://www.dirtywave.com), two popular trackers greatly loved in the tracker community.
+The goal of this fork is to turn the RG Nano into a tiny, practical music-production device: tracker sequencing, sample-based composition, RG Nano UI/audio improvements, and a desktop simulator so changes can be tested before copying builds to hardware.
 
-All versions are available for free under the [GPLv3 License](LICENSE). If you like the project and want to contribute, don't hesitate to make a pull request for this repo.
+## Current Focus
+
+- RG Nano builds and packaging
+- audio input / sampling workflow experiments
+- sample import and project workflow improvements
+- 240x240 tracker UI refinements
+- RG Nano simulator build for scripted desktop smoke tests
+
+For the simulator, see [docs/RGNANO_SIM.md](docs/RGNANO_SIM.md).
 
 ## About This Fork
 
-This build is derivative of the work of the original author `m-.-n`
-aka [Marc Nostromo](https://github.com/Mdashdotdashn/LittleGPTracker).
-The original work and releasing the source code has laid the foundation for everything in this repo.
+This repository is a fork of [djdiskmachine/LittleGPTracker](https://github.com/djdiskmachine/LittleGPTracker), which is itself derived from the original work by `m-.-n`, aka [Marc Nostromo](https://github.com/Mdashdotdashn/LittleGPTracker).
+
+That upstream work made this RG Nano experiment possible. This fork keeps the upstream license notices and adds project-specific RG Nano changes on top.
+
+## Public Repository Policy
+
+This repository is public so users can inspect the source, build the RG Nano version, follow development, and preserve the legal freedoms granted by the upstream licenses.
+
+This particular fork is maintainer-directed. Issues are disabled, and unsolicited pull requests are not the preferred way to propose changes. If you want to experiment heavily, please do it in your own fork, as permitted by the license. Changes may or may not be accepted back here.
+
+No extra trademark, endorsement, warranty, or support rights are granted by this fork.
+
+## License
+
+See [LICENSE](LICENSE). In short:
+
+- the original LittleGPTracker lineage includes BSD 3-Clause terms
+- this project carries GPLv3 terms for the current fork
+- because this is free/open-source software, public redistribution and forks cannot be prohibited beyond the actual license terms
 
 All implemented features have been tested not to break old
 projects but make sure to backup your old cherished work
@@ -20,11 +44,13 @@ just to be safe &#9829;
 
 ## Releases
 
-### Current Builds
+### Upstream Builds
 
-Latest releases from this fork here:
+Latest upstream Little Piggy Tracker releases:
 
 - [Releases](https://github.com/djdiskmachine/LittleGPTracker/releases)
+
+RG Nano builds from this fork are experimental. Check this repository's releases or build from source when no release is available.
 
 ### 2006 Builds
 
@@ -46,6 +72,7 @@ Recommended reading to get you started:
 - [Quick-Start Guide](docs/wiki/quick_start_guide.md)
 - [Little Piggy Tracker Configuration](docs/LittlePiggyTrackerConf.md)
 - [Tips and Tricks](docs/wiki/tips_and_tricks.md)
+- [RG Nano Simulator](docs/RGNANO_SIM.md)
 
 ## Features per platform
 
