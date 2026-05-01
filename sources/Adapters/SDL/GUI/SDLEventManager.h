@@ -37,6 +37,7 @@ private:
 	static int exitConfirmSelection_ ;
 	static bool showDebugScreen_ ;
 	static int debugScreenSelection_ ;
+	static bool menuInputHeld_[SDLK_LAST] ;
 	const char *keyname_[SDLK_LAST] ;
 	SDL_Joystick *joystick_[MAX_JOY_COUNT];
 	ButtonControllerSource *buttonCS_[MAX_JOY_COUNT] ;

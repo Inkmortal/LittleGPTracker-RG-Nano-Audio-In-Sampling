@@ -25,6 +25,7 @@ bool SDLEventManager::showExitConfirm_=false ;
 int SDLEventManager::exitConfirmSelection_=0;
 bool SDLEventManager::showDebugScreen_=false ;
 int SDLEventManager::debugScreenSelection_=0;
+bool SDLEventManager::menuInputHeld_[SDLK_LAST]={false};
 
 SDLEventManager::SDLEventManager() 
 {
@@ -135,13 +136,18 @@ int SDLEventManager::MainLoop()
           {
 						Trace::Log("EVENT","key(%s):%d",keyname_[event.key.keysym.sym],1) ;
 					}
+					if (event.key.keysym.sym>=0 && event.key.keysym.sym<SDLK_LAST && menuInputHeld_[event.key.keysym.sym]) {
+						break;
+					}
 
 #ifdef PLATFORM_RGNANO
 					// Check for power menu toggle (SDLK_q)
 					if (event.key.keysym.sym == SDLK_q) {
+						menuInputHeld_[event.key.keysym.sym]=true;
 						showPowerMenu_ = !showPowerMenu_;
 						if (showPowerMenu_) {
 							powerMenuSelection_ = 0;  // Reset to first option
+							showExitConfirm_ = false;
 						}
 						break;
 					}
@@ -149,12 +155,24 @@ int SDLEventManager::MainLoop()
 
 					// If menu is active, handle menu input
 					if (showPowerMenu_) {
+						if (event.key.keysym.sym>=0 && event.key.keysym.sym<SDLK_LAST) {
+							if (menuInputHeld_[event.key.keysym.sym]) {
+								break;
+							}
+							menuInputHeld_[event.key.keysym.sym]=true;
+						}
 						HandlePowerMenuInput(event.key.keysym.sym);
 						break;  // Don't pass to game when menu is active
 					}
 
 					// If debug screen is active, handle debug input
 					if (showDebugScreen_) {
+						if (event.key.keysym.sym>=0 && event.key.keysym.sym<SDLK_LAST) {
+							if (menuInputHeld_[event.key.keysym.sym]) {
+								break;
+							}
+							menuInputHeld_[event.key.keysym.sym]=true;
+						}
 						HandleDebugScreenInput(event.key.keysym.sym);
 						break;  // Don't pass to game when debug screen is active
 					}
@@ -171,6 +189,10 @@ int SDLEventManager::MainLoop()
 					if (dumpEvent_) 
           {
 						Trace::Log("EVENT","key(%s):%d",keyname_[event.key.keysym.sym],0) ;
+					}
+					if (event.key.keysym.sym>=0 && event.key.keysym.sym<SDLK_LAST && menuInputHeld_[event.key.keysym.sym]) {
+						menuInputHeld_[event.key.keysym.sym]=false;
+						break;
 					}
 					keyboardCS_->SetKey((int)event.key.keysym.sym,false) ;
 #ifdef PLATFORM_RGNANO_SIM
