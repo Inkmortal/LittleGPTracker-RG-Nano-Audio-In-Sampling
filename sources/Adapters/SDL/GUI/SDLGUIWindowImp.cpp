@@ -940,8 +940,8 @@ void SDLGUIWindowImp::DrawRGNanoControls()
 	Uint32 text=SDL_MapRGB(screen_->format,239,235,255);
 	SDL_Rect rect;
 
-	DrawRGNanoShoulder(18,16,false,button,buttonPress,SDLK_m,"L");
-	DrawRGNanoShoulder(254,16,true,button,buttonPress,SDLK_n,"R");
+	DrawRGNanoShoulder(12,12,false,button,buttonPress,SDLK_m,"L");
+	DrawRGNanoShoulder(260,12,true,button,buttonPress,SDLK_n,"R");
 
 	rect.x=156;
 	rect.y=28;
