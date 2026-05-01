@@ -511,7 +511,15 @@ void SDLEventManager::LoadSimScript()
 		return;
 	}
 
-	std::ifstream file(scriptPath);
+	std::string resolvedScriptPath(scriptPath);
+	std::ifstream file(resolvedScriptPath.c_str());
+	if (!file.is_open()) {
+		std::string withExtension=resolvedScriptPath + ".rgsim";
+		file.open(withExtension.c_str());
+		if (file.is_open()) {
+			resolvedScriptPath=withExtension;
+		}
+	}
 	if (!file.is_open()) {
 		Trace::Error("RGNANO_SIM failed to open script %s", scriptPath);
 		return;
@@ -521,7 +529,7 @@ void SDLEventManager::LoadSimScript()
 	int lineNumber=0;
 	while (std::getline(file,line)) {
 		lineNumber++;
-		if (!AddSimScriptLine(line,scriptPath,lineNumber)) {
+		if (!AddSimScriptLine(line,resolvedScriptPath.c_str(),lineNumber)) {
 			simScriptFailed_=true;
 			break;
 		}
@@ -531,7 +539,7 @@ void SDLEventManager::LoadSimScript()
 	simNextCommandTime_=System::GetInstance()->GetClock()+250;
 	simPendingReleaseKey_=0;
 	simScriptActive_=!simCommands_.empty();
-	Trace::Log("RGNANO_SIM","Loaded %d script commands from %s",(int)simCommands_.size(),scriptPath);
+	Trace::Log("RGNANO_SIM","Loaded %d script commands from %s",(int)simCommands_.size(),resolvedScriptPath.c_str());
 }
 
 void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)

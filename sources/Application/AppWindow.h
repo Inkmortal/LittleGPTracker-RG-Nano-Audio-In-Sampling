@@ -35,6 +35,8 @@ class AppWindow : public GUIWindow, I_Observer, Status {
     virtual void Clear(bool all = false);
     virtual void ClearRect(GUIRect &rect);
     virtual void SetColor(ColorDefinition cd);
+    int GetVisibleColumns() const;
+    int GetVisibleRows() const;
     void SetDirty();
     void SetCurrentViewDirty();
     void RefreshCurrentView();

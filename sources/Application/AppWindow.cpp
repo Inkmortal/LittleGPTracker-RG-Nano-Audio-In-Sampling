@@ -149,19 +149,44 @@ AppWindow::AppWindow(I_GUIWindowImp &imp) : GUIWindow(imp) {
 
 AppWindow::~AppWindow() { MidiService::GetInstance()->Close(); }
 
+int AppWindow::GetVisibleColumns() const {
+    GUIRect rect = const_cast<AppWindow *>(this)->GetRect();
+    int columns = rect.Width() / charWidth_;
+    if (columns < 0) {
+        columns = 0;
+    }
+    if (columns > 40) {
+        columns = 40;
+    }
+    return columns;
+}
+
+int AppWindow::GetVisibleRows() const {
+    GUIRect rect = const_cast<AppWindow *>(this)->GetRect();
+    int rows = rect.Height() / charHeight_;
+    if (rows < 0) {
+        rows = 0;
+    }
+    if (rows > 30) {
+        rows = 30;
+    }
+    return rows;
+}
+
 void AppWindow::DrawString(const char *string, GUIPoint &pos,
                            GUITextProperties &props, bool force) {
 
-    // we know we don't have mode than 40 chars
+    int visibleColumns = GetVisibleColumns();
+    int visibleRows = GetVisibleRows();
 
     char buffer[41];
-    if ((pos._y < 0) || (pos._y >= 30) || (pos._x >= 40)) {
+    if ((pos._y < 0) || (pos._y >= visibleRows) || (pos._x >= visibleColumns)) {
         return;
     }
     int len = strlen(string);
     int offset = (pos._x < 0) ? -pos._x : 0;
     len -= offset;
-    int available = 40 - ((pos._x < 0) ? 0 : pos._x);
+    int available = visibleColumns - ((pos._x < 0) ? 0 : pos._x);
     len = MIN(len, available);
     if (len <= 0) {
         return;
@@ -190,6 +215,26 @@ void AppWindow::ClearRect(GUIRect &r) {
     int y = r.Top();
     int w = r.Width();
     int h = r.Height();
+    int visibleColumns = GetVisibleColumns();
+    int visibleRows = GetVisibleRows();
+
+    if (x < 0) {
+        w += x;
+        x = 0;
+    }
+    if (y < 0) {
+        h += y;
+        y = 0;
+    }
+    if (x >= visibleColumns || y >= visibleRows || w <= 0 || h <= 0) {
+        return;
+    }
+    if (x + w > visibleColumns) {
+        w = visibleColumns - x;
+    }
+    if (y + h > visibleRows) {
+        h = visibleRows - y;
+    }
 
     unsigned char *st = _charScreen + x + (40 * y);
     unsigned char *pr = _charScreenProp + x + (40 * y);
