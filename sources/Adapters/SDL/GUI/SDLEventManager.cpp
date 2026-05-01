@@ -255,6 +255,12 @@ int SDLEventManager::MainLoop()
 			{
 
 				case SDL_QUIT:
+#ifdef PLATFORM_RGNANO_SIM
+					if (!simCommands_.empty() && !simScriptFailed_ && simCommandIndex_ < simCommands_.size()) {
+						Trace::Log("RGNANO_SIM","user_abort window close while script command %d/%d was active",simCommandIndex_,(int)simCommands_.size());
+						LogSimState("user_abort",true);
+					}
+#endif
 					sdlWindow->ProcessQuit() ;
 					break ;
 				case SDL_VIDEOEXPOSE:
