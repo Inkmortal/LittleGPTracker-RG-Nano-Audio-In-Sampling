@@ -154,16 +154,21 @@ void AppWindow::DrawString(const char *string, GUIPoint &pos,
     // we know we don't have mode than 40 chars
 
     char buffer[41];
+    if ((pos._y < 0) || (pos._y >= 30) || (pos._x >= 40)) {
+        return;
+    }
     int len = strlen(string);
-    int offset = (pos._x < 0) ? -pos._x / 8 : 0;
+    int offset = (pos._x < 0) ? -pos._x : 0;
     len -= offset;
     int available = 40 - ((pos._x < 0) ? 0 : pos._x);
     len = MIN(len, available);
+    if (len <= 0) {
+        return;
+    }
     memcpy(buffer, string + offset, len);
     buffer[len] = 0;
 
-    NAssert((pos._x < 40) && (pos._y < 30));
-    int index = pos._x + 40 * pos._y;
+    int index = ((pos._x < 0) ? 0 : pos._x) + 40 * pos._y;
     memcpy(_charScreen + index, buffer, len);
     unsigned char prop = colorIndex_ + (props.invert_ ? PROP_INVERT : 0);
     memset(_charScreenProp + index, prop, len);
@@ -527,6 +532,30 @@ void AppWindow::onUpdate() {
 };
 
 void AppWindow::LayoutChildren() {};
+
+#ifdef PLATFORM_RGNANO_SIM
+const char *AppWindow::GetCurrentViewName() const {
+    if (_currentView == _songView)
+        return "song";
+    if (_currentView == _chainView)
+        return "chain";
+    if (_currentView == _phraseView)
+        return "phrase";
+    if (_currentView == _projectView)
+        return "project";
+    if (_currentView == _instrumentView)
+        return "instrument";
+    if (_currentView == _tableView)
+        return "table";
+    if (_currentView == _grooveView)
+        return "groove";
+    if (_currentView == _mixerView)
+        return "mixer";
+    if (_currentView == _nullView)
+        return "null";
+    return "unknown";
+}
+#endif
 
 void AppWindow::Update(Observable &o, I_ObservableData *d) {
 

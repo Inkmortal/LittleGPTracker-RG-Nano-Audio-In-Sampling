@@ -1,0 +1,27 @@
+# Source-derived first music workflow:
+# boot new project -> Song -> create chain -> Chain -> create phrase -> Phrase
+# -> create first note/instrument -> Instrument -> sample import modal.
+route boot.new_project_random
+expect_view song
+press a 80
+wait 120
+route song.to_chain
+wait 120
+expect_view chain
+press a 80
+wait 120
+route chain.to_phrase
+wait 120
+expect_view phrase
+press a 80
+wait 120
+route phrase.to_instrument
+wait 120
+expect_view instrument
+route instrument.open_sample_import
+screenshot basic-music-workflow.bmp
+expect_size 240 240
+expect_colors 4
+expect_file projects/last_project
+expect_no_error
+quit

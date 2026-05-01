@@ -1,6 +1,7 @@
 
 #include "SDLEventManager.h"
 #include "Application/Application.h"
+#include "Application/AppWindow.h"
 #include "UIFramework/BasicDatas/GUIEvent.h"
 #include "SDLGUIWindowImp.h"
 #include "Application/Model/Config.h"
@@ -275,7 +276,7 @@ void SDLEventManager::LoadSimScript()
 			if (command.value<=0) {
 				command.value=80;
 			}
-		} else if (command.op=="down" || command.op=="up" || command.op=="screenshot" || command.op=="log" || command.op=="expect_file") {
+		} else if (command.op=="down" || command.op=="up" || command.op=="screenshot" || command.op=="log" || command.op=="expect_file" || command.op=="expect_view") {
 			iss >> command.arg;
 		} else if (command.op=="click") {
 			iss >> command.value >> command.value2 >> command.arg;
@@ -396,6 +397,11 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 	} else if (command.op=="expect_no_error") {
 		if (!ExpectSimNoError()) {
 			FailSimScript("log error assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_view") {
+		if (!ExpectSimView(command.arg)) {
+			FailSimScript("view assertion failed");
 			return;
 		}
 	} else if (command.op=="expect_colors") {
@@ -553,6 +559,19 @@ bool SDLEventManager::ExpectSimNoError()
 	bool clean=haystack.find("[*ERROR*]")==std::string::npos && haystack.find("ERROR") == std::string::npos;
 	Trace::Log("RGNANO_SIM","expect_no_error in %s => %s",logPath,clean?"clean":"error found");
 	return clean;
+}
+
+bool SDLEventManager::ExpectSimView(const std::string &viewName)
+{
+	GUIWindow *guiWindow=Application::GetInstance()->GetWindow();
+	AppWindow *appWindow=(AppWindow *)guiWindow;
+	const char *current=appWindow ? appWindow->GetCurrentViewName() : "unknown";
+	bool matches=viewName==current;
+	Trace::Log("RGNANO_SIM","expect_view %s => %s",viewName.c_str(),current);
+	if (!matches) {
+		Trace::Error("RGNANO_SIM expected view %s but found %s",viewName.c_str(),current);
+	}
+	return matches;
 }
 
 bool SDLEventManager::ExpectSimScreenSize(SDLGUIWindowImp *window, int width, int height)

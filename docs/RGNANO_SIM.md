@@ -99,6 +99,9 @@ expect_file rgnano-sim-data/samples/rgnano-test-tone.wav
 # fail unless the simulator log contains text
 expect_log Loaded
 
+# fail unless the active LGPT view matches the source-derived view name
+expect_view song
+
 # fail if the simulator log contains an error marker
 expect_no_error
 
@@ -142,4 +145,10 @@ The source-derived new-project route drives the actual boot controls from `Selec
 
 ```powershell
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\new-project-route.rgsim -ResetLastProject -ArtifactsDir .\sim-artifacts
+```
+
+The first source-derived music workflow creates a new project, creates a chain, creates a phrase, creates the first note/instrument, opens Instrument, then opens the sample import modal:
+
+```powershell
+.\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\basic-music-workflow.rgsim -ResetLastProject -ArtifactsDir .\sim-artifacts
 ```

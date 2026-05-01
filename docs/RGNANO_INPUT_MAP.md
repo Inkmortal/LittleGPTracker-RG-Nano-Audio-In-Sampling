@@ -229,3 +229,5 @@ The simulator should not need hand-written one-off probes for every screen. The 
 4. Test on hardware only after the simulator route proves the workflow.
 
 `tools\rgnano-sim-routes.ps1` is the first route-helper layer. Scripts can use `route from.to` commands such as `route project.to_song`, `route song.to_chain`, `route phrase.to_instrument`, and `route instrument.open_sample_import`; the runner expands them into the exact held-button events described above.
+
+`expect_view <name>` is the source-level view assertion for simulator scripts. It reads the active `AppWindow` view directly, so route tests can fail on “still in Chain” instead of only failing later because a screenshot looked wrong.

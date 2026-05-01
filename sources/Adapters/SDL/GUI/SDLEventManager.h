@@ -72,6 +72,7 @@ private:
 	bool ExpectSimFile(const std::string &path);
 	bool ExpectSimLog(const std::string &needle);
 	bool ExpectSimNoError();
+	bool ExpectSimView(const std::string &viewName);
 	bool ExpectSimScreenSize(SDLGUIWindowImp *window, int width, int height);
 	bool ExpectSimScreenColors(SDLGUIWindowImp *window, int minColors);
 	int CountSurfaceColors(SDL_Surface *surface, int maxColors);

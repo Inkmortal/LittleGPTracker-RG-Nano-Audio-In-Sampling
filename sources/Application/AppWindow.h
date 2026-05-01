@@ -35,6 +35,9 @@ class AppWindow : public GUIWindow, I_Observer, Status {
     virtual void ClearRect(GUIRect &rect);
     virtual void SetColor(ColorDefinition cd);
     void SetDirty();
+#ifdef PLATFORM_RGNANO_SIM
+    const char *GetCurrentViewName() const;
+#endif
 
   protected: // GUIWindow implementation
     virtual bool onEvent(GUIEvent &event);
