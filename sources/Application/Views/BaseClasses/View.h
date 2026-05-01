@@ -145,6 +145,7 @@ class View : public Observable {
 
     void drawMap();
     void drawNotes();
+    void drawMiniMeters();
 
   public: // temp hack for modl windo constructors
     GUIWindow &w_;

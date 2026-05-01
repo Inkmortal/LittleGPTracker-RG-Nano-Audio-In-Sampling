@@ -19,9 +19,9 @@ Latest audit: passed on the native `RGNANO_SIM` executable at 240x240. Every scr
 | Boot project selector | Existing modal | Load/new project | Confirmed in sim | Must stay readable because every session starts here. |
 | New project dialog | Existing modal | Create song folders | Confirmed in sim | Naming UI is cramped but the random-name path is usable. |
 | Song view | Existing core view | Arrange chains across 8 tracks | Confirmed in sim | Split mode fits all 8 tracks, but dense rows need continued readability checks. |
-| 8-channel playback | Existing core engine | Full arrangements across all tracks | Confirmed in sim | `all-8-channels-workflow.rgsim` assigns independent chains, phrases, notes, and instruments to channels 0-7 and asserts all 8 channels are playing. |
+| 8-channel playback | Existing core engine plus live Nano meters | Full arrangements across all tracks | Confirmed in sim | `all-8-channels-workflow.rgsim` assigns independent chains, phrases, notes, and instruments to channels 0-7, asserts all 8 channels are playing, captures audio, and screenshots the active note/instrument monitor plus one-row meter strip. |
 | Mixer view | Existing view, route restored | Track activity, play time, CPU/clip/battery | Confirmed in sim | `SongView` could request `VT_MIXER`, but `AppWindow` was not switching to it. This pass restores it and labels the screen as `Mixer Song` or `Mixer Live`. |
-| Chain view | Existing core view | Phrase order and transposition | Confirmed in sim | Usable, but transposition readability should be checked at device scale. |
+| Chain view | Existing core view plus dynamic sidebar meters | Phrase order, transposition, channel activity | Confirmed in sim | Usable, and the right sidebar meter now reflects live audio peak/activity instead of a static playing marker. |
 | Phrase view | Existing core view | Notes, instruments, commands | Confirmed in sim | This is the most important editing screen; command columns need special audit. |
 | Phrase table | Existing core view | Per-step command automation | Confirmed in sim | Needs command-selector coverage next. |
 | Groove view | Existing core view | Swing/timing feel | Confirmed in sim | Good M8-adjacent feature already present. |

@@ -52,6 +52,8 @@ public:
     void SetRenderMode(int);
     bool IsRendering();
     int GetPlayedBufferPercentage() ;
+    int GetBusPeakPercent(int bus) ;
+    int GetMasterPeakPercent() ;
 	
 	virtual void Execute(FourCC id,float value) ;
 

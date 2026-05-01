@@ -12,10 +12,11 @@ AudioMixer::AudioMixer(const char *name):
 	name_(name)
 {
 	volume_=(i2fp(1)) ;
-    softclip_ = -1;
+	softclip_ = -1;
     softclipGain_ = 0 ;
 	masterVolume_ = 100 ;
 	clipped_ = false ;
+	peakPercent_ = 0 ;
 	
 	// Precalculate constant values for softclipping algorithm
 	softClipData_[0].alpha = 1.45f; // -1.5db (approx.)
@@ -106,10 +107,25 @@ bool AudioMixer::Render(fixed *buffer,int samplecount) {
 
          // Apply soft/hard clipping before recording
          c = buffer;
+         int peak = 0;
          for (int i = 0; i < samplecount * 2; i++) {
              fixed sample = *c;
              sample = fl2fp(damp * fp2fl(hardClip(softClip(sample))));
              *c++ = sample;
+             int absSample = sample < 0 ? -sample : sample;
+             if (absSample > peak) {
+                 peak = absSample;
+             }
+         }
+         int percent = (int)(((long long)peak * 100) / MAX_POSITIVE_FIXED);
+         if (percent > 100) {
+             percent = 100;
+         }
+         peakPercent_ = percent;
+     } else if (peakPercent_ > 0) {
+         peakPercent_ -= 8;
+         if (peakPercent_ < 0) {
+             peakPercent_ = 0;
          }
      }
     if (enableRendering_&&writer_) {
@@ -134,6 +150,8 @@ void AudioMixer::SetMasterVolume(int volume) {
 }
 
 bool AudioMixer::Clipped() { return clipped_; }
+
+int AudioMixer::GetPeakPercent() { return peakPercent_; }
 
 fixed AudioMixer::hardClip(fixed sample) {
     if (sample > MAX_POSITIVE_FIXED || sample < MAX_NEGATIVE_FIXED) {

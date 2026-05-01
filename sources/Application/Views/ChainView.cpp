@@ -1,4 +1,5 @@
 #include "ChainView.h"
+#include "Application/Mixer/MixerService.h"
 #include "Application/Utils/char.h"
 #include "System/Console/Trace.h"
 #include "UIController.h"
@@ -730,6 +731,7 @@ void ChainView::DrawView() {
 
     drawMap();
     drawNotes();
+    drawMiniMeters();
 
     // RG Nano: Draw channel meters in sidebar
     if (ultraCompactLayout_) {
@@ -843,13 +845,36 @@ void ChainView::drawChannelMeters(int x, int y) {
 
         bool isPlaying = player->IsChannelPlaying(i);
         bool isMuted = player->IsChannelMuted(i);
+        int level = MixerService::GetInstance()->GetBusPeakPercent(i);
+        int masterLevel = MixerService::GetInstance()->GetMasterPeakPercent();
+        if (isPlaying && level < masterLevel) {
+            level = masterLevel;
+        }
+        int width = 0;
+        if (level > 4) width = 1;
+        if (level > 18) width = 2;
+        if (level > 32) width = 3;
+        if (level > 46) width = 4;
+        if (level > 62) width = 5;
+        if (level > 78) width = 6;
 
         if (isMuted) {
             // Muted: show dashes
             DrawString(pos._x, pos._y, "------", props);
         } else if (isPlaying) {
-            // Playing: show active meter
-            DrawString(pos._x, pos._y, "######", props);
+            if (level > 62) {
+                SetColor(CD_PLAY);
+            } else {
+                SetColor(CD_HILITE1);
+            }
+            if (width==0) DrawString(pos._x, pos._y, "......", props);
+            else if (width==1) DrawString(pos._x, pos._y, "#.....", props);
+            else if (width==2) DrawString(pos._x, pos._y, "##....", props);
+            else if (width==3) DrawString(pos._x, pos._y, "###...", props);
+            else if (width==4) DrawString(pos._x, pos._y, "####..", props);
+            else if (width==5) DrawString(pos._x, pos._y, "#####.", props);
+            else DrawString(pos._x, pos._y, "######", props);
+            SetColor(CD_NORMAL);
         } else {
             // Silent: show empty meter
             DrawString(pos._x, pos._y, "......", props);

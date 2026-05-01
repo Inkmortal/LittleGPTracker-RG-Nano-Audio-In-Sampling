@@ -220,6 +220,7 @@ void MixerView::DrawView() {
 	
     drawMap() ;
 	drawNotes() ;
+	drawMiniMeters() ;
     
 	if (player->IsRunning()) {
 		OnPlayerUpdate(PET_UPDATE) ;
@@ -282,5 +283,6 @@ void MixerView::OnPlayerUpdate(PlayerEventType ,unsigned int tick) {
 	DrawString(pos._x,pos._y,strbuffer,props) ;
 
     drawNotes() ;
+    drawMiniMeters() ;
 
 } ;

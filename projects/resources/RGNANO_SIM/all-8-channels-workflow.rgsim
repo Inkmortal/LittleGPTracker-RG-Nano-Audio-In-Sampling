@@ -31,6 +31,14 @@ sim_set_song_chain 0 4 4
 sim_set_song_chain 0 5 5
 sim_set_song_chain 0 6 6
 sim_set_song_chain 0 7 7
+sim_set_song_chain 1 0 0
+sim_set_song_chain 1 1 1
+sim_set_song_chain 1 2 2
+sim_set_song_chain 1 3 3
+sim_set_song_chain 1 4 4
+sim_set_song_chain 1 5 5
+sim_set_song_chain 1 6 6
+sim_set_song_chain 1 7 7
 expect_song_chain 0 0 00
 expect_song_chain 0 1 01
 expect_song_chain 0 2 02
@@ -39,6 +47,14 @@ expect_song_chain 0 4 04
 expect_song_chain 0 5 05
 expect_song_chain 0 6 06
 expect_song_chain 0 7 07
+expect_song_chain 1 0 00
+expect_song_chain 1 1 01
+expect_song_chain 1 2 02
+expect_song_chain 1 3 03
+expect_song_chain 1 4 04
+expect_song_chain 1 5 05
+expect_song_chain 1 6 06
+expect_song_chain 1 7 07
 
 # Each chain uses its own phrase and each phrase triggers its matching instrument.
 sim_set_chain_phrase 0 0 0 0
@@ -70,7 +86,6 @@ expect_phrase_row_count 0 1
 expect_phrase_row_count 7 1
 
 dump_state all 8 channels arranged
-screenshot all-8-channels-song.bmp
 route song.to_mixer
 wait 120
 expect_view mixer
@@ -93,6 +108,7 @@ expect_playing_channel 4 04
 expect_playing_channel 5 05
 expect_playing_channel 6 06
 expect_playing_channel 7 07
+screenshot all-8-channels-playing.bmp
 wait 1200
 expect_audio_activity 64
 expect_audio_capture_bytes 90000

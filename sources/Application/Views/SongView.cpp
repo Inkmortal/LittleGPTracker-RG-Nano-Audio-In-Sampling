@@ -1025,6 +1025,7 @@ void SongView::DrawView() {
 
     drawMap();
     drawNotes();
+    drawMiniMeters();
 
     if (player->IsRunning()) {
         OnPlayerUpdate(PET_UPDATE);
@@ -1162,6 +1163,7 @@ void SongView::OnPlayerUpdate(PlayerEventType eventType, unsigned int tick) {
         DrawString(pos._x, pos._y, strbuffer, props);
     }
     drawNotes();
+    drawMiniMeters();
 };
 
 void SongView::nudgeTempo(int direction) {

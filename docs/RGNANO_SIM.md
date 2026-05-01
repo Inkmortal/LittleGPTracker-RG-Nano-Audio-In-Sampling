@@ -52,6 +52,12 @@ The Wuxia/donghua lofi studio workflow imports that palette, programs an 8-chann
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\wuxia-lofi-studio.rgsim -ResetLastProject -SeedLofiFixture -Skin -ArtifactsDir .\sim-artifacts-wuxia-lofi
 ```
 
+The all-channel workflow is the compact RG Nano playback regression. It programs all 8 tracker channels, verifies each channel is producing its assigned instrument, captures audio, and screenshots the live bottom note/instrument monitor plus the one-row audio meter strip:
+
+```powershell
+.\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\all-8-channels-workflow.rgsim -ResetLastProject -SeedLofiFixture -ArtifactsDir .\sim-artifacts-all-8
+```
+
 The producer persistence pair creates a multi-instrument project, saves it, relaunches through `AUTO_LOAD_LAST`, verifies tempo/song/chain/phrase/sample bindings, and captures audio from the reopened project:
 
 ```powershell

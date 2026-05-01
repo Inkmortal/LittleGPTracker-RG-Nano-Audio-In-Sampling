@@ -162,6 +162,20 @@ int MixerService::GetPlayedBufferPercentage() {
 	return out_->GetPlayedBufferPercentage() ;
 }
 
+int MixerService::GetBusPeakPercent(int bus) {
+    if (bus<0 || bus>=MAX_BUS_COUNT) {
+        return 0;
+    }
+    return bus_[bus].GetPeakPercent();
+}
+
+int MixerService::GetMasterPeakPercent() {
+    if (!out_) {
+        return 0;
+    }
+    return out_->GetPeakPercent();
+}
+
 void MixerService::toggleRendering(bool enable) {
     isRendering_ = enable;
     switch (mode_) {

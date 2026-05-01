@@ -24,6 +24,7 @@ public:
     virtual void SetSoftclip(int clip, int gain);
     virtual void SetMasterVolume(int volume) ;
 	virtual bool Clipped() ;
+	int GetPeakPercent() ;
 	
 private:
   fixed hardClip(fixed sample);
@@ -38,5 +39,6 @@ private:
   int softclipGain_;
   int masterVolume_;
   bool clipped_;
+  int peakPercent_;
 } ;
 #endif

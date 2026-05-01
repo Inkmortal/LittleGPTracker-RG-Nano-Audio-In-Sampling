@@ -1,6 +1,7 @@
 #include "View.h"
 #include "System/Console/Trace.h"
 #include "Application/Player/Player.h"
+#include "Application/Mixer/MixerService.h"
 #include "Application/Utils/char.h"
 #include "Application/AppWindow.h"
 #include "Application/Model/Config.h"
@@ -192,6 +193,55 @@ void View::drawNotes() {
 			pos._y = initialY ;
 			pos._x+= 3;
 		}
+}
+
+void View::drawMiniMeters() {
+	if (!ultraCompactLayout_) {
+		return;
+	}
+	Player *player=Player::GetInstance();
+	if (!player || !player->IsRunning() || viewData_->playMode_ == PM_AUDITION) {
+		return;
+	}
+
+	GUIPoint anchor=GetAnchor();
+	int y = anchor._y + View::songRowCount_ + 4;
+	if (y > 29) {
+		return;
+	}
+
+	GUITextProperties props;
+	props.invert_=true;
+	int x = anchor._x;
+	int masterLevel = MixerService::GetInstance()->GetMasterPeakPercent();
+	for (int i=0;i<SONG_CHANNEL_COUNT;i++) {
+		bool isPlaying = player->IsChannelPlaying(i);
+		int level = MixerService::GetInstance()->GetBusPeakPercent(i);
+		if (isPlaying && level < masterLevel) {
+			level = masterLevel;
+		}
+		int width = 0;
+		if (level > 4) width = 1;
+		if (level > 28) width = 2;
+		if (level > 62) width = 3;
+		if (i==viewData_->songX_) {
+			SetColor(CD_HILITE2);
+		} else if (level > 62) {
+			SetColor(CD_PLAY);
+		} else {
+			SetColor(CD_HILITE1);
+		}
+		if (!isPlaying) {
+			DrawString(x,y,"   ",props);
+		} else if (width==1) {
+			DrawString(x,y,"=  ",props);
+		} else if (width==2) {
+			DrawString(x,y,"== ",props);
+		} else {
+			DrawString(x,y,"===",props);
+		}
+		x+=3;
+	}
 }
 
 void View::DoModal(ModalView *view,ModalViewCallback cb) {
