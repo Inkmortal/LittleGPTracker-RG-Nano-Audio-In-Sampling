@@ -313,12 +313,21 @@ void MixerView::drawChannelMeters(bool force) {
 #if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
     MixerService *mixer = MixerService::GetInstance();
     SDLGUIWindowImp *imp = (SDLGUIWindowImp *)w_.GetImpWindow();
-    const int startCol = 2;
+    const int startX = 16;
     const int labelRow = 4;
-    const int meterRow = 7;
-    const int noteRow = 10;
-    const int cellWidth = 3;
+    const int meterTop = 52;
+    const int meterHeight = 38;
+    const int stripWidth = 24;
+    const int meterWidth = 12;
+    const int scopeY = 96;
+    const int scopeHeight = 14;
+    const int noteRow = 14;
     GUIColor panel(0x1D, 0x0A, 0x1F);
+    GUIColor meterLow(0xB8, 0x3C, 0xD8);
+    GUIColor meterHot(0xDB, 0x33, 0xDB);
+    GUIColor meterClip(0xF5, 0xEB, 0xFF);
+    GUIColor selected(0xF5, 0xEB, 0xFF);
+    GUIColor frame(0x5E, 0x24, 0x62);
 
     if (force) {
         imp->SetColor(panel);
@@ -329,9 +338,9 @@ void MixerView::drawChannelMeters(bool force) {
     GUITextProperties props;
     props.invert_ = false;
     char label[3];
-    char meterCell[4];
     for (int i=0; i<SONG_CHANNEL_COUNT; i++) {
-        int col = startCol + i * cellWidth;
+        int stripX = startX + i * stripWidth;
+        int x = stripX + 6;
         int bus = Mixer::GetInstance()->GetBus(i);
         int level = mixer->GetBusPeakPercent(bus);
         if (level<0) level=0;
@@ -339,32 +348,34 @@ void MixerView::drawChannelMeters(bool force) {
         bool isSelected = (i == viewData_->mixerCol_);
         bool isActive = Player::GetInstance()->IsChannelPlaying(i) || level > 0;
 
+        imp->SetColor(isSelected ? selected : frame);
+        GUIRect outline(x, meterTop - 1, x + meterWidth + 1, meterTop + meterHeight + 1);
+        imp->DrawRect(outline);
+        imp->SetColor(panel);
+        GUIRect inner(x + 1, meterTop, x + meterWidth, meterTop + meterHeight);
+        imp->DrawRect(inner);
+
+        int fill = (level * (meterHeight - 2)) / 100;
+        if (fill > 0) {
+            if (level > 92) {
+                imp->SetColor(meterClip);
+            } else if (level > 68) {
+                imp->SetColor(meterHot);
+            } else {
+                imp->SetColor(isActive ? meterLow : frame);
+            }
+            GUIRect bar(x + 2, meterTop + meterHeight - 1 - fill,
+                        x + meterWidth - 1, meterTop + meterHeight - 1);
+            imp->DrawRect(bar);
+        }
+
         SetColor(isSelected ? CD_HILITE2 : CD_NORMAL);
         hex2char(bus, label);
-        DrawString(col, labelRow, label, props);
-
-        meterCell[0]=' ';
-        meterCell[1]=' ';
-        meterCell[2]=0;
-        if (level > 4) meterCell[0]='=';
-        if (level > 38) meterCell[1]='=';
-        if (level > 78) {
-            meterCell[0]='!';
-            meterCell[1]='!';
-        }
-        if (isSelected) {
-            SetColor(CD_HILITE2);
-        } else if (level > 78) {
-            SetColor(CD_PLAY);
-        } else if (isActive) {
-            SetColor(CD_HILITE1);
-        } else {
-            SetColor(CD_NORMAL);
-        }
-        DrawString(col, meterRow, meterCell, props);
+        DrawString(stripX / 8, labelRow, label, props);
+        drawChannelWaveform(bus, stripX + 4, scopeY, 16, scopeHeight, isSelected);
 
         SetColor(CD_NORMAL);
-        DrawString(col, noteRow, "   ", props);
+        DrawString(stripX / 8, noteRow, "   ", props);
         if (Player::GetInstance()->IsRunning() && viewData_->playMode_ != PM_AUDITION) {
             const char *playedNote = Player::GetInstance()->GetPlayedNote(i);
             char noteChar = playedNote && playedNote[0] ? playedNote[0] : ' ';
@@ -381,15 +392,69 @@ void MixerView::drawChannelMeters(bool force) {
                 }
             }
             SetColor(isSelected ? CD_HILITE2 : CD_HILITE1);
-            DrawString(col, noteRow, lastChannelNote_[i], props);
+            DrawString(stripX / 8, noteRow, lastChannelNote_[i], props);
         } else {
             lastChannelNote_[i][0]='-';
             lastChannelNote_[i][1]='-';
             SetColor(CD_NORMAL);
-            DrawString(col, noteRow, lastChannelNote_[i], props);
+            DrawString(stripX / 8, noteRow, lastChannelNote_[i], props);
         }
     }
     SetColor(CD_NORMAL);
+#endif
+}
+
+void MixerView::drawChannelWaveform(int bus, int x, int y, int width, int height, bool selected) {
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+    MixerService *mixer = MixerService::GetInstance();
+    SDLGUIWindowImp *imp = (SDLGUIWindowImp *)w_.GetImpWindow();
+    const int columns = AudioMixer::WAVEFORM_SIZE;
+    const int mid = y + (height / 2);
+    GUIColor background(0x1D, 0x0A, 0x1F);
+    GUIColor trace = selected ? GUIColor(0xF5, 0xEB, 0xFF) : GUIColor(0xDB, 0x33, 0xDB);
+
+    imp->SetColor(background);
+    GUIRect clear(x, y, x + width, y + height);
+    imp->DrawRect(clear);
+
+    int peakAbs = 1;
+    for (int i=0; i<columns; i++) {
+        int sample = mixer->GetBusWaveformSample(bus, i);
+        int absSample = sample < 0 ? -sample : sample;
+        if (absSample > peakAbs) peakAbs = absSample;
+    }
+    int gain = (peakAbs < 100) ? ((100 * 100) / peakAbs) : 100;
+    if (gain > 500) gain = 500;
+
+    int previousY = mid;
+    imp->SetColor(trace);
+    for (int col=0; col<width; col++) {
+        int startIndex = (col * columns) / width;
+        int endIndex = ((col + 1) * columns) / width;
+        if (endIndex <= startIndex) endIndex = startIndex + 1;
+        if (endIndex > columns) endIndex = columns;
+
+        int total = 0;
+        int count = 0;
+        for (int index=startIndex; index<endIndex; index++) {
+            total += mixer->GetBusWaveformSample(bus, index);
+            count++;
+        }
+        int sample = count > 0 ? total / count : 0;
+        int waveY = mid - ((sample * gain * (height / 2 - 2)) / 10000);
+        if (waveY < y + 1) waveY = y + 1;
+        if (waveY >= y + height - 1) waveY = y + height - 2;
+
+        int top = previousY < waveY ? previousY : waveY;
+        int bottom = previousY > waveY ? previousY : waveY;
+        if (bottom - top < 1) {
+            bottom = top + 1;
+        }
+        if (bottom >= y + height - 1) bottom = y + height - 2;
+        GUIRect wave(x + col, top, x + col + 1, bottom + 1);
+        imp->DrawRect(wave);
+        previousY = waveY;
+    }
 #endif
 }
 
@@ -405,9 +470,9 @@ void MixerView::drawWaveform(bool force) {
 
     SDLGUIWindowImp *imp = (SDLGUIWindowImp *)w_.GetImpWindow();
     const int x = 16;
-    const int y = 104;
+    const int y = 132;
     const int width = 192;
-    const int height = 72;
+    const int height = 56;
     const int mid = y + (height / 2);
     const int columns = AudioMixer::WAVEFORM_SIZE;
     const int stepPx = 1;
@@ -445,17 +510,14 @@ void MixerView::drawWaveform(bool force) {
 
     for (int col = 0; col < width; col += stepPx) {
         int drawIndex = col / stepPx;
-        int sampleIndex = (col * columns) / width;
-        int prevIndex = sampleIndex > 0 ? sampleIndex - 1 : sampleIndex;
-        int nextIndex = ((col + stepPx) * columns) / width;
-        if (nextIndex >= columns) {
-            nextIndex = columns - 1;
-        }
-        int prevSample = mixer->GetMasterWaveformSample(prevIndex);
+        int scaled = (col * (columns - 1) * 256) / (width - 1);
+        int sampleIndex = scaled / 256;
+        int frac = scaled - (sampleIndex * 256);
+        int nextIndex = sampleIndex + 1;
+        if (nextIndex >= columns) nextIndex = columns - 1;
         int sample = mixer->GetMasterWaveformSample(sampleIndex);
         int nextSample = mixer->GetMasterWaveformSample(nextIndex);
-
-        int smoothed = (prevSample + (sample * 2) + nextSample) / 4;
+        int smoothed = sample + (((nextSample - sample) * frac) / 256);
         int waveY = mid - ((smoothed * gain * (height / 2 - 2)) / 10000);
         if (waveY < y + 2) waveY = y + 2;
         if (waveY >= y + height - 2) waveY = y + height - 3;
@@ -467,7 +529,15 @@ void MixerView::drawWaveform(bool force) {
         imp->DrawRect(wave);
 
         if (sampleIndex>0) {
-            int prevSmoothed = (prevSample + sample) / 2;
+            int prevScaled = ((col - stepPx) * (columns - 1) * 256) / (width - 1);
+            if (prevScaled < 0) prevScaled = 0;
+            int prevIndex = prevScaled / 256;
+            int prevFrac = prevScaled - (prevIndex * 256);
+            int prevNextIndex = prevIndex + 1;
+            if (prevNextIndex >= columns) prevNextIndex = columns - 1;
+            int prevSample = mixer->GetMasterWaveformSample(prevIndex);
+            int prevNextSample = mixer->GetMasterWaveformSample(prevNextIndex);
+            int prevSmoothed = prevSample + (((prevNextSample - prevSample) * prevFrac) / 256);
             int prevY = mid - ((prevSmoothed * gain * (height / 2 - 2)) / 10000);
             if (prevY < y + 2) prevY = y + 2;
             if (prevY >= y + height - 2) prevY = y + height - 3;
