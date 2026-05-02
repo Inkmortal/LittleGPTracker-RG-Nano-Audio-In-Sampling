@@ -318,7 +318,7 @@ void MixerView::drawChannelMeters(bool force) {
     const int meterRow = 7;
     const int noteRow = 10;
     const int cellWidth = 3;
-    GUIColor panel(0x08, 0x12, 0x16);
+    GUIColor panel(0x1D, 0x0A, 0x1F);
 
     if (force) {
         imp->SetColor(panel);
@@ -411,9 +411,9 @@ void MixerView::drawWaveform(bool force) {
     const int mid = y + (height / 2);
     const int columns = AudioMixer::WAVEFORM_SIZE;
     const int stepPx = 1;
-    GUIColor scopeBackground(0x08,0x12,0x16);
-    GUIColor scopeTrace(0x35,0xD3,0xCE);
-    GUIColor scopeCenter(0x24,0x5E,0x62);
+    GUIColor scopeBackground(0x1D,0x0A,0x1F);
+    GUIColor scopeTrace(0xDB,0x33,0xDB);
+    GUIColor scopeCenter(0x5E,0x24,0x62);
     int peakAbs = 1;
     for (int i=0; i<columns; i++) {
         int sample = mixer->GetMasterWaveformSample(i);

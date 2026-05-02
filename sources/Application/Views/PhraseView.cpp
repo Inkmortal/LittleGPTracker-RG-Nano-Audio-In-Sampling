@@ -1579,9 +1579,9 @@ void PhraseView::drawMiniWaveform(bool force) {
     const int height = 12;
     const int mid = y + (height / 2);
     const int columns = AudioMixer::WAVEFORM_SIZE;
-    GUIColor scopeBackground(0x08, 0x12, 0x16);
-    GUIColor scopeTrace(0x35, 0xD3, 0xCE);
-    GUIColor scopeBright(0xF3, 0xFF, 0xFB);
+    GUIColor scopeBackground(0x1D, 0x0A, 0x1F);
+    GUIColor scopeTrace(0xDB, 0x33, 0xDB);
+    GUIColor scopeBright(0xF5, 0xEB, 0xFF);
 
     imp->SetColor(scopeBackground);
     GUIRect clear(x, y, x + width, y + height);
