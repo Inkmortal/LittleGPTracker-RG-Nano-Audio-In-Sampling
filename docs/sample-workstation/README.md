@@ -106,3 +106,19 @@ No synth engines yet. Make sample instruments feel great first.
 - Marker edits still use the normal field workflow below the visual panel.
 - Motion is only a visual grouping for existing table/feedback settings; it is not an M8-style modulation matrix yet.
 - Sample import is still the existing text list. A visual library/browser is a separate next step.
+
+## Layout Audit
+
+Tiny screens need automated layout checks, not just screenshots. After capturing the Instrument Lab pages with `projects/resources/RGNANO_SIM/sample-lab-pages-preview.rgsim`, run:
+
+```powershell
+python ..\tools\rgnano_layout_audit.py .\sample-lab-source.bmp .\sample-lab-shape.bmp .\sample-lab-filter.bmp .\sample-lab-loop.bmp .\sample-lab-motion.bmp
+```
+
+The audit fails on:
+
+- screenshots that are not 240x240 app captures
+- foreground pixels bleeding onto the app edge
+- rows that are too dense to be readable
+- Source/Loop waveforms colliding with legend or editable fields
+- Shape/Filter/Motion controls pushing into the field list
