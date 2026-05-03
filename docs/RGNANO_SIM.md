@@ -349,3 +349,9 @@ The producer screen audit walks every core producer-facing view, captures a scre
 ```powershell
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\producer-screen-audit.rgsim -ResetLastProject -SeedSampleFixture -Skin -ArtifactsDir .\sim-artifacts-screen-audit
 ```
+
+For the stricter app-only readability check, use the Python runner. It avoids the PowerShell helper path, captures the 240x240 app screens, checks for clipped edges, missing regions, and dense unreadable rows, then cleans up generated screenshots:
+
+```powershell
+python tools\run_producer_layout_audit.py
+```

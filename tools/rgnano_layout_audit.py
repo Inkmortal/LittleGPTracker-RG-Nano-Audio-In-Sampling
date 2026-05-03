@@ -137,33 +137,140 @@ def rect_ink(mask: List[List[bool]], rect: BBox) -> int:
     return sum(1 for y in range(y0, y1 + 1) for x in range(x0, x1 + 1) if mask[y][x])
 
 
+def max_run(values: Iterable[bool]) -> int:
+    best = 0
+    current = 0
+    for value in values:
+        if value:
+            current += 1
+            best = max(best, current)
+        else:
+            current = 0
+    return best
+
+
+def edge_run(mask: List[List[bool]], edge: str) -> int:
+    width = len(mask[0])
+    height = len(mask)
+    if edge == "top":
+        return max_run(mask[0])
+    if edge == "bottom":
+        return max_run(mask[height - 1])
+    if edge == "left":
+        return max_run(mask[y][0] for y in range(height))
+    if edge == "right":
+        return max_run(mask[y][width - 1] for y in range(height))
+    return 0
+
+
+def is_framed_modal(name: str) -> bool:
+    return (
+        "audit-00-boot-project" in name
+        or "audit-00-new-project" in name
+        or "audit-12-sample-import" in name
+    )
+
+
+def dense_row_allowed(name: str, row: int) -> bool:
+    if ("instrument-lab-" in name or "sample-lab-" in name) and 4 <= row <= 11:
+        return True
+    if is_framed_modal(name):
+        if "audit-12-sample-import" in name:
+            return row in (4, 25)
+        return row in (2, 28)
+    if "audit-02-mixer" in name:
+        return 5 <= row <= 23
+    return False
+
+
 def audit_generic(path: str, img: Image.Image, mask: List[List[bool]]) -> List[Issue]:
     issues: List[Issue] = []
     name = os.path.basename(path).lower()
-    is_sample_lab = "instrument-lab-" in name or "sample-lab-" in name
     if img.size != (240, 240):
         issues.append(Issue(path, f"expected 240x240 app screenshot, got {img.size[0]}x{img.size[1]}"))
 
-    # Bright/colored content on the outermost app edge usually means clipping.
-    edge_ink = (
-        rect_ink(mask, (0, 0, 239, 0))
-        + rect_ink(mask, (0, 239, 239, 239))
-        + rect_ink(mask, (0, 0, 0, 239))
-        + rect_ink(mask, (239, 0, 239, 239))
-    )
-    if edge_ink > 24:
-        issues.append(Issue(path, f"too much foreground on app edge ({edge_ink}px); likely clipped or bleeding"))
+    # Long continuous edge runs usually mean a visual panel is clipped. Modal
+    # frames are intentional and get screen-specific checks below.
+    if not is_framed_modal(name):
+        edge_runs = {edge: edge_run(mask, edge) for edge in ("top", "bottom", "left", "right")}
+        bad_edges = [f"{edge}={run}" for edge, run in edge_runs.items() if run >= 80]
+        if bad_edges:
+            issues.append(Issue(path, f"large continuous foreground on edge ({', '.join(bad_edges)}); likely clipped"))
 
     for row in range(30):
-        if is_sample_lab and 4 <= row <= 11:
-            # Dense waveform/meter rows are expected inside the sample lab
-            # visual panel. Screen-specific checks below verify that the panel
-            # stays out of the editable field area.
+        if dense_row_allowed(name, row):
             continue
         active = row_active_cells(mask, row)
         ink = row_ink(mask, row)
         if active >= 28 and ink > 900:
             issues.append(Issue(path, f"row {row} is nearly full and dense ({active} cells, {ink}px); likely unreadable"))
+
+    return issues
+
+
+def require_row(issues: List[Issue], path: str, mask: List[List[bool]], row: int,
+                label: str, minimum: int = 32) -> None:
+    ink = row_ink(mask, row)
+    if ink < minimum:
+        issues.append(Issue(path, f"missing/too faint {label} on row {row} ({ink}px)"))
+
+
+def require_rect(issues: List[Issue], path: str, mask: List[List[bool]], rect: BBox,
+                 label: str, minimum: int) -> None:
+    ink = rect_ink(mask, rect)
+    if ink < minimum:
+        issues.append(Issue(path, f"missing/too faint {label} in rect {rect} ({ink}px)"))
+
+
+def audit_producer_screen(path: str, mask: List[List[bool]]) -> List[Issue]:
+    issues: List[Issue] = []
+    name = os.path.basename(path).lower()
+    if not name.startswith("audit-"):
+        return issues
+
+    if "audit-00-boot-project" in name:
+        require_row(issues, path, mask, 5, "project list", 40)
+        require_row(issues, path, mask, 26, "Load/New/Exit action row", 80)
+    elif "audit-00-new-project" in name:
+        require_row(issues, path, mask, 7, "new project dialog content", 40)
+        require_row(issues, path, mask, 26, "dialog actions", 40)
+    elif "audit-01-song" in name or "audit-03-song-chain" in name:
+        require_row(issues, path, mask, 0, "song title/status", 40)
+        require_rect(issues, path, mask, (0, 32, 220, 160), "song chain grid", 500)
+        require_rect(issues, path, mask, (16, 176, 216, 224), "song channel monitor", 250)
+    elif "audit-02-mixer" in name:
+        require_row(issues, path, mask, 0, "mixer title/status", 40)
+        require_row(issues, path, mask, 4, "mixer channel labels", 80)
+        require_rect(issues, path, mask, (20, 48, 220, 128), "mixer channel meters", 250)
+    elif "audit-04-chain" in name or "audit-05-chain-phrase" in name:
+        require_row(issues, path, mask, 0, "chain title/status", 40)
+        require_rect(issues, path, mask, (0, 32, 180, 160), "chain rows", 350)
+    elif "audit-06-phrase" in name or "audit-07-phrase-note" in name:
+        require_row(issues, path, mask, 0, "phrase title/status", 40)
+        require_rect(issues, path, mask, (0, 32, 236, 164), "phrase note/effect grid", 900)
+        require_rect(issues, path, mask, (16, 184, 216, 224), "phrase mini waveform/monitor", 160)
+    elif "audit-08-table" in name:
+        require_row(issues, path, mask, 0, "table title/status", 40)
+        require_rect(issues, path, mask, (0, 32, 236, 164), "table effect grid", 700)
+    elif "audit-09-groove" in name:
+        require_row(issues, path, mask, 0, "groove title/status", 40)
+        require_rect(issues, path, mask, (0, 32, 180, 164), "groove rows", 300)
+    elif "audit-10-instrument" in name:
+        require_row(issues, path, mask, 0, "instrument title/status", 40)
+        require_row(issues, path, mask, 2, "instrument lab title", 40)
+        require_row(issues, path, mask, 17, "instrument editable fields", 40)
+    elif "audit-11-table-instrument" in name:
+        require_row(issues, path, mask, 0, "instrument table title/status", 40)
+        require_rect(issues, path, mask, (0, 32, 236, 164), "instrument table rows", 700)
+    elif "audit-12-sample-import" in name:
+        require_row(issues, path, mask, 7, "sample import file list", 80)
+        require_row(issues, path, mask, 23, "sample import actions", 120)
+    elif "audit-13-project" in name:
+        require_row(issues, path, mask, 0, "project title/status", 80)
+        require_row(issues, path, mask, 5, "tempo/master settings", 80)
+        require_rect(issues, path, mask, (0, 40, 230, 220), "project settings list", 700)
+    elif "audit-14-power-menu" in name:
+        require_rect(issues, path, mask, (28, 78, 212, 148), "power menu dialog", 600)
 
     return issues
 
@@ -238,6 +345,7 @@ def audit_paths(paths: Iterable[str]) -> List[Issue]:
         img = load_rgb(path)
         mask = foreground_mask(img)
         issues.extend(audit_generic(path, img, mask))
+        issues.extend(audit_producer_screen(path, mask))
         issues.extend(audit_sample_lab(path, mask))
     return issues
 

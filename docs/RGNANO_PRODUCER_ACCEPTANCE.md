@@ -12,7 +12,15 @@ The open question is no longer "can it make a song?" It can. The open question i
 
 ## Screen Audit Matrix
 
-Run `projects/resources/RGNANO_SIM/producer-screen-audit.rgsim` to capture the current view set. The script writes screenshots named `audit-*.bmp` and `dump_state` logs for every screen below.
+Run the full app-only layout audit with:
+
+```powershell
+python tools\run_producer_layout_audit.py
+```
+
+That runner builds `RGNANO_SIM`, runs `projects/resources/RGNANO_SIM/producer-screen-audit-appshots.rgsim`, captures every core producer-facing screen as `audit-*.bmp`, applies the programmatic 240x240 layout audit, and cleans generated files afterward.
+
+For manual inspection with state logs, `projects/resources/RGNANO_SIM/producer-screen-audit.rgsim` still captures the current view set and writes `dump_state` logs for every screen below.
 
 Latest audit: passed on the native `RGNANO_SIM` executable at 240x240. Every scripted view assertion passed, `expect_no_error` was clean, and visual review confirmed the core tracker screens are readable at RG Nano resolution.
 
@@ -92,7 +100,7 @@ These are not drop-in ports, but they are useful references for feature design a
 
 ## Near-Term Work
 
-1. Run the screen audit after every RG Nano layout change.
+1. Run `python tools\run_producer_layout_audit.py` after every RG Nano layout change.
 2. Review `audit-*.bmp` screenshots at actual 240x240 size, not scaled up.
 3. Fix any screen where the selected item, cursor, or active mode is not obvious.
 4. Add dedicated tests for instrument parameter editing and deeper audio-shaping commands.
