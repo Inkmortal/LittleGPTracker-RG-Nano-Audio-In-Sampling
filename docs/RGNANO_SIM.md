@@ -64,6 +64,37 @@ The mixer waveform workflow programs a minimal song, starts playback, opens Mixe
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\mixer-waveform-workflow.rgsim -ResetLastProject -SeedLofiFixture -Skin -ArtifactsDir .\sim-artifacts-mixer-waveform
 ```
 
+The universal context overlay workflow verifies that `R + Select` opens the same helper layer from real tracker views, that `Up`/`Down` pages between minimap and context commands, and that it closes without leaking inputs into the song:
+
+```powershell
+.\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\context-overlay-workflow.rgsim -ResetLastProject -Skin -ArtifactsDir .\sim-artifacts-context-overlay
+```
+
+Direct executable form, useful when the helper script is not available:
+
+```powershell
+cd .\projects
+.\lgpt-rgnano-sim.exe -AUTO_LOAD_LAST=NO -RGNANOSIM_SCRIPT=resources\RGNANO_SIM\context-overlay-workflow.rgsim
+```
+
+The command selector workflow verifies a core tracker producer move: create a song/chain/phrase, open the Phrase command selector with `Select`, confirm `ARPG`, edit its parameter, then open the same selector from Table view:
+
+```powershell
+.\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\command-selector-workflow.rgsim -ResetLastProject -Skin -ArtifactsDir .\sim-artifacts-command-selector
+```
+
+The command runtime workflow verifies measurable command behavior while the song is playing: `TABL` starts table playback, `GROV` changes channel groove state, and `TMPO` changes the project tempo:
+
+```powershell
+.\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\command-runtime-workflow.rgsim -ResetLastProject -SeedLofiFixture -Skin -ArtifactsDir .\sim-artifacts-command-runtime
+```
+
+The playback scope workflow verifies that the visible `PLAY:` label matches actual tracker mode from Song, Chain, Phrase, and Table, including Phrase `R + Start` for song-context playback:
+
+```powershell
+.\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\playback-scope-workflow.rgsim -ResetLastProject -Skin -ArtifactsDir .\sim-artifacts-playback-scope
+```
+
 The producer persistence pair creates a multi-instrument project, saves it, relaunches through `AUTO_LOAD_LAST`, verifies tempo/song/chain/phrase/sample bindings, and captures audio from the reopened project:
 
 ```powershell
@@ -160,6 +191,10 @@ dump_state sample import open
 expect_song_chain 0 0 00
 expect_chain_phrase 0 0 00
 expect_phrase_row_count 0 8
+expect_phrase_command 0 0 1 ARPG
+expect_phrase_param 0 0 1 0001
+expect_groove 0 1
+expect_table_active 0 0
 expect_tempo 86
 expect_instrument_sample 4 wuxia-guzheng.wav
 
@@ -172,6 +207,8 @@ sim_import_sample_to_instrument 3 wuxia-guzheng.wav
 sim_set_song_chain 0 3 3
 sim_set_chain_phrase 3 0 3 0
 sim_set_phrase_note 3 0 50 3
+sim_set_phrase_command 3 0 1 TABL 0000
+sim_set_table_command 0 0 1 VOLM 0040
 sim_save_project
 
 # reset and assert measured non-silent tracker audio output
@@ -263,6 +300,12 @@ The all-8-channels workflow assigns independent chains, phrases, notes, and inst
 
 ```powershell
 .\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\all-8-channels-workflow.rgsim -ResetLastProject -SeedLofiFixture -Skin -ArtifactsDir .\sim-artifacts
+```
+
+The render/export workflow uses the app's native Project `Render:` field. It sets `Stereo`, starts/stops song playback, and asserts the active project contains a non-empty `mixdown.wav`; then it sets `Stems` and asserts `channel0.wav` exists with audio-sized data:
+
+```powershell
+.\tools\run-rgnano-sim.ps1 -Script .\projects\resources\RGNANO_SIM\render-export-workflow.rgsim -ResetLastProject -SeedLofiFixture -ArtifactsDir .\sim-artifacts
 ```
 
 The mixer waveform workflow verifies the Mixer screen's live master waveform during song playback:

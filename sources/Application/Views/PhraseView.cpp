@@ -285,9 +285,8 @@ void PhraseView::updateCursorValue(ViewUpdateDirection direction, int xOffset,
         }
     }
     Player *player = Player::GetInstance();
-    // Phrase FX params are currently not applied to preview
-    if (col_ == 0 || col_ == 1 || col_ == 2 || col_ == 3 || col_ == 4 ||
-        col_ == 5) {
+    // Phrase FX params are currently not applied to preview.
+    if (col_ == 0 || col_ == 1) {
         if (player->IsRunning()) {
             if ((viewData_->playMode_ == PM_AUDITION)) {
                 player->Stop();
@@ -990,6 +989,11 @@ void PhraseView::processNormalButtonMask(unsigned short mask) {
             toggleMute();
     } else {
 
+        if (mask == EPBM_SELECT && isCommandColumn()) {
+            enterCommandSelector();
+            return;
+        }
+
         // A Modifer
 
         if (mask & EPBM_A) {
@@ -1573,15 +1577,15 @@ void PhraseView::drawMiniWaveform(bool force) {
 
     SDLGUIWindowImp *imp = (SDLGUIWindowImp *)w_.GetImpWindow();
     MixerService *mixer = MixerService::GetInstance();
-    const int x = 88;
+    const int x = 0;
     const int y = 26;
-    const int width = 128;
+    const int width = 240;
     const int height = 12;
     const int mid = y + (height / 2);
     const int columns = AudioMixer::WAVEFORM_SIZE;
     GUIColor scopeBackground(0x1D, 0x0A, 0x1F);
     GUIColor scopeTrace(0xDB, 0x33, 0xDB);
-    GUIColor scopeBright(0xF5, 0xEB, 0xFF);
+    GUIColor scopeCenter(0x5E, 0x24, 0x62);
 
     imp->SetColor(scopeBackground);
     GUIRect clear(x, y, x + width, y + height);
@@ -1604,25 +1608,21 @@ void PhraseView::drawMiniWaveform(bool force) {
         gain = 620;
     }
 
-    imp->SetColor(scopeBright);
+    imp->SetColor(scopeCenter);
     for (int col = 0; col < width; col += 12) {
         GUIRect center(x + col, mid, x + col + 2, mid + 1);
         imp->DrawRect(center);
     }
 
-    int previousY = mid;
     for (int col = 0; col < width; col++) {
-        int sampleIndex = (col * columns) / width;
-        int prevIndex = sampleIndex > 0 ? sampleIndex - 1 : sampleIndex;
-        int nextIndex = ((col + 1) * columns) / width;
-        if (nextIndex >= columns) {
-            nextIndex = columns - 1;
-        }
-
-        int previous = mixer->GetMasterWaveformSample(prevIndex);
+        int scaled = (col * (columns - 1) * 256) / (width - 1);
+        int sampleIndex = scaled / 256;
+        int frac = scaled - (sampleIndex * 256);
+        int nextIndex = sampleIndex + 1;
+        if (nextIndex >= columns) nextIndex = columns - 1;
         int sample = mixer->GetMasterWaveformSample(sampleIndex);
-        int next = mixer->GetMasterWaveformSample(nextIndex);
-        int smoothed = (previous + (sample * 2) + next) / 4;
+        int nextSample = mixer->GetMasterWaveformSample(nextIndex);
+        int smoothed = sample + (((nextSample - sample) * frac) / 256);
         int waveY = mid - ((smoothed * gain * (height / 2 - 1)) / 10000);
         if (waveY < y + 1) {
             waveY = y + 1;
@@ -1631,12 +1631,28 @@ void PhraseView::drawMiniWaveform(bool force) {
             waveY = y + height - 2;
         }
 
-        imp->SetColor(scopeTrace);
-        int top = previousY < waveY ? previousY : waveY;
-        int bottom = previousY > waveY ? previousY : waveY;
-        if (bottom - top > 4) {
-            if (previousY < waveY) {
-                top = waveY - 3;
+        int top = waveY;
+        int bottom = waveY;
+        if (col > 0) {
+            int prevScaled = ((col - 1) * (columns - 1) * 256) / (width - 1);
+            int prevIndex = prevScaled / 256;
+            int prevFrac = prevScaled - (prevIndex * 256);
+            int prevNextIndex = prevIndex + 1;
+            if (prevNextIndex >= columns) prevNextIndex = columns - 1;
+            int prevSample = mixer->GetMasterWaveformSample(prevIndex);
+            int prevNextSample = mixer->GetMasterWaveformSample(prevNextIndex);
+            int prevSmoothed =
+                prevSample + (((prevNextSample - prevSample) * prevFrac) / 256);
+            int prevY = mid - ((prevSmoothed * gain * (height / 2 - 1)) / 10000);
+            if (prevY < y + 1) prevY = y + 1;
+            if (prevY >= y + height - 1) prevY = y + height - 2;
+
+            int delta = prevY > waveY ? prevY - waveY : waveY - prevY;
+            if (delta <= 3) {
+                top = prevY < waveY ? prevY : waveY;
+                bottom = prevY > waveY ? prevY : waveY;
+            } else if (prevY < waveY) {
+                top = waveY - 2;
             } else {
                 bottom = waveY + 3;
             }
@@ -1648,18 +1664,9 @@ void PhraseView::drawMiniWaveform(bool force) {
             bottom = y + height - 2;
         }
 
+        imp->SetColor(scopeTrace);
         GUIRect wave(x + col, top, x + col + 1, bottom + 1);
         imp->DrawRect(wave);
-
-        int minSample = mixer->GetMasterWaveformMin(sampleIndex);
-        int maxSample = mixer->GetMasterWaveformMax(sampleIndex);
-        if ((col % 24) == 0 && maxSample - minSample > 140) {
-            imp->SetColor(scopeBright);
-            GUIRect spark(x + col, waveY - 1, x + col + 1, waveY + 2);
-            imp->DrawRect(spark);
-        }
-
-        previousY = waveY;
     }
 #endif
 }

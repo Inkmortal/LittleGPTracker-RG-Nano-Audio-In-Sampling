@@ -678,6 +678,11 @@ void TableView::processNormalButtonMask(unsigned short mask) {
 
     } else {
 
+        if (mask == EPBM_SELECT && isCommandColumn()) {
+            enterCommandSelector();
+            return;
+        }
+
         // A modifier
 
         if (mask & EPBM_A) {

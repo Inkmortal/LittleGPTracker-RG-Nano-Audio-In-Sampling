@@ -313,7 +313,7 @@ void MixerView::drawChannelMeters(bool force) {
 #if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
     MixerService *mixer = MixerService::GetInstance();
     SDLGUIWindowImp *imp = (SDLGUIWindowImp *)w_.GetImpWindow();
-    const int startX = 16;
+    const int startX = 24;
     const int labelRow = 4;
     const int meterTop = 52;
     const int meterHeight = 38;
@@ -469,7 +469,7 @@ void MixerView::drawWaveform(bool force) {
     lastWaveformDrawMs_=now;
 
     SDLGUIWindowImp *imp = (SDLGUIWindowImp *)w_.GetImpWindow();
-    const int x = 16;
+    const int x = 24;
     const int y = 132;
     const int width = 192;
     const int height = 56;

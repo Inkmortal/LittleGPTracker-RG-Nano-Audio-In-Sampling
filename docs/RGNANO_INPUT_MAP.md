@@ -32,6 +32,31 @@ up n
 
 The power menu is intentionally separate from `Select`. `Select` remains an LGPT tracker input, while `KEY_POWER` is a global app/menu input that is swallowed before it reaches tracker playback or note preview handling.
 
+## Universal Context Overlay
+
+`R + Select` opens a small context/helper overlay on every main tracker view. Hold `R`, tap `Select`, then release `R`. The overlay is meant for power-user navigation, not full manual reading.
+
+Page 1 is the minimap: it shows the current screen name, the core LGPT screen chain, the fastest exits from the current screen, and the primary editing gesture for that screen.
+
+Press `Up` or `Down` while the helper is open to switch to page 2. Page 2 is the command helper for the current screen: it lists the highest-value inputs and short descriptions for exactly where the producer is standing. Use `R + Select` again to close it.
+
+While the overlay is visible, normal tracker inputs are blocked so a producer can check the map without accidentally writing notes, changing chain slots, or previewing audio. Modal dialogs keep their own controls and do not use this overlay.
+
+## Playback Scope Label
+
+Main tracker views show a compact transport/scope label so producers can tell what Start is actually playing:
+
+| Label | Meaning |
+| --- | --- |
+| `STOP` | Nothing is playing. |
+| `PLAY:SONG` | Song arrangement context is playing. |
+| `PLAY:CHAIN` | Current channel chain context is playing. |
+| `PLAY:PHR` | Current channel phrase context is playing. |
+| `PLAY:LIVE` | Live/queued chain mode is active. |
+| `AUDITION` | Note/sample preview is active. |
+
+On Chain, Phrase, Table, Instrument, and Groove-style screens, normal `Start` focuses on the current channel/context. `R + Start` is the song-context shortcut when you want to hear the thing you are editing with the surrounding arrangement.
+
 ## Global Field Editing
 
 `FieldView` is the shared behavior for project and instrument fields:
@@ -154,7 +179,7 @@ flowchart LR
 | `B + R` | Toggle mute. |
 | `A + R` | Toggle solo. |
 | Start | Start chain from current row. |
-| R + Start | Start full chain. |
+| R + Start | Start in song context. |
 
 ## Phrase View
 
@@ -164,6 +189,7 @@ flowchart LR
 | `A` | Preview notes/instruments and paste last value. |
 | `A + D-pad` | Edit note, instrument, command, or parameter value. Note-column edits are chromatic while Project `Key:` is `--`; once a key is set, note edits follow Project `Key:` and `Scale:`. |
 | `L + D-pad` on note column | Quick chromatic note edit, ignoring Project `Key:` and `Scale:` for outside notes and passing tones. |
+| `Select` on command columns | Open the command selector/help picker for the focused command slot. |
 | `A + Up/Down` on command columns | Open command selector. |
 | `B + D-pad` | Warp to neighboring phrases or phrase rows in chain. |
 | `B + A` | Cut current phrase position. |
@@ -172,7 +198,7 @@ flowchart LR
 | `B + R` | Toggle mute. |
 | `A + R` | Toggle solo. |
 | Start | Start phrase from current row. |
-| R + Start | Start full phrase. |
+| R + Start | Start in song context. |
 
 ## Instrument And Samples
 
@@ -190,7 +216,7 @@ The sample workflow starts in `InstrumentView` with focus on the `sample:` field
 | R + Left | Return to Phrase. |
 | R + Down | Open instrument table view. |
 | Start | Start phrase from current row. |
-| R + Start | Start full phrase. |
+| R + Start | Start in song context. |
 
 Sample import modal actions are `Listen`, `Import`, `Record`, `Exit`.
 
@@ -216,6 +242,7 @@ Table view follows the same tracker editing style:
 | --- | --- |
 | D-pad | Move table cursor. |
 | `A + D-pad` | Edit table value. |
+| `Select` on command columns | Open the command selector/help picker for the focused command slot. |
 | `A + Up/Down` on command columns | Open command selector. |
 | `B + D-pad` | Warp between tables. |
 | `B + A` | Cut current position. |
@@ -249,3 +276,9 @@ The simulator should not need hand-written one-off probes for every screen. The 
 `expect_view <name>` is the source-level view assertion for simulator scripts. It reads the active `AppWindow` view directly, so route tests can fail on “still in Chain” instead of only failing later because a screenshot looked wrong.
 
 `expect_project_sample <filename>` resolves the active project's `samples:` alias and checks that an imported WAV exists there. This is the first assertion that proves uploaded sample import changed the LGPT project, not just the simulator UI.
+
+`sim_set_render_mode <0|1|2>` sets the active project's native render mode: `0` Off, `1` Stereo, `2` Stems. It updates the project variable and mixer service so scripted Start/Stop uses the same render path as the UI.
+
+`expect_render_mode <0|1|2>` verifies the active project render setting.
+
+`expect_project_file_bytes <filename> <minBytes>` resolves `project:<filename>` and checks the file exists with enough data. `render-export-workflow.rgsim` uses it to prove `mixdown.wav` and `channel0.wav` are real native render outputs, not just simulator audio captures.

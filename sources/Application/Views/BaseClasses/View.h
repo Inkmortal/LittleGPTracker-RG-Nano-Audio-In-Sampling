@@ -144,6 +144,8 @@ class View : public Observable {
     GUIPoint GetTitlePosition();
 
     void drawMap();
+    void drawContextOverlay();
+    void drawPlaybackScope();
     void drawNotes();
     void drawMiniMeters();
 
@@ -175,6 +177,8 @@ class View : public Observable {
     static bool ultraCompactLayout_;  // For RG Nano 240x240
     static int altRowNumber_;
     static int cursorAnimFrame_;  // For cursor pulse animation
+    static bool contextOverlay_;
+    static int contextOverlayPage_;
 };
 
 #endif

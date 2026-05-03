@@ -3,10 +3,15 @@
 #include "Application/Application.h"
 #include "Application/AppWindow.h"
 #include "Application/Instruments/InstrumentBank.h"
+#include "Application/Instruments/CommandList.h"
 #include "Application/Instruments/SampleInstrument.h"
 #include "Application/Instruments/SamplePool.h"
+#include "Application/Mixer/MixerService.h"
+#include "Application/Model/Groove.h"
 #include "Application/Model/Scale.h"
+#include "Application/Model/Table.h"
 #include "Application/Player/Player.h"
+#include "Application/Player/TablePlayback.h"
 #include "Application/Persistency/PersistencyService.h"
 #include "System/FileSystem/FileSystem.h"
 #include "UIFramework/BasicDatas/FontConfig.h"
@@ -16,6 +21,7 @@
 #include "System/Console/Trace.h"
 #include "System/System/System.h"
 #include "Application/Views/BaseClasses/ViewEvent.h"
+#include "Application/Utils/char.h"
 #include <fstream>
 #include <sstream>
 #include <stdlib.h>
@@ -485,12 +491,18 @@ bool SDLEventManager::AddSimScriptLine(const std::string &line, const char *scri
 			command.arg2.erase(0,1);
 		}
 	} else if (command.op=="expect_no_error" || command.op=="expect_skin_frame_clean" || command.op=="reset_audio_stats" || command.op=="end_audio_capture" || command.op=="sim_save_project" || command.op=="quit") {
-	} else if (command.op=="expect_colors" || command.op=="expect_audio_activity" || command.op=="expect_audio_silence" || command.op=="expect_audio_capture_bytes" || command.op=="expect_tempo" || command.op=="sim_set_tempo" || command.op=="sim_set_scale" || command.op=="sim_set_key") {
+	} else if (command.op=="expect_colors" || command.op=="expect_audio_activity" || command.op=="expect_audio_silence" || command.op=="expect_audio_capture_bytes" || command.op=="expect_tempo" || command.op=="expect_render_mode" || command.op=="sim_set_tempo" || command.op=="sim_set_render_mode" || command.op=="sim_set_scale" || command.op=="sim_set_key") {
 		iss >> command.value;
+	} else if (command.op=="expect_project_file_bytes") {
+		iss >> command.arg >> command.value;
 	} else if (command.op=="start_audio_capture") {
 		iss >> command.arg;
 	} else if (command.op=="expect_song_chain" || command.op=="expect_chain_phrase") {
 		iss >> command.value >> command.value2 >> command.arg;
+	} else if (command.op=="expect_phrase_command" || command.op=="expect_phrase_param") {
+		iss >> command.value >> command.value2 >> command.arg >> command.arg2;
+	} else if (command.op=="expect_groove" || command.op=="expect_table_active") {
+		iss >> command.value >> command.value2;
 	} else if (command.op=="expect_phrase_row_count" || command.op=="expect_size") {
 		iss >> command.value >> command.value2;
 	} else if (command.op=="expect_instrument_sample" || command.op=="expect_playing_channel" || command.op=="sim_import_sample_to_instrument") {
@@ -499,6 +511,8 @@ bool SDLEventManager::AddSimScriptLine(const std::string &line, const char *scri
 		iss >> command.value >> command.value2 >> command.arg;
 	} else if (command.op=="sim_set_chain_phrase" || command.op=="sim_set_phrase_note") {
 		iss >> command.value >> command.value2 >> command.arg >> command.arg2;
+	} else if (command.op=="sim_set_phrase_command" || command.op=="sim_set_table_command") {
+		iss >> command.value >> command.value2 >> command.arg >> command.arg2 >> command.arg3;
 	}
 	simCommands_.push_back(command);
 	return true;
@@ -634,6 +648,11 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 			FailSimScript("file assertion failed");
 			return;
 		}
+	} else if (command.op=="expect_project_file_bytes") {
+		if (!ExpectSimProjectFileBytes(command.arg,command.value)) {
+			FailSimScript("project file byte assertion failed");
+			return;
+		}
 	} else if (command.op=="expect_project_sample") {
 		if (!ExpectSimProjectSample(command.arg)) {
 			FailSimScript("project sample assertion failed");
@@ -728,6 +747,26 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 			FailSimScript("chain phrase assertion failed");
 			return;
 		}
+	} else if (command.op=="expect_phrase_command") {
+		if (!ExpectSimPhraseCommand(command.value,command.value2,atoi(command.arg.c_str()),command.arg2)) {
+			FailSimScript("phrase command assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_phrase_param") {
+		if (!ExpectSimPhraseParam(command.value,command.value2,atoi(command.arg.c_str()),command.arg2)) {
+			FailSimScript("phrase param assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_groove") {
+		if (!ExpectSimGroove(command.value,command.value2)) {
+			FailSimScript("groove assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_table_active") {
+		if (!ExpectSimTableActive(command.value,command.value2)) {
+			FailSimScript("table active assertion failed");
+			return;
+		}
 	} else if (command.op=="expect_phrase_row_count") {
 		if (!ExpectSimPhraseRowCount(command.value,command.value2)) {
 			FailSimScript("phrase row count assertion failed");
@@ -738,6 +777,11 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 			FailSimScript("tempo assertion failed");
 			return;
 		}
+	} else if (command.op=="expect_render_mode") {
+		if (!ExpectSimRenderMode(command.value)) {
+			FailSimScript("render mode assertion failed");
+			return;
+		}
 	} else if (command.op=="expect_instrument_sample") {
 		if (!ExpectSimInstrumentSample(command.value,command.arg)) {
 			FailSimScript("instrument sample assertion failed");
@@ -746,6 +790,11 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 	} else if (command.op=="sim_set_tempo") {
 		if (!SimSetTempo(command.value)) {
 			FailSimScript("tempo setup failed");
+			return;
+		}
+	} else if (command.op=="sim_set_render_mode") {
+		if (!SimSetRenderMode(command.value)) {
+			FailSimScript("render mode setup failed");
 			return;
 		}
 	} else if (command.op=="sim_set_note_names") {
@@ -781,6 +830,16 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 	} else if (command.op=="sim_set_phrase_note") {
 		if (!SimSetPhraseNote(command.value,command.value2,atoi(command.arg.c_str()),atoi(command.arg2.c_str()))) {
 			FailSimScript("phrase setup failed");
+			return;
+		}
+	} else if (command.op=="sim_set_phrase_command") {
+		if (!SimSetPhraseCommand(command.value,command.value2,atoi(command.arg.c_str()),command.arg2,command.arg3)) {
+			FailSimScript("phrase command setup failed");
+			return;
+		}
+	} else if (command.op=="sim_set_table_command") {
+		if (!SimSetTableCommand(command.value,command.value2,atoi(command.arg.c_str()),command.arg2,command.arg3)) {
+			FailSimScript("table command setup failed");
 			return;
 		}
 	} else if (command.op=="sim_save_project") {
@@ -963,6 +1022,26 @@ bool SDLEventManager::ExpectSimFile(const std::string &path)
 	bool exists=file.good();
 	Trace::Log("RGNANO_SIM","expect_file %s => %s",path.c_str(),exists?"exists":"missing");
 	return exists;
+}
+
+bool SDLEventManager::ExpectSimProjectFileBytes(const std::string &path, int minBytes)
+{
+	if (path.empty() || minBytes<0) {
+		Trace::Error("RGNANO_SIM expect_project_file_bytes invalid args path=%s minBytes=%d",path.c_str(),minBytes);
+		return false;
+	}
+	std::string aliasPath="project:";
+	aliasPath+=path;
+	Path projectPath(aliasPath.c_str());
+	std::ifstream file(projectPath.GetPath().c_str(),std::ios::binary | std::ios::ate);
+	if (!file.is_open()) {
+		Trace::Log("RGNANO_SIM","expect_project_file_bytes %s => missing (%s)",path.c_str(),projectPath.GetPath().c_str());
+		return false;
+	}
+	std::streamoff size=file.tellg();
+	bool matches=size>=minBytes;
+	Trace::Log("RGNANO_SIM","expect_project_file_bytes %s size=%ld min=%d => %s",projectPath.GetPath().c_str(),(long)size,minBytes,matches?"ok":"too small");
+	return matches;
 }
 
 bool SDLEventManager::ExpectSimProjectSample(const std::string &sampleName)
@@ -1245,6 +1324,38 @@ static bool ParseSimExpectedByte(const std::string &expected, unsigned char actu
 	return end && *end==0 && value>=0 && value<=0xFF && actual==(unsigned char)value;
 }
 
+static bool ParseSimHexWord(const std::string &text, ushort *out)
+{
+	if (!out || text.empty()) {
+		return false;
+	}
+	char *end=0;
+	long value=strtol(text.c_str(),&end,16);
+	if (!end || *end!=0 || value<0 || value>0xFFFF) {
+		return false;
+	}
+	*out=(ushort)value;
+	return true;
+}
+
+static bool ParseSimCommandName(const std::string &name, FourCC *out)
+{
+	if (!out || name.empty()) {
+		return false;
+	}
+	for (int i=0;i<CommandList::GetCount();i++) {
+		FourCC command=CommandList::GetAt(i);
+		char buffer[5];
+		fourCC2char(command,buffer);
+		buffer[4]=0;
+		if (name==buffer) {
+			*out=command;
+			return true;
+		}
+	}
+	return false;
+}
+
 bool SDLEventManager::ExpectSimSongChain(int row, int channel, const std::string &expected)
 {
 	GUIWindow *guiWindow=Application::GetInstance()->GetWindow();
@@ -1297,6 +1408,70 @@ bool SDLEventManager::ExpectSimPhraseRowCount(int phrase, int minRows)
 	return matches;
 }
 
+bool SDLEventManager::ExpectSimPhraseCommand(int phrase, int row, int slot, const std::string &expected)
+{
+	ViewData *viewData=GetSimViewData();
+	if (!viewData || !viewData->song_ || phrase<0 || phrase>=PHRASE_COUNT || row<0 || row>=16 || slot<1 || slot>2 || expected.empty()) {
+		Trace::Error("RGNANO_SIM expect_phrase_command invalid args phrase=%d row=%d slot=%d expected=%s",phrase,row,slot,expected.c_str());
+		return false;
+	}
+	FourCC actual=(slot==1)
+		? *(viewData->song_->phrase_->cmd1_ + 16 * phrase + row)
+		: *(viewData->song_->phrase_->cmd2_ + 16 * phrase + row);
+	char buffer[5];
+	fourCC2char(actual,buffer);
+	buffer[4]=0;
+	bool matches=expected==buffer;
+	Trace::Log("RGNANO_SIM","expect_phrase_command phrase=%02X row=%d slot=%d actual=%s expected=%s => %s",phrase,row,slot,buffer,expected.c_str(),matches?"match":"mismatch");
+	return matches;
+}
+
+bool SDLEventManager::ExpectSimPhraseParam(int phrase, int row, int slot, const std::string &expected)
+{
+	ViewData *viewData=GetSimViewData();
+	if (!viewData || !viewData->song_ || phrase<0 || phrase>=PHRASE_COUNT || row<0 || row>=16 || slot<1 || slot>2 || expected.empty()) {
+		Trace::Error("RGNANO_SIM expect_phrase_param invalid args phrase=%d row=%d slot=%d expected=%s",phrase,row,slot,expected.c_str());
+		return false;
+	}
+	ushort actual=(slot==1)
+		? *(viewData->song_->phrase_->param1_ + 16 * phrase + row)
+		: *(viewData->song_->phrase_->param2_ + 16 * phrase + row);
+	char buffer[5];
+	hexshort2char(actual,buffer);
+	buffer[4]=0;
+	bool matches=expected==buffer;
+	Trace::Log("RGNANO_SIM","expect_phrase_param phrase=%02X row=%d slot=%d actual=%s expected=%s => %s",phrase,row,slot,buffer,expected.c_str(),matches?"match":"mismatch");
+	return matches;
+}
+
+bool SDLEventManager::ExpectSimGroove(int channel, int groove)
+{
+	if (channel<0 || channel>=SONG_CHANNEL_COUNT || groove<0) {
+		Trace::Error("RGNANO_SIM expect_groove invalid args channel=%d groove=%d",channel,groove);
+		return false;
+	}
+	int actual=-1;
+	int position=-1;
+	Groove::GetInstance()->GetChannelData(channel,&actual,&position);
+	bool matches=actual==groove;
+	Trace::Log("RGNANO_SIM","expect_groove channel=%d actual=%d position=%d expected=%d => %s",channel,actual,position,groove,matches?"match":"mismatch");
+	return matches;
+}
+
+bool SDLEventManager::ExpectSimTableActive(int channel, int table)
+{
+	if (channel<0 || channel>=SONG_CHANNEL_COUNT || table<0 || table>=TABLE_COUNT) {
+		Trace::Error("RGNANO_SIM expect_table_active invalid args channel=%d table=%d",channel,table);
+		return false;
+	}
+	TablePlayback &playback=TablePlayback::GetTablePlayback(channel);
+	Table *actual=playback.GetTable();
+	Table *expected=&TableHolder::GetInstance()->GetTable(table);
+	bool matches=actual==expected;
+	Trace::Log("RGNANO_SIM","expect_table_active channel=%d active=%s expected=%02X => %s",channel,actual?"yes":"no",table,matches?"match":"mismatch");
+	return matches;
+}
+
 static ViewData *GetSimViewData()
 {
 	GUIWindow *guiWindow=Application::GetInstance()->GetWindow();
@@ -1337,6 +1512,19 @@ bool SDLEventManager::ExpectSimInstrumentSample(int instrument, const std::strin
 	return matches;
 }
 
+bool SDLEventManager::ExpectSimRenderMode(int mode)
+{
+	ViewData *viewData=GetSimViewData();
+	if (!viewData || !viewData->project_ || mode<0 || mode>2) {
+		Trace::Error("RGNANO_SIM expect_render_mode invalid mode=%d",mode);
+		return false;
+	}
+	int actual=viewData->project_->GetRenderMode();
+	bool matches=actual==mode;
+	Trace::Log("RGNANO_SIM","expect_render_mode actual=%d expected=%d => %s",actual,mode,matches?"match":"mismatch");
+	return matches;
+}
+
 bool SDLEventManager::SimSetTempo(int bpm)
 {
 	ViewData *viewData=GetSimViewData();
@@ -1351,6 +1539,29 @@ bool SDLEventManager::SimSetTempo(int bpm)
 	}
 	tempo->SetInt(bpm);
 	Trace::Log("RGNANO_SIM","sim_set_tempo %d",bpm);
+	return true;
+}
+
+bool SDLEventManager::SimSetRenderMode(int mode)
+{
+	ViewData *viewData=GetSimViewData();
+	if (!viewData || !viewData->project_ || mode<0 || mode>2) {
+		Trace::Error("RGNANO_SIM sim_set_render_mode invalid mode=%d",mode);
+		return false;
+	}
+	Variable *renderMode=viewData->project_->FindVariable(VAR_RENDER);
+	if (!renderMode) {
+		Trace::Error("RGNANO_SIM sim_set_render_mode missing project variable");
+		return false;
+	}
+	renderMode->SetInt(mode);
+	viewData->renderMode_=mode;
+	MixerService::GetInstance()->SetRenderMode(mode);
+	AppWindow *appWindow=(AppWindow *)Application::GetInstance()->GetWindow();
+	if (appWindow) {
+		appWindow->RefreshCurrentView();
+	}
+	Trace::Log("RGNANO_SIM","sim_set_render_mode %d",mode);
 	return true;
 }
 
@@ -1493,6 +1704,53 @@ bool SDLEventManager::SimSetPhraseNote(int phrase, int row, int note, int instru
 	*(viewData->song_->phrase_->instr_ + 16 * phrase + row)=(unsigned char)instrument;
 	viewData->song_->phrase_->SetUsed((unsigned char)phrase);
 	Trace::Log("RGNANO_SIM","sim_set_phrase_note phrase=%02X row=%d note=%d instrument=%02X",phrase,row,note,instrument);
+	return true;
+}
+
+bool SDLEventManager::SimSetPhraseCommand(int phrase, int row, int slot, const std::string &commandName, const std::string &paramText)
+{
+	ViewData *viewData=GetSimViewData();
+	FourCC command=I_CMD_NONE;
+	ushort param=0;
+	if (!viewData || !viewData->song_ || phrase<0 || phrase>=PHRASE_COUNT || row<0 || row>=16 || slot<1 || slot>2 ||
+		!ParseSimCommandName(commandName,&command) || !ParseSimHexWord(paramText,&param)) {
+		Trace::Error("RGNANO_SIM sim_set_phrase_command invalid args phrase=%d row=%d slot=%d command=%s param=%s",phrase,row,slot,commandName.c_str(),paramText.c_str());
+		return false;
+	}
+	if (slot==1) {
+		*(viewData->song_->phrase_->cmd1_ + 16 * phrase + row)=command;
+		*(viewData->song_->phrase_->param1_ + 16 * phrase + row)=param;
+	} else {
+		*(viewData->song_->phrase_->cmd2_ + 16 * phrase + row)=command;
+		*(viewData->song_->phrase_->param2_ + 16 * phrase + row)=param;
+	}
+	viewData->song_->phrase_->SetUsed((unsigned char)phrase);
+	Trace::Log("RGNANO_SIM","sim_set_phrase_command phrase=%02X row=%d slot=%d command=%s param=%04X",phrase,row,slot,commandName.c_str(),param);
+	return true;
+}
+
+bool SDLEventManager::SimSetTableCommand(int tableIndex, int row, int slot, const std::string &commandName, const std::string &paramText)
+{
+	FourCC command=I_CMD_NONE;
+	ushort param=0;
+	if (tableIndex<0 || tableIndex>=TABLE_COUNT || row<0 || row>=TABLE_STEPS || slot<1 || slot>3 ||
+		!ParseSimCommandName(commandName,&command) || !ParseSimHexWord(paramText,&param)) {
+		Trace::Error("RGNANO_SIM sim_set_table_command invalid args table=%d row=%d slot=%d command=%s param=%s",tableIndex,row,slot,commandName.c_str(),paramText.c_str());
+		return false;
+	}
+	Table &table=TableHolder::GetInstance()->GetTable(tableIndex);
+	if (slot==1) {
+		table.cmd1_[row]=command;
+		table.param1_[row]=param;
+	} else if (slot==2) {
+		table.cmd2_[row]=command;
+		table.param2_[row]=param;
+	} else {
+		table.cmd3_[row]=command;
+		table.param3_[row]=param;
+	}
+	TableHolder::GetInstance()->SetUsed(tableIndex);
+	Trace::Log("RGNANO_SIM","sim_set_table_command table=%02X row=%d slot=%d command=%s param=%04X",tableIndex,row,slot,commandName.c_str(),param);
 	return true;
 }
 

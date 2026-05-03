@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>M8 / RG Nano Producer Flow</title>
+  <link rel="stylesheet" href="styles.css?v=20260503-legend-v1">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">LittleGPTracker RG Nano</p>
+      <h1>M8 / RG Nano Producer Flow</h1>
+    </div>
+    <nav>
+      <a href="#devices">Devices</a>
+      <a href="m8-map.html">M8 Map</a>
+      <a href="rg-nano-map.html">RG Nano Map</a>
+      <a href="#gaps">Gaps</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="devices" class="device-lab">
+      <aside class="flow-picker">
+        <p class="eyebrow">Producer flow</p>
+        <h2 id="flowTitle">Build first pattern</h2>
+        <p id="flowSummary">Song -> Chain -> Phrase -> playback</p>
+        <div id="flowButtons" class="flow-buttons"></div>
+      </aside>
+
+      <section class="device-stage">
+        <div class="stage-toolbar">
+          <button id="prevStep" type="button">Prev</button>
+          <div>
+            <strong id="stepTitle">Start from the song grid</strong>
+            <span id="stepCounter">1 / 4</span>
+          </div>
+          <button id="nextStep" type="button">Next</button>
+        </div>
+
+        <div class="device-pair">
+          <article class="device-card">
+            <header><span>M8 Tracker</span><strong id="m8Title">Song View</strong></header>
+            <div class="m8-shell">
+              <div id="m8Display" class="tracker-screen"></div>
+            </div>
+            <p id="m8Controls" class="control-note">M8: EDIT / SHIFT+RIGHT</p>
+          </article>
+
+          <article class="device-card">
+            <header><span>RG Nano LGPT</span><strong id="rgTitle">Song View</strong></header>
+            <div class="nano-shell">
+              <div class="shoulder left">L</div>
+              <div class="shoulder right">R</div>
+              <div class="nano-screen">
+                <img id="rgCapture" alt="RG Nano screen">
+                <div id="rgFallback" class="tracker-screen"></div>
+              </div>
+            </div>
+            <p id="rgControls" class="control-note">RG Nano: A / R+Right</p>
+          </article>
+        </div>
+
+        <article id="screenExplainer" class="screen-explainer"></article>
+        <p id="stepDescription" class="step-description"></p>
+        <div class="flow-device-tabs" aria-label="Step explanation device">
+          <button class="active" type="button" data-flow-device="m8">M8</button>
+          <button type="button" data-flow-device="rg">RG Nano</button>
+        </div>
+        <article id="flowManual" class="manual-panel"></article>
+        <ol id="stepList" class="step-list"></ol>
+      </section>
+    </section>
+
+    <section class="map-landing">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Screen maps</p>
+          <h2>Device maps are separate now</h2>
+        </div>
+      </div>
+      <div class="map-links">
+        <a href="m8-map.html">
+          <strong>Open M8 screen map</strong>
+          <span>Producer workflow, recreated screen thumbnails, manual references, and action paths.</span>
+        </a>
+        <a href="rg-nano-map.html">
+          <strong>Open RG Nano screen map</strong>
+          <span>Actual 240x240 simulator captures, route notes, and explicit missing parity labels.</span>
+        </a>
+      </div>
+    </section>
+
+    <section id="gaps" class="gaps-section">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Parity gaps</p>
+          <h2>Say plainly what does not exist</h2>
+        </div>
+      </div>
+      <div id="gapList" class="gap-list"></div>
+    </section>
+  </main>
+
+  <script src="app.js?v=20260503-legend-v1"></script>
+</body>
+</html>

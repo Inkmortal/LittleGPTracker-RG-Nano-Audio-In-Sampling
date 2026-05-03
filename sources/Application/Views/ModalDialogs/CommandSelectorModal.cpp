@@ -125,6 +125,14 @@ void CommandSelectorModal::ProcessButtonMask(unsigned short mask, bool pressed) 
         navigateGrid(0, 1);
         isDirty_ = true;
     } else if (mask & EPBM_A) {
+        if (liveTarget_) {
+            *liveTarget_ = selectedCommand_;
+        }
+        EndModal(1);  // Confirm selection
+    } else if (mask & EPBM_SELECT) {
+        if (liveTarget_) {
+            *liveTarget_ = selectedCommand_;
+        }
         EndModal(1);  // Confirm selection
     } else if (mask & EPBM_B) {
         if (liveTarget_) {
@@ -139,7 +147,7 @@ void CommandSelectorModal::DrawView() {
     int rows = (count + GRID_COLUMNS - 1) / GRID_COLUMNS;
     int width = GRID_COLUMNS * 5;
 
-    SetWindow(width, rows);
+    SetWindow(width, rows + 4);
 
     GUITextProperties props;
 
@@ -167,11 +175,11 @@ void CommandSelectorModal::DrawView() {
 
     std::string *cmdStr = getHelpLegend(selectedCommand_);
     for (int i = 0; i < 3; i++) {
-        // Clear legend area first so shorter lines don't leave stale text.
-        View::DrawString(10, i, "                              ", props);
-        View::DrawString(10, i, cmdStr[i].c_str(), props);
+        DrawString(0, rows + 1 + i, "                         ", props);
+        DrawString(0, rows + 1 + i, cmdStr[i].c_str(), props);
 
     }
+    delete[] cmdStr;
 }
 
 void CommandSelectorModal::OnPlayerUpdate(PlayerEventType, unsigned int) {}

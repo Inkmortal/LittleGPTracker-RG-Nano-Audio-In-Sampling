@@ -1,0 +1,47 @@
+# Native WAV bounce workflow:
+# Set Project Render to Stereo, play the song, stop playback, and prove the
+# app wrote a non-empty mixdown WAV inside the active project folder.
+route boot.new_project_random
+expect_view song
+
+sim_set_tempo 92
+sim_import_sample_to_instrument 0 lofi-kick.wav
+sim_set_song_chain 0 0 0
+sim_set_chain_phrase 0 0 0 0
+sim_set_phrase_note 0 0 48 0
+sim_set_phrase_note 0 4 48 0
+sim_set_phrase_note 0 8 48 0
+sim_set_phrase_note 0 12 48 0
+
+route song.to_project
+expect_view project
+sim_set_render_mode 1
+expect_render_mode 1
+expect_screen_text Render: Stereo
+
+press s 80
+wait 900
+expect_player_running yes
+expect_screen_text PLAY:SONG
+press s 80
+wait 300
+expect_player_running no
+expect_project_file_bytes mixdown.wav 4096
+
+# Stems mode writes per-channel WAVs. This beat uses channel 0, so channel0.wav
+# must contain more than a header after the bounce is stopped.
+sim_set_render_mode 2
+expect_render_mode 2
+expect_screen_text Render: Stems
+press s 80
+wait 900
+expect_player_running yes
+press s 80
+wait 300
+expect_player_running no
+expect_project_file_bytes channel0.wav 4096
+
+sim_set_render_mode 0
+expect_render_mode 0
+expect_no_error
+quit

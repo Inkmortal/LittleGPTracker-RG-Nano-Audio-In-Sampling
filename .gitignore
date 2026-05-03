@@ -8,6 +8,8 @@ tracks/**
 *elf*
 *dge*
 sim-artifacts-*/
+docs/m8-rgnano-parity/source/*.pdf
+docs/m8-rgnano-parity/assets/m8-manual/
 basic-music-workflow.bmp
 sample-import-workflow.bmp
 sample-fixture.bmp

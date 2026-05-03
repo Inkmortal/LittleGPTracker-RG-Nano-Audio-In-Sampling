@@ -76,6 +76,7 @@ private:
 	void SaveSimAppScreenshot(SDLGUIWindowImp *window, const std::string &path);
 	void FailSimScript(const char *message);
 	bool ExpectSimFile(const std::string &path);
+	bool ExpectSimProjectFileBytes(const std::string &path, int minBytes);
 	bool ExpectSimProjectSample(const std::string &sampleName);
 	bool ExpectSimLog(const std::string &needle);
 	bool ExpectSimNoError();
@@ -93,9 +94,15 @@ private:
 	bool ExpectSimSongChain(int row, int channel, const std::string &expected);
 	bool ExpectSimChainPhrase(int chain, int row, const std::string &expected);
 	bool ExpectSimPhraseRowCount(int phrase, int minRows);
+	bool ExpectSimPhraseCommand(int phrase, int row, int slot, const std::string &expected);
+	bool ExpectSimPhraseParam(int phrase, int row, int slot, const std::string &expected);
+	bool ExpectSimGroove(int channel, int groove);
+	bool ExpectSimTableActive(int channel, int table);
 	bool ExpectSimTempo(int bpm);
 	bool ExpectSimInstrumentSample(int instrument, const std::string &sampleName);
+	bool ExpectSimRenderMode(int mode);
 	bool SimSetTempo(int bpm);
+	bool SimSetRenderMode(int mode);
 	bool SimSetNoteNames(const std::string &mode);
 	bool SimSetScale(int scale);
 	bool SimSetScaleKey(int key);
@@ -103,6 +110,8 @@ private:
 	bool SimSetSongChain(int row, int channel, int chain);
 	bool SimSetChainPhrase(int chain, int row, int phrase, int transpose);
 	bool SimSetPhraseNote(int phrase, int row, int note, int instrument);
+	bool SimSetPhraseCommand(int phrase, int row, int slot, const std::string &command, const std::string &param);
+	bool SimSetTableCommand(int table, int row, int slot, const std::string &command, const std::string &param);
 	bool SimSaveProject();
 	bool ExpectSimScreenSize(SDLGUIWindowImp *window, int width, int height);
 	bool ExpectSimScreenColors(SDLGUIWindowImp *window, int minColors);

@@ -1,0 +1,232 @@
+# RG Nano User Manual
+
+This manual is for the RG Nano fork of LittleGPTracker. It explains the practical production workflow on the 240x240 RG Nano screen.
+
+The short version: Song chooses chains, chains choose phrases, phrases contain notes and commands, instruments choose the sounds, and tables/grooves add motion and feel.
+
+## Device Basics
+
+| RG Nano button | Main use |
+| --- | --- |
+| D-pad | Move around the current screen. |
+| A | Confirm, paste/create, or edit with D-pad. |
+| B | Back, cut/copy/select actions, or alternate edits with D-pad. |
+| L | Left shoulder modifier for jumps, chromatic note override, and some clipboard actions. |
+| R | Right shoulder modifier for screen navigation and song-context actions. |
+| Start | Play or stop the current context. |
+| Select | Contextual helper or command picker, depending on where you are. |
+| Power | Global app/power menu. It is intentionally separate from tracker Select. |
+
+The simulator keyboard mapping is listed in [RGNANO_SIM.md](RGNANO_SIM.md).
+
+## The Tracker Stack
+
+| Layer | What it means | FL Studio-ish comparison |
+| --- | --- | --- |
+| Song | The full timeline. Rows go downward through time, columns are the 8 channels. | Playlist. |
+| Chain | A short ordered list of phrases for one Song cell/channel. | A pattern playlist for one lane. |
+| Phrase | The actual notes, instruments, and commands. | Piano roll/pattern data. |
+| Instrument | The sample or sound settings used by phrase notes. | Channel/instrument settings. |
+| Table | A small command sequence for repeated movement. | Automation/macro pattern. |
+| Groove | Timing values that change the feel/swing. | Groove/swing template. |
+| Mixer | Playback monitor for channel activity and waveform feedback. | Mixer/level monitor, not full mastering yet. |
+
+When multiple chains are placed on the same Song row, they play at the same time, one chain per channel. A song is not only 8 chains long; each Song row can hold up to 8 simultaneous chain references, and later rows continue the arrangement.
+
+## Main Navigation
+
+Hold `R` and tap a D-pad direction to move between major screens:
+
+| From | Combo | Goes to |
+| --- | --- | --- |
+| Song | `R + Right` | Chain for the selected Song cell, if that cell contains a chain. |
+| Song | `R + Down` | Mixer. |
+| Song | `R + Up` | Project/settings. |
+| Chain | `R + Left` | Song. |
+| Chain | `R + Right` | Phrase for the selected Chain row, if it contains a phrase. |
+| Phrase | `R + Left` | Chain. |
+| Phrase | `R + Right` | Instrument for the selected/nearest instrument. |
+| Phrase | `R + Down` | Phrase Table. |
+| Phrase | `R + Up` | Groove. |
+| Instrument | `R + Left` | Phrase. |
+| Instrument | `R + Down` | Instrument Table. |
+| Table | `R + Up` | Phrase or Instrument, depending on table type. |
+
+## Universal Helper
+
+`R + Select` opens the universal helper from any main tracker view.
+
+Page 1 is the minimap. It shows:
+
+- the current screen name
+- the main Song > Chain > Phrase relationship
+- where to navigate next
+- the main edit gesture for the current screen
+
+Press `Up` or `Down` while the helper is open to switch to page 2.
+
+Page 2 is the command page. It shows:
+
+- the most useful buttons for the current screen
+- short descriptions for each input
+- playback/context hints
+
+Press `R + Select` again to close the helper. While the helper is open, normal tracker inputs are blocked so you can read without accidentally changing music.
+
+## Playback Scope
+
+The RG Nano fork shows a small playback label on main screens:
+
+| Label | Meaning |
+| --- | --- |
+| `STOP` | Nothing is playing. |
+| `PLAY:SONG` | Song/arrangement context is playing. All active channels can run. |
+| `PLAY:CHAIN` | Current channel chain context is playing. |
+| `PLAY:PHR` | Current channel phrase context is playing. |
+| `PLAY:LIVE` | Live/queued chain mode is active. |
+| `AUDITION` | A note/sample preview is playing. |
+
+Important playback controls:
+
+| Screen | Input | Behavior |
+| --- | --- | --- |
+| Song | `Start` | Play/stop song context from the selected row. |
+| Song | `L + Start` | Start current row in live mode. |
+| Song | `R + Start` | Stop or song-context transport action. |
+| Chain | `Start` | Play/stop the current channel chain. |
+| Chain | `R + Start` | Play/stop in song context. |
+| Phrase | `Start` | Play/stop the current channel phrase. |
+| Phrase | `R + Start` | Play/stop in song context so you can hear the phrase with the arrangement around it. |
+| Table/Instrument/Groove | `Start` | Play/stop phrase/current-channel context. |
+
+This is the answer to the common producer problem: if you are writing melody and want drums/bass around it, use song context. If you want to focus tightly on only the thing you are editing, use the normal Start behavior on Chain/Phrase.
+
+## Song View
+
+Song View is the top timeline.
+
+| Thing on screen | Meaning |
+| --- | --- |
+| Row numbers | Time positions in the arrangement. |
+| 8 columns | The 8 tracker channels/tracks. |
+| Cell value like `00` | Play chain 00 on this channel at this row. |
+| `--` | Empty cell; nothing starts there for that channel. |
+| Bottom activity strip | Live note/instrument/meter feedback while playback runs. |
+
+Basic actions:
+
+| Input | Behavior |
+| --- | --- |
+| D-pad | Move between rows/channels. |
+| `A` | Paste/create a chain in an empty cell. |
+| `A + D-pad` | Change chain value. |
+| `L + Left/Right` | Nudge tempo. |
+| `L + Up/Down` | Jump song sections. |
+| `R + Right` | Open selected Chain. |
+| `R + Down` | Open Mixer. |
+
+## Chain View
+
+Chain View is a playlist of phrases for one Song cell/channel.
+
+| Field | Meaning |
+| --- | --- |
+| Phrase | Which phrase number plays at this chain row. |
+| Transpose | Pitch offset for that phrase. |
+
+Basic actions:
+
+| Input | Behavior |
+| --- | --- |
+| D-pad | Move row/field. |
+| `A` | Paste/create phrase on phrase column. |
+| `A + D-pad` | Edit phrase or transpose value. |
+| `R + Left` | Return to Song. |
+| `R + Right` | Open selected Phrase. |
+
+## Phrase View
+
+Phrase View is where you write notes and tracker commands.
+
+| Field | Meaning |
+| --- | --- |
+| Note | Pitch or rest. |
+| Instrument | Which instrument/sample slot plays the note. |
+| Command | Tracker effect command. |
+| Value | Four-digit command parameter. |
+| Mini waveform/activity strip | Playback feedback while you work. |
+
+Basic actions:
+
+| Input | Behavior |
+| --- | --- |
+| D-pad | Move between rows/fields. |
+| `A` | Preview/paste depending on field. |
+| `A + D-pad` | Edit note/instrument/command/value. |
+| `L + D-pad` on note | Quick chromatic note edit, ignoring project key/scale. |
+| `Select` on command columns | Open command selector/help picker. |
+| `R + Left` | Return to Chain. |
+| `R + Right` | Open Instrument. |
+| `R + Down` | Open Phrase Table. |
+| `R + Up` | Open Groove. |
+
+New projects default to Project `Key: --`, which means normal chromatic editing. If you set a key/scale later, note edits can follow that scale, and `L + D-pad` remains the quick outside-note override.
+
+## Instruments And Samples
+
+The RG Nano has no built-in microphone. The practical workflow is uploaded samples:
+
+1. Put `.wav` files in the configured sample folder.
+2. Open Instrument View from Phrase with `R + Right`.
+3. Move to the sample field.
+4. Open sample import.
+5. Use `Listen` to preview.
+6. Use `Import` to copy the sample into the project.
+
+This fork aims for M8-like pocket production, but native M8-style synth engines and deep sample editing are still future work.
+
+## Tables And Groove
+
+Tables are tiny command patterns. Use them for movement:
+
+- arps
+- retrigs
+- pitch movement
+- filter movement
+- repeating command effects
+
+Groove changes timing feel and swing. Small groove edits can make loops feel much less rigid.
+
+## Rendering WAVs
+
+Use Project View when you want to bounce the tracker song into audio files:
+
+1. From Song View, press `R + Up` to open Project.
+2. Set `Render:` to `Stereo` for one full mix, or `Stems` for separate channel files.
+3. Press `Start` to begin song playback/rendering.
+4. Press `Start` again to stop and close the WAV file.
+
+`Stereo` writes `mixdown.wav` into the active project folder. `Stems` writes per-channel files such as `channel0.wav`, `channel1.wav`, and so on. The simulator now verifies both modes by checking the native files the app writes, not an external capture.
+
+## Current Limits
+
+Implemented and useful today:
+
+- 8-channel tracker arrangement
+- sample import/listen workflow
+- Song/Chain/Phrase editing
+- Instrument, Table, Groove, Mixer, Project screens
+- universal helper
+- visible playback scope
+- native stereo/stems WAV rendering from Project View
+- simulator workflows for navigation, commands, playback scope, render/export, and audio capture
+
+Still incomplete compared with Dirtywave M8:
+
+- native synth engines
+- deep sample editor: crop, normalize, slice, resample
+- dedicated M8-style render view and render-to-sample workflow
+- full EQ/limiter/send/mixer parity
+- hardware live sampling path
+
+The current design philosophy is: M8-style power in a much smaller pocket device, with compact screens and strong shortcuts instead of trying to show everything at once.

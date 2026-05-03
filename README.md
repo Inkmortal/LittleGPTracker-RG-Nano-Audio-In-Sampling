@@ -14,6 +14,7 @@ This is not a Dirtywave M8 firmware clone. It is a native RG Nano fork of LGPT a
 - RG Nano-friendly project, song, instrument, and sample workflows
 - audio input / sampling experiments where the hardware and OS allow it
 - sample upload/import workflow for cases where live recording is not available
+- native WAV rendering: `Stereo` creates `mixdown.wav`, `Stems` creates per-channel `channelN.wav` files
 - 240x240 UI refinements for the RG Nano screen
 - desktop `RGNANO_SIM` build for scripted smoke tests and screenshot capture
 
@@ -25,6 +26,7 @@ This is not a Dirtywave M8 firmware clone. It is a native RG Nano fork of LGPT a
 - Hardware testing is still required before treating any build as performance-ready.
 
 For the simulator, see [docs/RGNANO_SIM.md](docs/RGNANO_SIM.md).
+For the RG Nano user manual, see [docs/RGNANO_USER_MANUAL.md](docs/RGNANO_USER_MANUAL.md).
 
 ## RG Nano Install
 
@@ -79,7 +81,16 @@ The fork keeps LGPT controls but adds RG Nano screen/layout behavior.
 | Confirm / primary action | `A` |
 | Back / secondary action | `B` |
 | Navigation | D-pad |
-| Menu/transport behavior | See LGPT docs |
+| Universal helper/minimap | `R + Select` |
+| Helper page switch | `Up` / `Down` while helper is open |
+| Command picker | `Select` on Phrase/Table command columns |
+| Play/stop current context | `Start` |
+| Play/stop in song context | `R + Start` on Chain/Phrase-style screens |
+| Power menu | Power button |
+
+The app shows a small playback-scope label on main views: `STOP`, `PLAY:SONG`, `PLAY:CHAIN`, `PLAY:PHR`, `PLAY:LIVE`, or `AUDITION`. Use it to confirm whether you are hearing the full arrangement or only the current chain/phrase.
+
+To bounce audio, open Project View, set `Render:` to `Stereo` or `Stems`, press `Start` to render/play, then press `Start` again to stop and close the WAV file. Outputs are written into the active project folder.
 
 ## Building For RG Nano
 
@@ -170,6 +181,8 @@ General Little Piggy Tracker documentation lives in [docs](docs).
 
 Recommended reading:
 
+- [RG Nano User Manual](docs/RGNANO_USER_MANUAL.md)
+- [RG Nano Input Map](docs/RGNANO_INPUT_MAP.md)
 - [What is Little Piggy Tracker](docs/wiki/What-is-LittlePiggyTracker.md)
 - [Quick-Start Guide](docs/wiki/quick_start_guide.md)
 - [Little Piggy Tracker Configuration](docs/LittlePiggyTrackerConf.md)

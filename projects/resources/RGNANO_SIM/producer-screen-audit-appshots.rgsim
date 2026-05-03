@@ -1,0 +1,106 @@
+# Producer screen audit app-only captures for documentation.
+# These are 240x240 RG Nano screen captures, not the decorative simulator shell.
+wait 500
+screenshot_app audit-00-boot-project.bmp
+press r 80
+press a 80
+wait 200
+screenshot_app audit-00-new-project.bmp
+press d 80
+press a 80
+press r 80
+press a 80
+wait 1000
+expect_view song
+screenshot_app audit-01-song.bmp
+expect_size 240 240
+expect_colors 3
+
+route song.to_mixer
+wait 120
+expect_view mixer
+screenshot_app audit-02-mixer.bmp
+route mixer.to_song
+wait 120
+expect_view song
+
+press a 80
+expect_song_chain 0 0 00
+screenshot_app audit-03-song-chain.bmp
+route song.to_chain
+wait 120
+expect_view chain
+screenshot_app audit-04-chain.bmp
+press a 80
+expect_chain_phrase 0 0 00
+screenshot_app audit-05-chain-phrase.bmp
+route chain.to_phrase
+wait 120
+expect_view phrase
+screenshot_app audit-06-phrase.bmp
+press a 80
+expect_phrase_row_count 0 1
+screenshot_app audit-07-phrase-note.bmp
+
+route phrase.to_table
+wait 120
+expect_view table
+screenshot_app audit-08-table-phrase.bmp
+route table.to_parent
+wait 120
+expect_view phrase
+route phrase.to_groove
+wait 120
+expect_view groove
+screenshot_app audit-09-groove.bmp
+route groove.to_phrase
+wait 120
+expect_view phrase
+
+route phrase.to_instrument
+wait 120
+expect_view instrument
+screenshot_app audit-10-instrument.bmp
+route instrument.to_table
+wait 120
+expect_view table
+screenshot_app audit-11-table-instrument.bmp
+route table.to_parent
+wait 120
+expect_view instrument
+
+route instrument.open_sample_import
+wait 120
+screenshot_app audit-12-sample-import.bmp
+expect_selected_text Listen
+route sample_import.exit
+wait 120
+expect_view instrument
+
+route instrument.to_phrase
+wait 120
+expect_view phrase
+route phrase.to_chain
+wait 120
+expect_view chain
+route chain.to_song
+wait 120
+expect_view song
+route song.to_project
+wait 120
+expect_view project
+expect_screen_text Key: --
+expect_screen_text Scale:
+expect_screen_text Notes:
+screenshot_app audit-13-project.bmp
+
+press p 80
+wait 120
+screenshot_app audit-14-power-menu.bmp
+expect_selected_text Exit
+press p 80
+wait 120
+expect_view project
+
+expect_no_error
+quit

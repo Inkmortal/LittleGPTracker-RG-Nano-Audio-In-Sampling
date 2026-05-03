@@ -1,0 +1,43 @@
+# Command selector producer workflow.
+route boot.new_project_random
+expect_view song
+press a 80
+wait 80
+route song.to_chain
+expect_view chain
+press a 80
+wait 80
+route chain.to_phrase
+expect_view phrase
+
+# Phrase command slot 1: Select opens the command picker, Select confirms.
+press r 80
+press r 80
+press q 80
+wait 120
+screenshot_app command-selector-phrase.bmp
+expect_screen_text ARPG
+expect_screen_text ARPeGgio
+press q 80
+wait 120
+expect_phrase_command 0 0 1 ARPG
+
+# Parameter editing still works after choosing a command.
+press r 80
+route combo.a.up
+expect_phrase_param 0 0 1 0001
+expect_player_running no
+
+# The same Select-to-command-picker gesture works in table command columns.
+route phrase.to_table
+expect_view table
+press q 80
+wait 120
+screenshot_app command-selector-table.bmp
+expect_screen_text ARPG
+expect_screen_text ARPeGgio
+press b 80
+wait 80
+expect_view table
+expect_no_error
+quit

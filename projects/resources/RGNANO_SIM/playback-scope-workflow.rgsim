@@ -1,0 +1,70 @@
+# Playback scope workflow:
+# Prove that Start/R+Start are visible and consistent from producer screens.
+route boot.new_project_random
+expect_view song
+
+sim_set_song_chain 0 0 0
+sim_set_chain_phrase 0 0 0 0
+sim_set_phrase_note 0 0 60 0
+
+expect_screen_text STOP
+
+# Song view: Start plays the arrangement context.
+press s 80
+wait 160
+expect_player_running yes
+expect_play_mode song
+expect_screen_text PLAY:SONG
+press s 80
+wait 120
+expect_player_running no
+expect_screen_text STOP
+
+# Chain view: Start plays the current channel/chain scope.
+route song.to_chain
+expect_view chain
+press s 80
+wait 160
+expect_player_running yes
+expect_play_mode chain
+expect_screen_text PLAY:CHAIN
+press s 80
+wait 120
+expect_player_running no
+
+# Phrase view: Start plays the current channel/phrase scope.
+route chain.to_phrase
+expect_view phrase
+press s 80
+wait 160
+expect_player_running yes
+expect_play_mode phrase
+expect_screen_text PLAY:PHR
+press s 80
+wait 120
+expect_player_running no
+
+# Phrase R+Start forces song context so writing can be checked against the arrangement.
+down n
+press s 80
+up n
+wait 160
+expect_player_running yes
+expect_play_mode song
+expect_screen_text PLAY:SONG
+down n
+press s 80
+up n
+wait 120
+expect_player_running no
+
+# Table keeps the same current-channel phrase scope on Start.
+route phrase.to_table
+expect_view table
+press s 80
+wait 160
+expect_player_running yes
+expect_play_mode phrase
+expect_screen_text PLAY:PHR
+expect_no_error
+quit
