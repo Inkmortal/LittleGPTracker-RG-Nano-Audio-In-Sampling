@@ -109,7 +109,13 @@ No synth engines yet. Make sample instruments feel great first.
 
 ## Layout Audit
 
-Tiny screens need automated layout checks, not just screenshots. After capturing the Instrument Lab pages with `projects/resources/RGNANO_SIM/sample-lab-pages-preview.rgsim`, run:
+Tiny screens need automated layout checks, not just screenshots. The preferred check builds the simulator, captures the Instrument Lab pages, audits them, and cleans up generated files:
+
+```powershell
+python tools\run_sample_lab_layout_audit.py
+```
+
+To audit existing captures manually after running `projects/resources/RGNANO_SIM/sample-lab-pages-preview.rgsim`, run from `projects`:
 
 ```powershell
 python ..\tools\rgnano_layout_audit.py .\sample-lab-source.bmp .\sample-lab-shape.bmp .\sample-lab-filter.bmp .\sample-lab-loop.bmp .\sample-lab-motion.bmp
