@@ -1,0 +1,103 @@
+# Explore the current sample-instrument workflow with a real imported sample.
+# This intentionally uses UI navigation and A+D-pad edits so the screenshots
+# reflect the present app experience rather than direct model setup.
+route boot.new_project_random
+expect_view song
+press a 80
+wait 120
+route song.to_chain
+wait 120
+expect_view chain
+press a 80
+wait 120
+route chain.to_phrase
+wait 120
+expect_view phrase
+press a 80
+wait 120
+route phrase.to_instrument
+wait 120
+expect_view instrument
+
+# Import a real melodic fixture sample through the existing sample import UI.
+route instrument.open_sample_import
+route sample_import.to_first_file
+press d 80
+press d 80
+press d 80
+press d 80
+press d 80
+press d 80
+press d 80
+screenshot_app sample-lab-01-pick-guzheng.bmp
+route sample_import.quick_import_selected
+expect_project_sample wuxia-guzheng.wav
+route sample_import.exit
+wait 120
+expect_view instrument
+expect_instrument_sample 0 wuxia-guzheng.wav
+screenshot_app sample-lab-02-loaded.bmp
+
+# Shape: volume, pan, root note, and fine tune.
+press d 80
+route combo.a.up
+route combo.a.up
+press d 80
+route combo.a.left
+press d 80
+route combo.a.up
+press d 80
+route combo.a.right
+screenshot_app sample-lab-03-pitch-level-edits.bmp
+
+# Texture: crush, drive, downsample.
+press d 80
+route combo.a.down
+route combo.a.down
+press r 80
+route combo.a.left
+press d 80
+route combo.a.up
+screenshot_app sample-lab-04-grit-edits.bmp
+
+# Filter: cutoff, resonance, type, mode.
+press d 80
+route combo.a.down
+route combo.a.down
+route combo.a.down
+press r 80
+route combo.a.up
+route combo.a.up
+press d 80
+route combo.a.right
+route combo.a.right
+press d 80
+route combo.a.right
+screenshot_app sample-lab-05-filter-edits.bmp
+
+# Loop/slice area: interpolation, loop mode, slice count, and start offset.
+press d 80
+press d 80
+press d 80
+route combo.a.right
+press d 80
+route combo.a.right
+press d 80
+route combo.a.up
+press d 80
+route combo.a.right
+route combo.a.right
+screenshot_app sample-lab-06-loop-slice-edits.bmp
+
+# Audition the edited sample in phrase context.
+start_audio_capture sample-workstation-exploration.wav
+press s 80
+wait 900
+expect_player_running yes
+press s 80
+wait 200
+expect_player_running no
+end_audio_capture
+expect_audio_capture_bytes 4096
+expect_no_error
+quit
