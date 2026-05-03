@@ -29,6 +29,17 @@ expect_instrument_sample 0 wuxia-guzheng.wav
 
 expect_screen_text SOURCE
 screenshot_app sample-lab-source.bmp
+route combo.l.down
+wait 120
+expect_screen_text LSTART
+down m
+down a
+press r 80
+up a
+up m
+wait 120
+expect_screen_text LSTART
+screenshot_app sample-lab-marker-edit.bmp
 route combo.l.right
 wait 120
 expect_screen_text SHAPE

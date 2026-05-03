@@ -193,6 +193,8 @@ The Instrument screen now splits sample design into five compact lab pages. Use 
 | Loop | Loop mode, slices, sample start, loop start, loop end. |
 | Motion | Instrument table automation and feedback movement. |
 
+On the Source and Loop pages, the waveform has three editable markers: `START`, `LSTART`, and `END`. Use `L + Up/Down` to choose the active marker, then `L + A + Left/Right` to nudge it on the waveform. The normal field list remains available below the visual panel for exact parameter editing.
+
 This fork aims for M8-like pocket production, but native M8-style synth engines and deep offline sample editing are still future work.
 
 ## Tables And Groove

@@ -258,12 +258,12 @@ void View::drawContextOverlay() {
 		case VT_INSTRUMENT:
 			name="INSTR";
 			where="R+Left Phrase A sample";
-			edit="L+Left/Right lab page";
-			field="Sample lab pages";
+			edit="L+LR page L+UD mark";
+			field="Sample lab + markers";
 			cmd1="Dpad choose field";
 			cmd2="A activate/sample";
 			cmd3="A+Dpad edit value";
-			cmd4="L+Left/Right page";
+			cmd4="L+A+LR nudge mark";
 			cmd5="B+A purge sample";
 			cmd6="R+Down Inst Table";
 			cmd7="R+Left Phrase";

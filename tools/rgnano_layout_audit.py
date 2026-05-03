@@ -301,7 +301,7 @@ def audit_sample_lab(path: str, mask: List[List[bool]]) -> List[Issue]:
         return issues
 
     x0, y0, x1, y1 = comp.bbox
-    if "source" in name or "loop" in name:
+    if "source" in name or "loop" in name or "marker-edit" in name:
         if y0 < 32:
             issues.append(Issue(path, f"waveform starts too high at y={y0}; collides with title/status area"))
         if y1 > 96:
@@ -313,8 +313,8 @@ def audit_sample_lab(path: str, mask: List[List[bool]]) -> List[Issue]:
         spacer_ink = row_ink(mask, 16)
         if legend_ink < 40:
             issues.append(Issue(path, "missing/too faint marker legend row"))
-        if sample_or_value_ink < 40:
-            issues.append(Issue(path, "missing sample name or loop value summary row"))
+        if "marker-edit" not in name and sample_or_value_ink < 40:
+            issues.append(Issue(path, "missing sample name, loop value, or marker summary row"))
         if first_field_ink < 40:
             issues.append(Issue(path, "editable field rows did not start where expected"))
         if spacer_ink > 120:

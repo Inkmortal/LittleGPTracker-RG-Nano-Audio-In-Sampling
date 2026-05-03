@@ -42,6 +42,12 @@ This branch now replaces the single long sample-instrument list with five Instru
 
 Shows the loaded WAV as an actual waveform preview, plus start/loop/end markers and the core source fields.
 
+### Marker Edit
+
+![Instrument Lab Marker Edit](assets/instrument-lab-marker-edit.png)
+
+On Source and Loop, use `L + Up/Down` to choose `START`, `LSTART`, or `END`, then use `L + A + Left/Right` to nudge the selected marker on the waveform.
+
 ### Shape
 
 ![Instrument Lab Shape](assets/instrument-lab-shape.png)
@@ -84,11 +90,13 @@ Instrument Lab pages:
 
 - `D-pad`: move focus inside the current page.
 - `A + D-pad`: edit the focused value.
+- `L + Left/Right`: switch Instrument Lab page.
+- `L + Up/Down`: choose the active waveform marker on Source/Loop.
+- `L + A + Left/Right`: nudge the active waveform marker.
 - `Start`: audition current instrument in phrase context.
 - `R + Start`: audition in song context.
 - `R + Left`: return to Phrase.
 - `R + Down`: open instrument table/motion.
-- A future page-switch shortcut should be easy to chord on the real Nano, likely `L/R + Left/Right` or `Select` only after checking existing mappings.
 
 ## First Build Target
 
@@ -107,7 +115,7 @@ No synth engines yet. Make sample instruments feel great first.
 ## Current Limitations
 
 - The Source and Loop waveform is read from the loaded sample buffer, so it reflects the actual WAV shape.
-- Marker edits still use the normal field workflow below the visual panel.
+- Source/Loop marker edits now have waveform shortcuts, but there is not yet a dedicated trim/chop editor.
 - Motion is only a visual grouping for existing table/feedback settings; it is not an M8-style modulation matrix yet.
 - Sample import now has a selected-item info strip, but it is still primarily a text list. A waveform-aware library/browser is a separate next step.
 
@@ -122,7 +130,7 @@ python tools\run_sample_lab_layout_audit.py
 To audit existing captures manually after running `projects/resources/RGNANO_SIM/sample-lab-pages-preview.rgsim`, run from `projects`:
 
 ```powershell
-python ..\tools\rgnano_layout_audit.py .\sample-lab-source.bmp .\sample-lab-shape.bmp .\sample-lab-filter.bmp .\sample-lab-loop.bmp .\sample-lab-motion.bmp
+python ..\tools\rgnano_layout_audit.py .\sample-lab-source.bmp .\sample-lab-marker-edit.bmp .\sample-lab-shape.bmp .\sample-lab-filter.bmp .\sample-lab-loop.bmp .\sample-lab-motion.bmp
 ```
 
 The audit fails on:

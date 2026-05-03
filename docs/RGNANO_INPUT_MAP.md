@@ -207,6 +207,8 @@ The sample workflow starts in `InstrumentView` with focus on the `sample:` field
 | Input | Behavior |
 | --- | --- |
 | `L + Left/Right` | Switch Instrument Lab page. |
+| `L + Up/Down` | On Source/Loop pages, choose active waveform marker: `START`, `LSTART`, `END`. |
+| `L + A + Left/Right` | On Source/Loop pages, nudge the active waveform marker. |
 | D-pad | Move field focus. |
 | `A + D-pad` | Edit focused parameter. |
 | `A` on `sample:` | Enter `VM_NEW`; next `A` opens sample import. |

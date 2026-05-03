@@ -27,6 +27,7 @@ TRACKS = PROJECTS / "rgnano-sim-data" / "tracks"
 KEEP_TRACKS = {"lgpt_DopeyBite", "lgpt_MildCook", "lgpt_SingingSnap"}
 SCREENSHOTS = [
     PROJECTS / "sample-lab-source.bmp",
+    PROJECTS / "sample-lab-marker-edit.bmp",
     PROJECTS / "sample-lab-shape.bmp",
     PROJECTS / "sample-lab-filter.bmp",
     PROJECTS / "sample-lab-loop.bmp",

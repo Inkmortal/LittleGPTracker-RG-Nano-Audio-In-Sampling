@@ -25,6 +25,7 @@ InstrumentView::InstrumentView(GUIWindow &w,ViewData *data):FieldView(w,data) {
 	lastFocusID_=0 ;
 	current_=0 ;
 	labPage_=0 ;
+	markerFocus_=SIP_START ;
 	onInstrumentChange() ;
 }
 
@@ -285,6 +286,79 @@ const char *InstrumentView::getLabPageName() {
 	}
 }
 
+bool InstrumentView::isWaveMarkerPage() {
+	return getInstrumentType()==IT_SAMPLE && (labPage_==0 || labPage_==3);
+}
+
+const char *InstrumentView::getWaveMarkerName() {
+	if (markerFocus_==SIP_LOOPSTART) return "LSTART";
+	if (markerFocus_==SIP_END) return "END";
+	return "START";
+}
+
+void InstrumentView::cycleWaveMarker(int offset) {
+	int index=0;
+	if (markerFocus_==SIP_LOOPSTART) index=1;
+	if (markerFocus_==SIP_END) index=2;
+	index+=offset;
+	if (index<0) index=2;
+	if (index>2) index=0;
+	switch(index) {
+		case 1:
+			markerFocus_=SIP_LOOPSTART;
+			break;
+		case 2:
+			markerFocus_=SIP_END;
+			break;
+		default:
+			markerFocus_=SIP_START;
+			break;
+	}
+	isDirty_=true;
+}
+
+void InstrumentView::nudgeWaveMarker(int offset) {
+	if (!isWaveMarkerPage()) {
+		return;
+	}
+	int i=viewData_->currentInstrument_;
+	InstrumentBank *bank=viewData_->project_->GetInstrumentBank();
+	SampleInstrument *instrument=(SampleInstrument *)bank->GetInstrument(i);
+	if (!instrument) {
+		return;
+	}
+	int sampleSize=instrument->GetSampleSize();
+	if (sampleSize<=0) {
+		return;
+	}
+	Variable *v=instrument->FindVariable(markerFocus_);
+	if (!v) {
+		return;
+	}
+	int step=sampleSize/128;
+	if (step<1) step=1;
+	int value=v->GetInt()+(offset*step);
+	int start=GetVarInt(instrument,SIP_START);
+	int loopStart=GetVarInt(instrument,SIP_LOOPSTART);
+	int end=GetVarInt(instrument,SIP_END);
+	if (end<=0 || end>sampleSize) end=sampleSize;
+	if (markerFocus_==SIP_START) {
+		if (value<0) value=0;
+		if (value>end) value=end;
+		start=value;
+	} else if (markerFocus_==SIP_LOOPSTART) {
+		if (value<start) value=start;
+		if (value>end) value=end;
+		loopStart=value;
+	} else {
+		if (value<loopStart) value=loopStart;
+		if (value>sampleSize) value=sampleSize;
+		end=value;
+	}
+	v->SetInt(value);
+	isDirty_=true;
+}
+
 void InstrumentView::drawLabBar(int x, int y, int width, int value, int maxValue) {
 	if (width<=0) return;
 	if (maxValue<=0) maxValue=1;
@@ -464,9 +538,9 @@ void InstrumentView::drawSampleWaveform(SampleInstrument *instrument, int x, int
 		int sx=x+2+((start*drawableWidth)/sampleSize);
 		int ls=x+2+((loopStart*drawableWidth)/sampleSize);
 		int le=x+2+((loopEnd*drawableWidth)/sampleSize);
-		drawMarkerLine(sx,y+1,height-2,CD_PLAY);
-		drawMarkerLine(ls,y+1,height-2,CD_HILITE2);
-		drawMarkerLine(le,y+1,height-2,CD_HILITE1);
+		drawMarkerLine(sx,y+1,height-2,markerFocus_==SIP_START?CD_HILITE1:CD_PLAY);
+		drawMarkerLine(ls,y+1,height-2,markerFocus_==SIP_LOOPSTART?CD_HILITE1:CD_HILITE2);
+		drawMarkerLine(le,y+1,height-2,markerFocus_==SIP_END?CD_HILITE1:CD_HILITE2);
 	}
 #endif
 }
@@ -511,7 +585,8 @@ void InstrumentView::drawSampleLabVisuals() {
 	if (labPage_==0 || labPage_==3) {
 #if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
 		drawSampleWaveform(instrument,10,36,220,52,true);
-		DrawString(2,12,"S start  L loop  E end",props);
+		sprintf(line,"%s  L+UD pick  L+A+LR",getWaveMarkerName());
+		DrawString(2,12,line,props);
 		if (labPage_==0) {
 			const char *sampleName=GetVarString(instrument,SIP_SAMPLE);
 			char name[25];
@@ -669,12 +744,32 @@ void InstrumentView::ProcessButtonMask(unsigned short mask,bool pressed) {
 
 	if (getInstrumentType()==IT_SAMPLE && (mask&EPBM_L) &&
 	    !(mask&(EPBM_A|EPBM_B|EPBM_R|EPBM_START|EPBM_SELECT))) {
+		if (isWaveMarkerPage() && (mask&EPBM_UP)) {
+			cycleWaveMarker(-1);
+			return;
+		}
+		if (isWaveMarkerPage() && (mask&EPBM_DOWN)) {
+			cycleWaveMarker(1);
+			return;
+		}
 		if (mask&EPBM_LEFT) {
 			switchLabPage(-1);
 			return;
 		}
 		if (mask&EPBM_RIGHT) {
 			switchLabPage(1);
+			return;
+		}
+	}
+
+	if (isWaveMarkerPage() && (mask&EPBM_L) && (mask&EPBM_A) &&
+	    !(mask&(EPBM_B|EPBM_R|EPBM_START|EPBM_SELECT))) {
+		if (mask&EPBM_LEFT) {
+			nudgeWaveMarker(-1);
+			return;
+		}
+		if (mask&EPBM_RIGHT) {
+			nudgeWaveMarker(1);
 			return;
 		}
 	}

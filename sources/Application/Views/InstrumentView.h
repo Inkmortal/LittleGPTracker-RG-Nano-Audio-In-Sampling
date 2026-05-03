@@ -35,6 +35,10 @@ protected:
 	void drawSampleWaveform(class SampleInstrument *instrument, int x, int y,
 	                        int width, int height, bool showMarkers) ;
 	void drawMarkerLine(int x, int y, int height, ColorDefinition color) ;
+	void cycleWaveMarker(int offset) ;
+	void nudgeWaveMarker(int offset) ;
+	const char *getWaveMarkerName() ;
+	bool isWaveMarkerPage() ;
 	const char *getLabPageName() ;
 	void Update(Observable &o,I_ObservableData *d) ;
 
@@ -43,5 +47,6 @@ private:
 	FourCC lastFocusID_ ;
 	I_Instrument *current_ ;
 	int labPage_ ;
+	FourCC markerFocus_ ;
 } ;
 #endif
