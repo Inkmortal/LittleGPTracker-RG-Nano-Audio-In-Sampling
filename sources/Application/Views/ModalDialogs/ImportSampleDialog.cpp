@@ -3,7 +3,7 @@
 #include "Application/Instruments/SampleInstrument.h"
 #include "RecordSampleDialog.h"
 
-#define LIST_SIZE 15
+#define LIST_SIZE 12
 #define LIST_WIDTH 28
 
 bool ImportSampleDialog::initStatic_=false ;
@@ -32,7 +32,7 @@ ImportSampleDialog::~ImportSampleDialog() {
 
 void ImportSampleDialog::DrawView() {
 
-	SetWindow(LIST_WIDTH,LIST_SIZE+3) ;
+	SetWindow(LIST_WIDTH,LIST_SIZE+6) ;
 
 	GUITextProperties props ;
 
@@ -86,7 +86,10 @@ void ImportSampleDialog::DrawView() {
 		count++ ;
 	} ;
 
-	y=LIST_SIZE+2 ;
+	Path *selectedElement=getImportElement();
+	drawSelectedInfo(selectedElement,sampleList_.Size());
+
+	y=LIST_SIZE+5 ;
 
 	SetColor(CD_NORMAL) ;
 
@@ -98,6 +101,63 @@ void ImportSampleDialog::DrawView() {
 		DrawString(x,y,text,props) ;
 	}	
 } ;
+
+long ImportSampleDialog::getFileSizeKb(Path &element) {
+	if (!element.IsFile()) {
+		return 0;
+	}
+	I_File *file=FileSystem::GetInstance()->Open(element.GetPath().c_str(),"r");
+	if (!file) {
+		return 0;
+	}
+	file->Seek(0,SEEK_END);
+	long size=file->Tell();
+	file->Close();
+	delete file;
+	if (size<=0) {
+		return 0;
+	}
+	return (size+1023)/1024;
+}
+
+void ImportSampleDialog::drawSelectedInfo(Path *element, int total) {
+	GUITextProperties props;
+	char line[64];
+	int y=LIST_SIZE+1;
+
+	SetColor(CD_BORDER);
+	props.invert_=false;
+	DrawString(1,y,"--------------------------",props);
+	y+=1;
+
+	SetColor(CD_NORMAL);
+	if (!element) {
+		DrawString(1,y,"No sample selected",props);
+		return;
+	}
+
+	const char *kind=element->IsDirectory()?"DIR":"WAV";
+	int position=currentSample_+1;
+	if (position<1) position=1;
+	if (total<1) total=1;
+	if (element->IsDirectory()) {
+		sprintf(line,"%s %02d/%02d open with A",kind,position,total);
+	} else {
+		long kb=getFileSizeKb(*element);
+		sprintf(line,"%s %02d/%02d %ldK",kind,position,total,kb);
+	}
+	line[LIST_WIDTH-1]=0;
+	DrawString(1,y,line,props);
+	y+=1;
+
+	std::string name=element->GetName();
+	if (!element->IsDirectory() && SamplePool::GetInstance()->IsImported(name)) {
+		name+=" *in project";
+	}
+	strncpy(line,name.c_str(),LIST_WIDTH-1);
+	line[LIST_WIDTH-1]=0;
+	DrawString(1,y,line,props);
+}
 
 void ImportSampleDialog::warpToNextSample(int direction) {
 

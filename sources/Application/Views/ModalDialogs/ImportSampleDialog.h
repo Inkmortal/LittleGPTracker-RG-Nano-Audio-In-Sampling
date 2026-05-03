@@ -22,6 +22,8 @@ protected:
 	void import(Path &element) ;
 	void preview(Path &element) ;
 	void endPreview() ;
+	void drawSelectedInfo(Path *element, int total) ;
+	long getFileSizeKb(Path &element) ;
 private:
 	Path *getImportElement();
 	bool isSampleLibRoot();

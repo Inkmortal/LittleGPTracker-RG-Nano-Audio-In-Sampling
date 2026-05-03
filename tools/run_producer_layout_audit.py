@@ -59,7 +59,7 @@ def main() -> int:
     env = os.environ.copy()
     env["PATH"] = f"{mingw_bin};{msys_bin};{env.get('PATH', '')}"
     env["PWD"] = msys_path(PROJECTS)
-    run([str(make), "PLATFORM=RGNANO_SIM"], PROJECTS, env)
+    run([str(make), "PLATFORM=RGNANO_SIM", "CXX=C:/msys64/mingw32/bin/g++.exe"], PROJECTS, env)
 
     sim_env = env.copy()
     sim_env["SDL_VIDEODRIVER"] = "dummy"

@@ -264,6 +264,8 @@ def audit_producer_screen(path: str, mask: List[List[bool]]) -> List[Issue]:
         require_rect(issues, path, mask, (0, 32, 236, 164), "instrument table rows", 700)
     elif "audit-12-sample-import" in name:
         require_row(issues, path, mask, 7, "sample import file list", 80)
+        require_row(issues, path, mask, 20, "sample import selected item info", 80)
+        require_row(issues, path, mask, 21, "sample import selected item name", 40)
         require_row(issues, path, mask, 23, "sample import actions", 120)
     elif "audit-13-project" in name:
         require_row(issues, path, mask, 0, "project title/status", 80)

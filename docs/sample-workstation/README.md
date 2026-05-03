@@ -12,6 +12,10 @@ Current Sample Import modal:
 
 ![Current Sample Import](assets/before-sample-import.png)
 
+Updated Sample Import modal:
+
+![Updated Sample Import](assets/sample-import-browser-info.png)
+
 ## Current Problem
 
 The existing sample instrument is already powerful, but the interface hides that power in a dense text stack. Important controls compete for attention:
@@ -105,7 +109,7 @@ No synth engines yet. Make sample instruments feel great first.
 - The Source and Loop waveform is read from the loaded sample buffer, so it reflects the actual WAV shape.
 - Marker edits still use the normal field workflow below the visual panel.
 - Motion is only a visual grouping for existing table/feedback settings; it is not an M8-style modulation matrix yet.
-- Sample import is still the existing text list. A visual library/browser is a separate next step.
+- Sample import now has a selected-item info strip, but it is still primarily a text list. A waveform-aware library/browser is a separate next step.
 
 ## Layout Audit
 
