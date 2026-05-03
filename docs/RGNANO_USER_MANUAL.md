@@ -183,7 +183,17 @@ The RG Nano has no built-in microphone. The practical workflow is uploaded sampl
 5. Use `Listen` to preview.
 6. Use `Import` to copy the sample into the project.
 
-This fork aims for M8-like pocket production, but native M8-style synth engines and deep sample editing are still future work.
+The Instrument screen now splits sample design into five compact lab pages. Use `L + Left/Right` to switch pages:
+
+| Page | What it edits |
+| --- | --- |
+| Source | Sample assignment, root note, detune, slices. |
+| Shape | Volume, pan, crush, drive, downsample, interpolation. |
+| Filter | Cutoff, resonance, filter type, mode, attenuation. |
+| Loop | Loop mode, slices, sample start, loop start, loop end. |
+| Motion | Instrument table automation and feedback movement. |
+
+This fork aims for M8-like pocket production, but native M8-style synth engines and deep offline sample editing are still future work.
 
 ## Tables And Groove
 

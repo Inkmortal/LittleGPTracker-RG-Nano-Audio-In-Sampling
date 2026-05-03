@@ -202,10 +202,11 @@ flowchart LR
 
 ## Instrument And Samples
 
-The sample workflow starts in `InstrumentView` with focus on the `sample:` field for sample instruments.
+The sample workflow starts in `InstrumentView` with focus on the `sample:` field for sample instruments. On RG Nano, sample instruments use the experimental Instrument Lab pages: Source, Shape, Filter, Loop, and Motion.
 
 | Input | Behavior |
 | --- | --- |
+| `L + Left/Right` | Switch Instrument Lab page. |
 | D-pad | Move field focus. |
 | `A + D-pad` | Edit focused parameter. |
 | `A` on `sample:` | Enter `VM_NEW`; next `A` opens sample import. |

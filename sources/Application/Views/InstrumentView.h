@@ -18,15 +18,30 @@ public:
 
 protected:
 	void warpToNext(int offset) ;
+	void switchLabPage(int offset) ;
 	void onInstrumentChange() ;
 	void fillSampleParameters() ;
+	void fillSampleSourcePage(class SampleInstrument *instrument, GUIPoint position) ;
+	void fillSampleShapePage(class SampleInstrument *instrument, GUIPoint position) ;
+	void fillSampleFilterPage(class SampleInstrument *instrument, GUIPoint position) ;
+	void fillSampleLoopPage(class SampleInstrument *instrument, GUIPoint position) ;
+	void fillSampleMotionPage(class SampleInstrument *instrument, GUIPoint position) ;
 	void fillMidiParameters() ;
 	InstrumentType getInstrumentType() ;
+	void drawSampleLabVisuals() ;
+	void drawLabBar(int x, int y, int width, int value, int maxValue) ;
+	void drawPixelLabBar(int x, int y, int width, int height, int value, int maxValue,
+	                     bool bipolar=false) ;
+	void drawSampleWaveform(class SampleInstrument *instrument, int x, int y,
+	                        int width, int height, bool showMarkers) ;
+	void drawMarkerLine(int x, int y, int height, ColorDefinition color) ;
+	const char *getLabPageName() ;
 	void Update(Observable &o,I_ObservableData *d) ;
 
 private:
 	Project *project_ ;
 	FourCC lastFocusID_ ;
 	I_Instrument *current_ ;
+	int labPage_ ;
 } ;
 #endif

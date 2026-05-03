@@ -66,16 +66,25 @@ The practical target is not to copy M8 screen-for-screen. The RG Nano should kee
 - Loop: start, loop start, loop end, loop mode, waveform markers.
 - Motion: table automation and reusable movement templates.
 
-## Next UI Prototype
+## Prototype Implemented On This Branch
 
-Build a visual Source/Loop page first:
+The first visual Instrument Lab prototype is now implemented in `InstrumentView`. `L + Left/Right` switches between Source, Shape, Filter, Loop, and Motion pages.
 
-- sample name and import/preview state
-- waveform overview from the assigned WAV
-- start marker
-- loop start/end markers
-- loop mode glyph
-- root note and detune
-- quick low/mid/high audition gesture
+The Source and Loop pages now draw the waveform from the assigned WAV sample buffer, so the producer can see the audio material they are editing instead of guessing from hex values alone.
 
-This would directly address the biggest gap seen in the real workflow: the app can shape samples, but the producer cannot see the sample they are shaping.
+![Instrument Lab Source](assets/instrument-lab-source.png)
+
+![Instrument Lab Shape](assets/instrument-lab-shape.png)
+
+![Instrument Lab Filter](assets/instrument-lab-filter.png)
+
+![Instrument Lab Loop](assets/instrument-lab-loop.png)
+
+![Instrument Lab Motion](assets/instrument-lab-motion.png)
+
+Remaining sample-workstation gaps:
+
+- sample import/library is still a plain text list
+- marker edits still happen through focused fields instead of direct waveform handles
+- Motion is still table/feedback grouping, not a full modulation matrix
+- no sample trim/chop/normalize/destructive edit screen yet

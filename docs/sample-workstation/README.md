@@ -28,11 +28,45 @@ The existing sample instrument is already powerful, but the interface hides that
 
 That is too much for one 240x240 text menu. It is usable for someone who already knows LGPT, but it does not invite playful sound design.
 
+## Implemented Prototype
+
+This branch now replaces the single long sample-instrument list with five Instrument Lab pages. The controls are still the real LGPT sample instrument variables, but each page gets a visual panel sized for the RG Nano screen. Use `L + Left/Right` to switch pages.
+
+### Source
+
+![Instrument Lab Source](assets/instrument-lab-source.png)
+
+Shows the loaded WAV as an actual waveform preview, plus start/loop/end markers and the core source fields.
+
+### Shape
+
+![Instrument Lab Shape](assets/instrument-lab-shape.png)
+
+Groups level, pan, and grit controls so volume/pan/crush/drive/downsample feel like sound-shaping controls instead of isolated rows.
+
+### Filter
+
+![Instrument Lab Filter](assets/instrument-lab-filter.png)
+
+Groups cutoff, resonance, filter type, mode, and attenuation into one tone page.
+
+### Loop
+
+![Instrument Lab Loop](assets/instrument-lab-loop.png)
+
+Uses the same real waveform preview, focused on loop mode, slice count, start, loop start, and loop end.
+
+### Motion
+
+![Instrument Lab Motion](assets/instrument-lab-motion.png)
+
+Puts table automation and feedback controls on a motion page. This is the roughest page visually because the current app has table selection, not a full modulation workstation yet.
+
 ## Design Direction
 
 Keep shortcuts fast and memorizable. Use visuals for state, not paragraphs.
 
-Proposed Instrument Lab pages:
+Instrument Lab pages:
 
 | Page | Job | Visual Bias |
 | --- | --- | --- |
@@ -54,7 +88,9 @@ Proposed Instrument Lab pages:
 
 ## First Build Target
 
-Start with a visual Source/Loop page, because sample-heavy production depends on quickly answering:
+The first prototype implements these Instrument Lab pages directly in `InstrumentView`. Use `L + Left/Right` to switch between Source, Shape, Filter, Loop, and Motion. It is still intentionally experimental, but it proves the visual-page direction inside the real app.
+
+The Source/Loop direction matters most because sample-heavy production depends on quickly answering:
 
 - What sample is loaded?
 - What part of it plays?
@@ -63,3 +99,10 @@ Start with a visual Source/Loop page, because sample-heavy production depends on
 - Does it still sound good when pitched low, normal, and high?
 
 No synth engines yet. Make sample instruments feel great first.
+
+## Current Limitations
+
+- The Source and Loop waveform is read from the loaded sample buffer, so it reflects the actual WAV shape.
+- Marker edits still use the normal field workflow below the visual panel.
+- Motion is only a visual grouping for existing table/feedback settings; it is not an M8-style modulation matrix yet.
+- Sample import is still the existing text list. A visual library/browser is a separate next step.

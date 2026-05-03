@@ -11,12 +11,20 @@
 #include "ModalDialogs/ImportSampleDialog.h"
 #include "ModalDialogs/MessageBox.h"
 #include "System/System/System.h"
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+#include "Adapters/SDL/GUI/SDLGUIWindowImp.h"
+#endif
+#include <stdio.h>
+#include <string.h>
+
+#define SAMPLE_LAB_PAGE_COUNT 5
 
 InstrumentView::InstrumentView(GUIWindow &w,ViewData *data):FieldView(w,data) {
 
 	project_=data->project_ ;
 	lastFocusID_=0 ;
 	current_=0 ;
+	labPage_=0 ;
 	onInstrumentChange() ;
 }
 
@@ -88,154 +96,134 @@ void InstrumentView::fillSampleParameters() {
 	position._y -= 3;
 #endif
 
-//	position._y+=View::fieldSpaceHeight_;
+	position._y=17;
+	switch(labPage_) {
+		case 0:
+			fillSampleSourcePage(instrument,position);
+			break;
+		case 1:
+			fillSampleShapePage(instrument,position);
+			break;
+		case 2:
+			fillSampleFilterPage(instrument,position);
+			break;
+		case 3:
+			fillSampleLoopPage(instrument,position);
+			break;
+		default:
+			fillSampleMotionPage(instrument,position);
+			break;
+	}
+} ;
+
+void InstrumentView::fillSampleSourcePage(SampleInstrument *instrument, GUIPoint position) {
 	Variable *v=instrument->FindVariable(SIP_SAMPLE) ;
 	SamplePool *sp=SamplePool::GetInstance() ;
-	UIIntVarField *f1=new UIIntVarField(position,*v,"sample: %s",0,sp->GetNameListSize()-1,1,0x10) ;
+	UIIntVarField *f1=new UIIntVarField(position,*v,"sample %s",0,sp->GetNameListSize()-1,1,0x10) ;
 	T_SimpleList<UIField>::Insert(f1) ;
-	f1->SetFocus() ;
-
-    position._y += 1;
-#ifdef FFMPEG_ENABLED
-    v = instrument->FindVariable(SIP_PRINTFX);
-    f1 = new UIIntVarField(position, *v, "%s", 0, 3, 1, 2);
-    T_SimpleList<UIField>::Insert(f1) ;
-
-    position._x += 7;
-    v = instrument->FindVariable(SIP_IR_WET);
-    f1 = new UIIntVarField(position, *v, "wet:%d%%", 0, 100, 1, 10);
-    T_SimpleList<UIField>::Insert(f1);
-    position._x += 9;
-
-    v = instrument->FindVariable(SIP_IR_PAD);
-    f1 = new UIIntVarField(position, *v, "pad:%dms", 0, 5000, 5, 100);
-    T_SimpleList<UIField>::Insert(f1);
-    position._x -= 16;
-#endif
-    position._y += 2;
-    v=instrument->FindVariable(SIP_VOLUME) ;
-	f1=new UIIntVarField(position,*v,"volume: %d [%2.2X]",0,255,1,10) ;
-	T_SimpleList<UIField>::Insert(f1) ;
-
-    position._y+=1 ;
-	v=instrument->FindVariable(SIP_PAN) ;
-	f1=new UIIntVarField(position,*v,"pan: %2.2X",0,0xFE,1,0x10) ;
-	T_SimpleList<UIField>::Insert(f1) ;
-
 	position._y+=1 ;
 	v=instrument->FindVariable(SIP_ROOTNOTE) ;
-	f1=new UINoteVarField(position,*v,"root note: %s",0,0x7F,1,0x0C) ;
+	f1=new UINoteVarField(position,*v,"root   %s",0,0x7F,1,0x0C) ;
 	T_SimpleList<UIField>::Insert(f1) ;
-
 	position._y+=1 ;
 	v=instrument->FindVariable(SIP_FINETUNE) ;
-	f1=new UIIntVarField(position,*v,"detune: %2.2X",0,255,1,0x10) ;
+	f1=new UIIntVarField(position,*v,"detune %2.2X",0,255,1,0x10) ;
 	T_SimpleList<UIField>::Insert(f1) ;
-
-    position._y += 2;
-    v=instrument->FindVariable(SIP_CRUSH);
-	f1=new UIIntVarField(position,*v,"crush: %d",1,0x10,1,4) ;
+	position._y+=1 ;
+	v=instrument->FindVariable(SIP_SLICES) ;
+	f1=new UIIntVarField(position,*v,"slices %2.2X",1,0xFF,1,0x10) ;
 	T_SimpleList<UIField>::Insert(f1) ;
+}
 
-    position._x += 10;
-    v = instrument->FindVariable(SIP_CRUSHVOL);
-    f1=new UIIntVarField(position,*v,"drive: %2.2X",0,0xFF,1,0x10) ;
+void InstrumentView::fillSampleShapePage(SampleInstrument *instrument, GUIPoint position) {
+	Variable *v=instrument->FindVariable(SIP_VOLUME) ;
+	UIIntVarField *f1=new UIIntVarField(position,*v,"vol    %3d %2.2X",0,255,1,10) ;
 	T_SimpleList<UIField>::Insert(f1) ;
-    position._x -= 10;
-
-    position._y += 1;
+	position._y+=1 ;
+	v=instrument->FindVariable(SIP_PAN) ;
+	f1=new UIIntVarField(position,*v,"pan    %2.2X",0,0xFE,1,0x10) ;
+	T_SimpleList<UIField>::Insert(f1) ;
+	position._y+=1 ;
+	v=instrument->FindVariable(SIP_CRUSH);
+	f1=new UIIntVarField(position,*v,"crush  %2.2d",1,0x10,1,4) ;
+	T_SimpleList<UIField>::Insert(f1) ;
+	position._y+=1 ;
+	v=instrument->FindVariable(SIP_CRUSHVOL);
+	f1=new UIIntVarField(position,*v,"drive  %2.2X",0,0xFF,1,0x10) ;
+	T_SimpleList<UIField>::Insert(f1) ;
+	position._y+=1 ;
 	v=instrument->FindVariable(SIP_DOWNSMPL) ;
-	f1=new UIIntVarField(position,*v,"downsample: %d",0,8,1,4) ;
+	f1=new UIIntVarField(position,*v,"down   %d",0,8,1,4) ;
 	T_SimpleList<UIField>::Insert(f1) ;
-
-
-	position._y+=2 ;
-	UIStaticField *sf=new UIStaticField(position,"flt cut/res:") ;
-	T_SimpleList<UIField>::Insert(sf) ;
-
-	position._x+=13 ;
-	v=instrument->FindVariable(SIP_FILTCUTOFF) ;
-	f1=new UIIntVarField(position,*v,"%2.2X",0,0xFF,1,0x10) ;
+	position._y+=1 ;
+	v=instrument->FindVariable(SIP_INTERPOLATION) ;
+	f1=new UIIntVarField(position,*v,"interp %s",0,1,1,1) ;
 	T_SimpleList<UIField>::Insert(f1) ;
+}
 
-	position._x+=3 ;
+void InstrumentView::fillSampleFilterPage(SampleInstrument *instrument, GUIPoint position) {
+	Variable *v=instrument->FindVariable(SIP_FILTCUTOFF) ;
+	UIIntVarField *f1=new UIIntVarField(position,*v,"cut    %2.2X",0,0xFF,1,0x10) ;
+	T_SimpleList<UIField>::Insert(f1) ;
+	position._y+=1 ;
 	v=instrument->FindVariable(SIP_FILTRESO) ;
-	f1=new UIIntVarField(position,*v,"%2.2X",0,0xFF,1,0x10) ;
+	f1=new UIIntVarField(position,*v,"reso   %2.2X",0,0xFF,1,0x10) ;
 	T_SimpleList<UIField>::Insert(f1) ;
-	position._x-=16 ;
-
 	position._y+=1 ;
 	v=instrument->FindVariable(SIP_FILTMIX) ;
-	f1=new UIIntVarField(position,*v,"type: %2.2X",0,0xFF,1,0x10) ;
+	f1=new UIIntVarField(position,*v,"type   %2.2X",0,0xFF,1,0x10) ;
 	T_SimpleList<UIField>::Insert(f1) ;
-
 	position._y+=1 ;
 	v=instrument->FindVariable(SIP_FILTMODE) ;
-	f1=new UIIntVarField(position,*v,"Mode: %s",0,2,1,1) ;
+	f1=new UIIntVarField(position,*v,"mode   %s",0,2,1,1) ;
 	T_SimpleList<UIField>::Insert(f1) ;
-
 	position._y+=1 ;
 	v=instrument->FindVariable(SIP_ATTENUATE) ;
-	f1=new UIIntVarField(position,*v,"attenuate: %d [%2.2X]",1,0xFF,1,0x10) ;
+	f1=new UIIntVarField(position,*v,"atten  %3d %2.2X",1,0xFF,1,0x10) ;
 	T_SimpleList<UIField>::Insert(f1) ;
+}
 
-	position._y+=1 ;
-	sf=new UIStaticField(position,"fb tune/mix: ") ;
-	T_SimpleList<UIField>::Insert(sf) ;
-
-	v=instrument->FindVariable(SIP_FBTUNE) ;
-	position._x+=13 ;
-	f1=new UIIntVarField(position,*v,"%2.2X",0,0xFF,1,0x10) ;
-	T_SimpleList<UIField>::Insert(f1) ;
-
-	position._x+=3 ;
-	v=instrument->FindVariable(SIP_FBMIX) ;
-	f1=new UIIntVarField(position,*v,"%2.2X",0,0xFF,1,0X10) ;
-	T_SimpleList<UIField>::Insert(f1) ;
-
-	position._x-=16 ;
-
-	position._y+=2;
-	v=instrument->FindVariable(SIP_INTERPOLATION) ;
-	f1=new UIIntVarField(position,*v,"interpolation: %s",0,1,1,1) ;
-	T_SimpleList<UIField>::Insert(f1) ;
-
-    position._y+=1 ;
-	v=instrument->FindVariable(SIP_LOOPMODE) ;
-	f1=new UIIntVarField(position,*v,"loop mode: %s",0,SILM_LAST-1,1,1) ;
+void InstrumentView::fillSampleLoopPage(SampleInstrument *instrument, GUIPoint position) {
+	int max=instrument->GetSampleSize()-1;
+	if (max<0) max=0;
+	Variable *v=instrument->FindVariable(SIP_LOOPMODE) ;
+	UIIntVarField *f1=new UIIntVarField(position,*v,"mode   %s",0,SILM_LAST-1,1,1) ;
 	T_SimpleList<UIField>::Insert(f1) ;
 	position._y+=1 ;
-
 	v=instrument->FindVariable(SIP_SLICES) ;
-	f1=new UIIntVarField(position,*v,"slices: %2.2X",1,0xFF,1,0x10) ;
+	f1=new UIIntVarField(position,*v,"slices %2.2X",1,0xFF,1,0x10) ;
 	T_SimpleList<UIField>::Insert(f1) ;
-
 	position._y+=1 ;
 	v=instrument->FindVariable(SIP_START) ;
-	f1=new UIBigHexVarField(position,*v,7,"start: %7.7X",0,instrument->GetSampleSize()-1,16) ;
+	f1=new UIBigHexVarField(position,*v,7,"start  %7.7X",0,max,16) ;
 	T_SimpleList<UIField>::Insert(f1) ;
-
 	position._y+=1 ;
 	v=instrument->FindVariable(SIP_LOOPSTART) ;
-	f1=new UIBigHexVarField(position,*v,7,"loop start: %7.7X",0,instrument->GetSampleSize()-1,16) ;
+	f1=new UIBigHexVarField(position,*v,7,"lstart %7.7X",0,max,16) ;
 	T_SimpleList<UIField>::Insert(f1) ;
-
 	position._y+=1 ;
 	v=instrument->FindVariable(SIP_END) ;
-	f1=new UIBigHexVarField(position,*v,7,"loop end: %7.7X",0,instrument->GetSampleSize()-1,16) ;
+	f1=new UIBigHexVarField(position,*v,7,"lend   %7.7X",0,max,16) ;
 	T_SimpleList<UIField>::Insert(f1) ;
+}
 
-	v=instrument->FindVariable(SIP_TABLEAUTO) ;
-	position._y+=2 ;
-	UIIntVarField *f2=new UIIntVarField(position,*v,"automation: %s",0,1,1,1) ;
+void InstrumentView::fillSampleMotionPage(SampleInstrument *instrument, GUIPoint position) {
+	Variable *v=instrument->FindVariable(SIP_TABLEAUTO) ;
+	UIIntVarField *f2=new UIIntVarField(position,*v,"auto   %s",0,1,1,1) ;
 	T_SimpleList<UIField>::Insert(f2) ;
-
 	position._y+=1 ;
 	v=instrument->FindVariable(SIP_TABLE) ;
-	f1=new UIIntVarOffField(position,*v,"table: %2.2X",0x00,0x7F,1,0x10) ;
+	UIIntVarField *f1=new UIIntVarOffField(position,*v,"table  %2.2X",0x00,0x7F,1,0x10) ;
 	T_SimpleList<UIField>::Insert(f1) ;
-
-} ;
+	position._y+=1 ;
+	v=instrument->FindVariable(SIP_FBTUNE) ;
+	f1=new UIIntVarField(position,*v,"fb tun %2.2X",0,0xFF,1,0x10) ;
+	T_SimpleList<UIField>::Insert(f1) ;
+	position._y+=1 ;
+	v=instrument->FindVariable(SIP_FBMIX) ;
+	f1=new UIIntVarField(position,*v,"fb mix %2.2X",0,0xFF,1,0X10) ;
+	T_SimpleList<UIField>::Insert(f1) ;
+}
 
 void InstrumentView::fillMidiParameters() {
 
@@ -272,6 +260,380 @@ void InstrumentView::fillMidiParameters() {
 
 } ;
 
+static int GetVarInt(I_Instrument *instr, FourCC id) {
+	if (!instr) return 0;
+	Variable *v=instr->FindVariable(id);
+	if (!v) return 0;
+	return v->GetInt();
+}
+
+static const char *GetVarString(I_Instrument *instr, FourCC id) {
+	if (!instr) return "";
+	Variable *v=instr->FindVariable(id);
+	if (!v) return "";
+	const char *value=v->GetString();
+	return value ? value : "";
+}
+
+const char *InstrumentView::getLabPageName() {
+	switch(labPage_) {
+		case 0: return "SOURCE";
+		case 1: return "SHAPE";
+		case 2: return "FILTER";
+		case 3: return "LOOP";
+		default: return "MOTION";
+	}
+}
+
+void InstrumentView::drawLabBar(int x, int y, int width, int value, int maxValue) {
+	if (width<=0) return;
+	if (maxValue<=0) maxValue=1;
+	if (value<0) value=0;
+	if (value>maxValue) value=maxValue;
+	int fill=(value*width)/maxValue;
+	char buffer[40];
+	if (width>30) width=30;
+	for (int i=0;i<width;i++) {
+		buffer[i]=(i<fill)?'#':'-';
+	}
+	buffer[width]=0;
+	GUITextProperties props;
+	SetColor(CD_HILITE1);
+	DrawString(x,y,buffer,props);
+	SetColor(CD_NORMAL);
+}
+
+void InstrumentView::drawMarkerLine(int x, int y, int height, ColorDefinition color) {
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+	SDLGUIWindowImp *imp=(SDLGUIWindowImp *)w_.GetImpWindow();
+	GUIColor markerColor(0xF5,0xEB,0xFF);
+	if (color==CD_PLAY) {
+		markerColor=GUIColor(0xDB,0x33,0xDB);
+	} else if (color==CD_HILITE2) {
+		markerColor=GUIColor(0xB8,0x3C,0xD8);
+	}
+	GUIRect marker(x,y,x+2,y+height);
+	imp->SetColor(markerColor);
+	imp->DrawRect(marker);
+	SetColor(CD_NORMAL);
+#endif
+}
+
+void InstrumentView::drawPixelLabBar(int x, int y, int width, int height, int value,
+                                     int maxValue, bool bipolar) {
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+	if (width<=0 || height<=0) return;
+	if (maxValue<=0) maxValue=1;
+	if (value<0) value=0;
+	if (value>maxValue) value=maxValue;
+
+	SDLGUIWindowImp *imp=(SDLGUIWindowImp *)w_.GetImpWindow();
+	GUIColor panel(0x1D,0x0A,0x1F);
+	GUIColor frame(0x5E,0x24,0x62);
+	GUIColor fill(0xDB,0x33,0xDB);
+	GUIColor fill2(0xF5,0xEB,0xFF);
+	imp->SetColor(frame);
+	GUIRect outer(x,y,x+width,y+height);
+	imp->DrawRect(outer);
+	imp->SetColor(panel);
+	GUIRect inner(x+1,y+1,x+width-1,y+height-1);
+	imp->DrawRect(inner);
+
+	if (bipolar) {
+		int center=x+(width/2);
+		imp->SetColor(frame);
+		GUIRect centerLine(center,y+1,center+1,y+height-1);
+		imp->DrawRect(centerLine);
+		int pos=x+1+((value*(width-2))/maxValue);
+		int left=pos<center?pos:center;
+		int right=pos>center?pos:center;
+		imp->SetColor(fill);
+		GUIRect filled(left,y+2,right+1,y+height-2);
+		imp->DrawRect(filled);
+		imp->SetColor(fill2);
+		GUIRect cursor(pos-1,y+1,pos+2,y+height-1);
+		imp->DrawRect(cursor);
+	} else {
+		int fillWidth=(value*(width-2))/maxValue;
+		if (fillWidth>0) {
+			imp->SetColor(fill);
+			GUIRect filled(x+1,y+1,x+1+fillWidth,y+height-1);
+			imp->DrawRect(filled);
+		}
+	}
+#else
+	drawLabBar(x/8,y/8,width/8,value,maxValue);
+#endif
+}
+
+void InstrumentView::drawSampleWaveform(SampleInstrument *instrument, int x, int y,
+                                        int width, int height, bool showMarkers) {
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+	SDLGUIWindowImp *imp=(SDLGUIWindowImp *)w_.GetImpWindow();
+	GUIColor panel(0x1D,0x0A,0x1F);
+	GUIColor frame(0x5E,0x24,0x62);
+	GUIColor center(0x5E,0x24,0x62);
+	GUIColor trace(0xDB,0x33,0xDB);
+	GUIColor traceHot(0xF5,0xEB,0xFF);
+	imp->SetColor(frame);
+	GUIRect outer(x,y,x+width,y+height);
+	imp->DrawRect(outer);
+	imp->SetColor(panel);
+	GUIRect clear(x+1,y+1,x+width-1,y+height-1);
+	imp->DrawRect(clear);
+
+	int sampleIndex=instrument->GetSampleIndex();
+	SamplePool *pool=SamplePool::GetInstance();
+	SoundSource *source=0;
+	if (sampleIndex>=0 && sampleIndex<pool->GetNameListSize()) {
+		source=pool->GetSource(sampleIndex);
+	}
+
+	int mid=y+(height/2);
+	imp->SetColor(center);
+	for (int col=0; col<width-2; col+=12) {
+		GUIRect centerLine(x+1+col,mid,x+3+col,mid+1);
+		imp->DrawRect(centerLine);
+	}
+
+	if (!source) {
+		GUITextProperties props;
+		SetColor(CD_NORMAL);
+		DrawString((x+8)/8,(y+height/2-4)/8,"no sample",props);
+		return;
+	}
+
+	int sampleSize=source->GetSize(-1);
+	int channels=source->GetChannelCount(-1);
+	short *samples=(short *)source->GetSampleBuffer(-1);
+	if (!samples || sampleSize<=0) {
+		GUITextProperties props;
+		SetColor(CD_NORMAL);
+		DrawString((x+8)/8,(y+height/2-4)/8,"sample pending",props);
+		return;
+	}
+	if (channels<=0) channels=1;
+
+	int drawableWidth=width-4;
+	int drawableHeight=height-6;
+	int peakAbs=1;
+	for (int col=0; col<drawableWidth; col++) {
+		int start=(col*sampleSize)/drawableWidth;
+		int end=((col+1)*sampleSize)/drawableWidth;
+		if (end<=start) end=start+1;
+		if (end>sampleSize) end=sampleSize;
+		for (int i=start; i<end; i++) {
+			int sample=samples[i*channels];
+			int absSample=sample<0?-sample:sample;
+			if (absSample>peakAbs) peakAbs=absSample;
+		}
+	}
+	if (peakAbs<512) peakAbs=512;
+
+	for (int col=0; col<drawableWidth; col++) {
+		int start=(col*sampleSize)/drawableWidth;
+		int end=((col+1)*sampleSize)/drawableWidth;
+		if (end<=start) end=start+1;
+		if (end>sampleSize) end=sampleSize;
+		int minSample=0;
+		int maxSample=0;
+		for (int i=start; i<end; i++) {
+			int sample=samples[i*channels];
+			if (sample<minSample) minSample=sample;
+			if (sample>maxSample) maxSample=sample;
+		}
+		int top=mid-((maxSample*(drawableHeight/2))/peakAbs);
+		int bottom=mid-((minSample*(drawableHeight/2))/peakAbs);
+		if (top<y+3) top=y+3;
+		if (bottom>y+height-4) bottom=y+height-4;
+		if (bottom<top) bottom=top;
+		imp->SetColor((bottom-top)>drawableHeight/2?traceHot:trace);
+		GUIRect wave(x+2+col,top,x+3+col,bottom+1);
+		imp->DrawRect(wave);
+	}
+
+	if (showMarkers) {
+		int start=GetVarInt(instrument,SIP_START);
+		int loopStart=GetVarInt(instrument,SIP_LOOPSTART);
+		int loopEnd=GetVarInt(instrument,SIP_END);
+		if (loopEnd<=0 || loopEnd>sampleSize) loopEnd=sampleSize;
+		if (start<0) start=0;
+		if (loopStart<0) loopStart=0;
+		if (start>sampleSize) start=sampleSize;
+		if (loopStart>sampleSize) loopStart=sampleSize;
+		int sx=x+2+((start*drawableWidth)/sampleSize);
+		int ls=x+2+((loopStart*drawableWidth)/sampleSize);
+		int le=x+2+((loopEnd*drawableWidth)/sampleSize);
+		drawMarkerLine(sx,y+1,height-2,CD_PLAY);
+		drawMarkerLine(ls,y+1,height-2,CD_HILITE2);
+		drawMarkerLine(le,y+1,height-2,CD_HILITE1);
+	}
+#endif
+}
+
+void InstrumentView::drawSampleLabVisuals() {
+	if (getInstrumentType()!=IT_SAMPLE) {
+		return;
+	}
+	int i=viewData_->currentInstrument_;
+	InstrumentBank *bank=viewData_->project_->GetInstrumentBank();
+	SampleInstrument *instrument=(SampleInstrument *)bank->GetInstrument(i);
+	if (!instrument) {
+		return;
+	}
+
+	GUITextProperties props;
+	char line[40];
+	SetColor(CD_HILITE2);
+	sprintf(line,"<L %d/5 %s L>",labPage_+1,getLabPageName());
+	DrawString(1,2,line,props);
+	SetColor(CD_NORMAL);
+
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+	SDLGUIWindowImp *imp=(SDLGUIWindowImp *)w_.GetImpWindow();
+	GUIColor panel(0x18,0x06,0x1B);
+	imp->SetColor(panel);
+	GUIRect clearPanel(0,34,240,128);
+	imp->DrawRect(clearPanel);
+#endif
+
+	int sampleSize=instrument->GetSampleSize();
+	int start=GetVarInt(instrument,SIP_START);
+	int loopStart=GetVarInt(instrument,SIP_LOOPSTART);
+	int loopEnd=GetVarInt(instrument,SIP_END);
+	if (sampleSize<=0) sampleSize=1;
+	if (loopEnd<=0 || loopEnd>sampleSize) loopEnd=sampleSize;
+	if (start<0) start=0;
+	if (loopStart<0) loopStart=0;
+	if (start>sampleSize) start=sampleSize;
+	if (loopStart>sampleSize) loopStart=sampleSize;
+
+	if (labPage_==0 || labPage_==3) {
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+		drawSampleWaveform(instrument,10,36,220,52,true);
+		DrawString(2,12,"S start  L loop  E end",props);
+		if (labPage_==0) {
+			const char *sampleName=GetVarString(instrument,SIP_SAMPLE);
+			char name[25];
+			strncpy(name,sampleName,24);
+			name[24]=0;
+			DrawString(2,14,name,props);
+		} else {
+			sprintf(line,"mode %d S%05X L%05X E%05X",GetVarInt(instrument,SIP_LOOPMODE),start,loopStart,loopEnd);
+			DrawString(2,14,line,props);
+		}
+#else
+		char wave[25];
+		for (int j=0;j<24;j++) {
+			int pattern=(j*7 + j*j) % 11;
+			wave[j]=(pattern<2)?'.':((pattern<5)?'-':((pattern<8)?'=':'#'));
+		}
+		wave[24]=0;
+		int sx=(start*23)/sampleSize;
+		int ls=(loopStart*23)/sampleSize;
+		int le=(loopEnd*23)/sampleSize;
+		if (sx<0) sx=0;
+		if (sx>23) sx=23;
+		if (ls<0) ls=0;
+		if (ls>23) ls=23;
+		if (le<0) le=0;
+		if (le>23) le=23;
+		wave[sx]='S';
+		wave[ls]='L';
+		wave[le]='E';
+		SetColor(CD_HILITE1);
+		DrawString(3,5,wave,props);
+		SetColor(CD_NORMAL);
+		DrawString(3,7,"Start auditions phrase",props);
+		if (labPage_==0) {
+			const char *sampleName=GetVarString(instrument,SIP_SAMPLE);
+			char name[25];
+			strncpy(name,sampleName,24);
+			name[24]=0;
+			DrawString(3,9,name,props);
+			sprintf(line,"root %03d det %02X sl %02X",GetVarInt(instrument,SIP_ROOTNOTE),GetVarInt(instrument,SIP_FINETUNE),GetVarInt(instrument,SIP_SLICES));
+			DrawString(3,11,line,props);
+		} else {
+			sprintf(line,"mode %d  S%05X",GetVarInt(instrument,SIP_LOOPMODE),start);
+			DrawString(3,9,line,props);
+			sprintf(line,"L%05X E%05X",loopStart,loopEnd);
+			DrawString(3,11,line,props);
+		}
+#endif
+	} else if (labPage_==1) {
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+		DrawString(2,5,"VOL",props);
+		drawPixelLabBar(48,40,160,14,GetVarInt(instrument,SIP_VOLUME),255);
+		DrawString(2,8,"PAN",props);
+		drawPixelLabBar(48,64,160,14,GetVarInt(instrument,SIP_PAN),254,true);
+		DrawString(2,11,"GRIT",props);
+		drawPixelLabBar(48,88,160,14,16-GetVarInt(instrument,SIP_CRUSH)+GetVarInt(instrument,SIP_DOWNSMPL)*2,31);
+		sprintf(line,"drive %02X down %d interp %d",GetVarInt(instrument,SIP_CRUSHVOL),GetVarInt(instrument,SIP_DOWNSMPL),GetVarInt(instrument,SIP_INTERPOLATION));
+		DrawString(2,14,line,props);
+#else
+		DrawString(3,5,"VOL",props);
+		drawLabBar(8,5,16,GetVarInt(instrument,SIP_VOLUME),255);
+		DrawString(3,7,"PAN L-----|-----R",props);
+		int pan=(GetVarInt(instrument,SIP_PAN)*11)/254;
+		char panLine[13];
+		strcpy(panLine,"-----------");
+		if (pan<0) pan=0;
+		if (pan>10) pan=10;
+		panLine[pan]='|';
+		panLine[11]=0;
+		SetColor(CD_HILITE1);
+		DrawString(8,8,panLine,props);
+		SetColor(CD_NORMAL);
+		DrawString(3,10,"GRIT",props);
+		drawLabBar(8,10,16,16-GetVarInt(instrument,SIP_CRUSH)+GetVarInt(instrument,SIP_DOWNSMPL)*2,31);
+		DrawString(3,12,"drive/downsample texture",props);
+#endif
+	} else if (labPage_==2) {
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+		DrawString(2,5,"CUT",props);
+		drawPixelLabBar(48,40,160,14,GetVarInt(instrument,SIP_FILTCUTOFF),255);
+		DrawString(2,8,"RES",props);
+		drawPixelLabBar(48,64,160,14,GetVarInt(instrument,SIP_FILTRESO),255);
+		DrawString(2,11,"TYPE",props);
+		drawPixelLabBar(48,88,160,14,GetVarInt(instrument,SIP_FILTMIX),255);
+		sprintf(line,"mode %d atten %02X",GetVarInt(instrument,SIP_FILTMODE),GetVarInt(instrument,SIP_ATTENUATE));
+		DrawString(2,14,line,props);
+#else
+		DrawString(3,5,"CUT",props);
+		drawLabBar(8,5,16,GetVarInt(instrument,SIP_FILTCUTOFF),255);
+		DrawString(3,7,"RES",props);
+		drawLabBar(8,7,16,GetVarInt(instrument,SIP_FILTRESO),255);
+		DrawString(3,9,"TYPE low <----> high",props);
+		drawLabBar(8,10,16,GetVarInt(instrument,SIP_FILTMIX),255);
+		sprintf(line,"mode %d atten %02X",GetVarInt(instrument,SIP_FILTMODE),GetVarInt(instrument,SIP_ATTENUATE));
+		DrawString(3,12,line,props);
+#endif
+	} else {
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+		DrawString(2,5,"TABLE",props);
+		int table=GetVarInt(instrument,SIP_TABLE);
+		for (int step=0; step<8; step++) {
+			int x=28+step*23;
+			int y=48+((step%2)?10:0);
+			drawPixelLabBar(x,y,14,42,(step*37+GetVarInt(instrument,SIP_FBTUNE))&0xFF,255);
+		}
+		sprintf(line,"auto %s table %02X",GetVarInt(instrument,SIP_TABLEAUTO)?"on":"off",table<0?0:table);
+		DrawString(2,13,line,props);
+		sprintf(line,"fb tune %02X mix %02X",GetVarInt(instrument,SIP_FBTUNE),GetVarInt(instrument,SIP_FBMIX));
+		DrawString(2,15,line,props);
+#else
+		DrawString(3,5,"INST TABLE MOTION",props);
+		int table=GetVarInt(instrument,SIP_TABLE);
+		sprintf(line,"auto %s table %02X",GetVarInt(instrument,SIP_TABLEAUTO)?"on":"off",table<0?0:table);
+		DrawString(3,7,line,props);
+		SetColor(CD_HILITE1);
+		DrawString(3,9,"[ ][>][ ][>][ ][>][ ]",props);
+		SetColor(CD_NORMAL);
+		DrawString(3,11,"fb tune/mix + table fx",props);
+#endif
+	}
+}
+
 
 void InstrumentView::warpToNext(int offset) {
 	int instrument=viewData_->currentInstrument_+offset ;
@@ -286,11 +648,36 @@ void InstrumentView::warpToNext(int offset) {
 	isDirty_=true ;
 } ;
 
+void InstrumentView::switchLabPage(int offset) {
+	labPage_+=offset;
+	if (labPage_<0) {
+		labPage_=SAMPLE_LAB_PAGE_COUNT-1;
+	}
+	if (labPage_>=SAMPLE_LAB_PAGE_COUNT) {
+		labPage_=0;
+	}
+	lastFocusID_=0;
+	onInstrumentChange();
+	isDirty_=true;
+} ;
+
 void InstrumentView::ProcessButtonMask(unsigned short mask,bool pressed) {
 
 	if (!pressed) return ;
 
 	isDirty_=false ;
+
+	if (getInstrumentType()==IT_SAMPLE && (mask&EPBM_L) &&
+	    !(mask&(EPBM_A|EPBM_B|EPBM_R|EPBM_START|EPBM_SELECT))) {
+		if (mask&EPBM_LEFT) {
+			switchLabPage(-1);
+			return;
+		}
+		if (mask&EPBM_RIGHT) {
+			switchLabPage(1);
+			return;
+		}
+	}
 
 	if (viewMode_==VM_NEW) {
 		if (mask==EPBM_A) {
@@ -481,7 +868,9 @@ void InstrumentView::DrawView() {
     sprintf(title, "Instrument %2.2X", viewData_->currentInstrument_);
     DrawString(pos._x, pos._y, title, props);
 
-    // Draw fields
+    if (getInstrumentType()==IT_SAMPLE) {
+        drawSampleLabVisuals();
+    }
 
     FieldView::Redraw();
     drawMap() ;

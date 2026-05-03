@@ -1,0 +1,50 @@
+# Capture the experimental visual Instrument Lab pages with a real sample.
+route boot.new_project_random
+expect_view song
+press a 80
+wait 120
+route song.to_chain
+press a 80
+wait 120
+route chain.to_phrase
+press a 80
+wait 120
+route phrase.to_instrument
+expect_view instrument
+
+route instrument.open_sample_import
+route sample_import.to_first_file
+press d 80
+press d 80
+press d 80
+press d 80
+press d 80
+press d 80
+press d 80
+route sample_import.quick_import_selected
+expect_project_sample wuxia-guzheng.wav
+route sample_import.exit
+expect_view instrument
+expect_instrument_sample 0 wuxia-guzheng.wav
+
+expect_screen_text SOURCE
+screenshot_app sample-lab-source.bmp
+route combo.l.right
+wait 120
+expect_screen_text SHAPE
+screenshot_app sample-lab-shape.bmp
+route combo.l.right
+wait 120
+expect_screen_text FILTER
+screenshot_app sample-lab-filter.bmp
+route combo.l.right
+wait 120
+expect_screen_text LOOP
+screenshot_app sample-lab-loop.bmp
+route combo.l.right
+wait 120
+expect_screen_text MOTION
+screenshot_app sample-lab-motion.bmp
+
+expect_no_error
+quit
