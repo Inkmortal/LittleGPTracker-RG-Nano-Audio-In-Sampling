@@ -122,6 +122,24 @@ void RecordSampleDialog::ProcessButtonMask(unsigned short mask, bool pressed) {
     }
 }
 
+void RecordSampleDialog::CustomizeContextOverlay(
+    const char *&name, const char *&where, const char *&edit,
+    const char *&field, const char *&cmd1, const char *&cmd2,
+    const char *&cmd3, const char *&cmd4, const char *&cmd5,
+    const char *&cmd6, const char *&cmd7) {
+	name="RECORD";
+	where="External capture";
+	edit="Start record/stop";
+	field="Recording modal";
+	cmd1="Up/Down device/len";
+	cmd2="A select/save";
+	cmd3="B cancel/back";
+	cmd4="Start rec/stop";
+	cmd5="RG Nano has no mic";
+	cmd6="Use imported WAVs";
+	cmd7="R+Select helper";
+}
+
 void RecordSampleDialog::startRecording() {
     statusMessage_ = "";
 

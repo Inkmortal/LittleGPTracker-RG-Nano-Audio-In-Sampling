@@ -205,6 +205,24 @@ void SelectProjectDialog::OnFocus() {
     currentProject_ = lastProject_;
 };
 
+void SelectProjectDialog::CustomizeContextOverlay(
+	const char *&name, const char *&where, const char *&edit,
+	const char *&field, const char *&cmd1, const char *&cmd2,
+	const char *&cmd3, const char *&cmd4, const char *&cmd5,
+	const char *&cmd6, const char *&cmd7) {
+	name="PROJECTS";
+	where="Load New Exit";
+	edit="A+B delete project";
+	field="Choose/create song";
+	cmd1="Up/Down choose song";
+	cmd2="B+Up/Dn page list";
+	cmd3="Left/Right action";
+	cmd4="A run action";
+	cmd5="A+B delete project";
+	cmd6="A on folder opens";
+	cmd7="R+Select helper";
+}
+
 void SelectProjectDialog::ProcessButtonMask(unsigned short mask,bool pressed) {
 	if (!pressed) return ;
 

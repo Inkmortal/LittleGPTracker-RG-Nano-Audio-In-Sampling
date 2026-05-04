@@ -1,0 +1,33 @@
+# Verify R+Select helper inside the Sample Import modal.
+route boot.new_project_random
+expect_view song
+press a 80
+wait 100
+route song.to_chain
+press a 80
+wait 100
+route chain.to_phrase
+press a 80
+wait 100
+route phrase.to_instrument
+expect_view instrument
+route instrument.open_sample_import
+wait 120
+down n
+press q 80
+up n
+wait 120
+screenshot_app context-overlay-modal-samples-map.bmp
+expect_screen_text SAMPLES
+expect_screen_text Browse samples
+press d 80
+wait 120
+screenshot_app context-overlay-modal-samples-commands.bmp
+expect_screen_text COMMANDS
+expect_screen_text Start+Right import
+down n
+press q 80
+up n
+wait 80
+expect_no_error
+quit

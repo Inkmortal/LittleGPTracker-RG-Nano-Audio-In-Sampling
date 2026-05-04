@@ -182,6 +182,24 @@ void ImportSampleDialog::OnFocus() {
 	toInstr_=viewData_->currentInstrument_ ;
 } ;
 
+void ImportSampleDialog::CustomizeContextOverlay(
+	const char *&name, const char *&where, const char *&edit,
+	const char *&field, const char *&cmd1, const char *&cmd2,
+	const char *&cmd3, const char *&cmd4, const char *&cmd5,
+	const char *&cmd6, const char *&cmd7) {
+	name="SAMPLES";
+	where="Listen Import Record Exit";
+	edit="A action Start preview";
+	field="Browse samples";
+	cmd1="Up/Down choose file";
+	cmd2="B+Up/Dn page list";
+	cmd3="Left/Right action";
+	cmd4="A listen/import/exit";
+	cmd5="Start+Up/Dn preview";
+	cmd6="Start+Right import";
+	cmd7="R+Select helper";
+}
+
 void ImportSampleDialog::preview(Path &element) {
 	Player::GetInstance()->StartStreaming(element) ;
 }

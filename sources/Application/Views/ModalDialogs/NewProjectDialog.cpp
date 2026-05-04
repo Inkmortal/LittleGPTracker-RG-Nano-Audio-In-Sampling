@@ -111,6 +111,24 @@ void NewProjectDialog::OnFocus() {
     keyboardCol_ = 0;
 };
 
+void NewProjectDialog::CustomizeContextOverlay(
+    const char *&name, const char *&where, const char *&edit,
+    const char *&field, const char *&cmd1, const char *&cmd2,
+    const char *&cmd3, const char *&cmd4, const char *&cmd5,
+    const char *&cmd6, const char *&cmd7) {
+	name="NEW SONG";
+	where="Name Random Ok Cancel";
+	edit="A edit/run";
+	field="Create project";
+	cmd1="Dpad move cursor";
+	cmd2="A on name keyboard";
+	cmd3="A Random makes name";
+	cmd4="A Ok creates song";
+	cmd5="B delete in keyboard";
+	cmd6="Start exits keyboard";
+	cmd7="R+Select helper";
+}
+
 void NewProjectDialog::ProcessButtonMask(unsigned short mask, bool pressed) {
 
     if (!pressed)

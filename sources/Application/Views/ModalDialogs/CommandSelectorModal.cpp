@@ -184,3 +184,21 @@ void CommandSelectorModal::DrawView() {
 
 void CommandSelectorModal::OnPlayerUpdate(PlayerEventType, unsigned int) {}
 void CommandSelectorModal::OnFocus() {}
+
+void CommandSelectorModal::CustomizeContextOverlay(
+    const char *&name, const char *&where, const char *&edit,
+    const char *&field, const char *&cmd1, const char *&cmd2,
+    const char *&cmd3, const char *&cmd4, const char *&cmd5,
+    const char *&cmd6, const char *&cmd7) {
+	name="COMMAND";
+	where="Phrase/Table FX";
+	edit="A or Select choose";
+	field="Pick tracker cmd";
+	cmd1="Dpad move grid";
+	cmd2="A choose command";
+	cmd3="Select also chooses";
+	cmd4="B cancel";
+	cmd5="Help below grid";
+	cmd6="Then edit params";
+	cmd7="R+Select helper";
+}

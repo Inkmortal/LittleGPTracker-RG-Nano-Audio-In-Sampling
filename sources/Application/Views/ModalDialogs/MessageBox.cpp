@@ -60,6 +60,23 @@ void MessageBox::OnPlayerUpdate(PlayerEventType ,unsigned int currentTick) {
 } ;
 void MessageBox::OnFocus() {
 } ;
+void MessageBox::CustomizeContextOverlay(
+	const char *&name, const char *&where, const char *&edit,
+	const char *&field, const char *&cmd1, const char *&cmd2,
+	const char *&cmd3, const char *&cmd4, const char *&cmd5,
+	const char *&cmd6, const char *&cmd7) {
+	name="CONFIRM";
+	where="Dialog choice";
+	edit="A confirm";
+	field="Confirm/cancel";
+	cmd1="Left/Right choose";
+	cmd2="A confirm choice";
+	cmd3="No/Cancel backs out";
+	cmd4="Read message first";
+	cmd5="Use No if unsure";
+	cmd6="Delete is final";
+	cmd7="R+Select helper";
+}
 void MessageBox::ProcessButtonMask(unsigned short mask,bool pressed) {
 	if (mask&EPBM_A) {
 		EndModal(button_[selected_]) ;

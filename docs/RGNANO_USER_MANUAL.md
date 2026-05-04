@@ -54,7 +54,7 @@ Hold `R` and tap a D-pad direction to move between major screens:
 
 ## Universal Helper
 
-`R + Select` opens the universal helper from any main tracker view.
+`R + Select` opens the universal helper from tracker views and modal dialogs, including the Project selector you see before a song is loaded.
 
 Page 1 is the minimap. It shows:
 
@@ -73,7 +73,7 @@ Page 2 is the command page. It shows:
 
 On the Instrument screen, the helper follows the current sample lab page. Source, Shape, Filter, Loop, and Motion each show their own compact controls instead of one generic instrument reminder.
 
-Press `R + Select` again to close the helper. While the helper is open, normal tracker inputs are blocked so you can read without accidentally changing music.
+Press `R + Select` again to close the helper. While the helper is open, normal inputs are blocked so you can read without accidentally changing music, confirming a dialog, or deleting a project.
 
 ## Playback Scope
 

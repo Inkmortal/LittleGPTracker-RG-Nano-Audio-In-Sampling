@@ -519,7 +519,7 @@ void View::Redraw() {
 		if (!suppressPlaybackScope_) {
 			drawPlaybackScope();
 		}
-		if (!suppressPlaybackScope_ && contextOverlay_) {
+		if (contextOverlay_) {
 			drawContextOverlay();
 		}
 	}

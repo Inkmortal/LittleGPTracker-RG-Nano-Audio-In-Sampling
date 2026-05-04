@@ -14,6 +14,12 @@ public:
 	virtual void OnPlayerUpdate(PlayerEventType ,unsigned int currentTick) ;
 	virtual void OnFocus() ;
 	virtual void ProcessButtonMask(unsigned short mask,bool pressed) ;
+	virtual void CustomizeContextOverlay(const char *&name, const char *&where,
+										 const char *&edit, const char *&field,
+										 const char *&cmd1, const char *&cmd2,
+										 const char *&cmd3, const char *&cmd4,
+										 const char *&cmd5, const char *&cmd6,
+										 const char *&cmd7) ;
 
 	Result OnNewProject(std::string &name) ;
     Result OnDeleteProject(const Path &projectPath);
