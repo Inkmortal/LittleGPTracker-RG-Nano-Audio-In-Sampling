@@ -46,7 +46,7 @@ Shows the loaded WAV as an actual waveform preview, plus start/loop/end markers 
 
 ![Instrument Lab Marker Edit](assets/instrument-lab-marker-edit.png)
 
-On Source and Loop, use `L + Up/Down` to choose `START`, `LSTART`, or `END`, then use `L + A + Left/Right` to nudge the selected marker on the waveform.
+On Source and Loop, use `L + Up/Down` to choose the marker shown as `S`, `L`, or `E`, then use `L + A + Left/Right` to nudge the selected marker on the waveform. `S` is sample start, `L` is loop start, and `E` is sample end.
 
 ### Shape
 

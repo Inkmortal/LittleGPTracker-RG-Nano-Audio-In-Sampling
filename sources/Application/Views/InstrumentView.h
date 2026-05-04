@@ -40,6 +40,7 @@ protected:
 	void nudgeWaveMarker(int offset) ;
 	void auditionSamplePitch(int offset) ;
 	const char *getWaveMarkerName() ;
+	const char *getWaveMarkerShortName() ;
 	bool isWaveMarkerPage() ;
 	const char *getLabPageName() ;
 	void Update(Observable &o,I_ObservableData *d) ;

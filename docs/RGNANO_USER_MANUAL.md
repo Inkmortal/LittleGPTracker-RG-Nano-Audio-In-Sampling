@@ -197,7 +197,7 @@ The Instrument screen now splits sample design into five compact lab pages. Use 
 | Loop | Loop mode, slices, sample start, loop start, loop end. |
 | Motion | Instrument table automation and feedback movement. |
 
-On the Source and Loop pages, the waveform has three editable markers: `START`, `LSTART`, and `END`. Use `L + Up/Down` to choose the active marker, then `L + A + Left/Right` to nudge it on the waveform. The normal field list remains available below the visual panel for exact parameter editing.
+On the Source and Loop pages, the waveform has three editable markers: `START`, `LSTART`, and `END`. The tiny waveform labels them compactly as `S`, `L`, and `E` so the marker text does not cover the audio shape. Use `L + Up/Down` to choose the active marker, then `L + A + Left/Right` to nudge it on the waveform. The normal field list remains available below the visual panel for exact parameter editing.
 
 To check whether a sample still feels musical after pitch shifts, hold `R + A` and tap `Left`, `Up`, or `Right` for low, root, or high audition notes. `R + A + Down` stops that audition. This keeps sample design on the Instrument screen instead of forcing a trip back to Phrase every time you tweak root note, loop points, filter, or volume.
 

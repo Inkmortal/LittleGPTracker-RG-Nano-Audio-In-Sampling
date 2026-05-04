@@ -48,14 +48,14 @@ wait 120
 expect_player_running no
 route combo.l.down
 wait 120
-expect_screen_text LSTART
+expect_screen_text MARK:L
 down m
 down a
 press r 80
 up a
 up m
 wait 120
-expect_screen_text LSTART
+expect_screen_text MARK:L
 screenshot_app sample-lab-marker-edit.bmp
 route combo.l.right
 wait 120

@@ -297,6 +297,12 @@ const char *InstrumentView::getWaveMarkerName() {
 	return "START";
 }
 
+const char *InstrumentView::getWaveMarkerShortName() {
+	if (markerFocus_==SIP_LOOPSTART) return "L";
+	if (markerFocus_==SIP_END) return "E";
+	return "S";
+}
+
 void InstrumentView::cycleWaveMarker(int offset) {
 	int index=0;
 	if (markerFocus_==SIP_LOOPSTART) index=1;
@@ -400,14 +406,21 @@ void InstrumentView::drawMarkerLine(int x, int y, int height, ColorDefinition co
 #if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
 	SDLGUIWindowImp *imp=(SDLGUIWindowImp *)w_.GetImpWindow();
 	GUIColor markerColor(0xF5,0xEB,0xFF);
+	bool active=(color==CD_HILITE1);
 	if (color==CD_PLAY) {
-		markerColor=GUIColor(0xDB,0x33,0xDB);
+		markerColor=GUIColor(0xD8,0x4C,0xD8);
 	} else if (color==CD_HILITE2) {
-		markerColor=GUIColor(0xB8,0x3C,0xD8);
+		markerColor=GUIColor(0x9B,0x2B,0xB8);
 	}
-	GUIRect marker(x,y,x+2,y+height);
+	GUIRect marker(x,y,x+1,y+height);
 	imp->SetColor(markerColor);
 	imp->DrawRect(marker);
+	if (active) {
+		GUIRect top(x-2,y,x+3,y+2);
+		GUIRect bottom(x-2,y+height-2,x+3,y+height);
+		imp->DrawRect(top);
+		imp->DrawRect(bottom);
+	}
 	SetColor(CD_NORMAL);
 #endif
 }
@@ -613,7 +626,7 @@ void InstrumentView::drawSampleLabVisuals() {
 	if (labPage_==0 || labPage_==3) {
 #if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
 		drawSampleWaveform(instrument,10,36,220,52,true);
-		sprintf(line,"%s  L+UD pick  L+A+LR",getWaveMarkerName());
+		sprintf(line,"MARK:%s  L+UD  L+A+LR",getWaveMarkerShortName());
 		drawLabText(2,12,line,props);
 		if (labPage_==0) {
 			const char *sampleName=GetVarString(instrument,SIP_SAMPLE);
