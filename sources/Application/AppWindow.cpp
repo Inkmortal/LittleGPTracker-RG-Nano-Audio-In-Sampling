@@ -205,6 +205,10 @@ void AppWindow::DrawString(const char *string, GUIPoint &pos,
 };
 
 void AppWindow::Clear(bool all) {
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+    GUIWindow::Clear(backgroundColor_);
+    all = true;
+#endif
     memset(_charScreen, ' ', 1200);
     memset(_charScreenProp, 0, 1200);
     if (all) {

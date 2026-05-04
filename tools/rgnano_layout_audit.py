@@ -163,6 +163,28 @@ def edge_run(mask: List[List[bool]], edge: str) -> int:
     return 0
 
 
+def is_visual_workstation_screen(name: str) -> bool:
+    return (
+        "sample-lab-" in name
+        or "sample-full-02-" in name
+        or "sample-full-03-" in name
+        or "sample-full-04-" in name
+        or "sample-full-05-" in name
+        or "sample-full-06-" in name
+        or "sample-full-07-" in name
+        or "sample-full-08-" in name
+        or "sample-full-09-" in name
+        or "sample-full-10-" in name
+        or "sample-full-11-" in name
+        or "sample-full-12-" in name
+        or "sample-full-13-" in name
+        or "sample-full-14-" in name
+        or "audit-02-mixer" in name
+        or "audit-06-phrase" in name
+        or "audit-07-phrase-note" in name
+    )
+
+
 def is_framed_modal(name: str) -> bool:
     return (
         "audit-00-boot-project" in name
@@ -188,6 +210,28 @@ def dense_row_allowed(name: str, row: int) -> bool:
     if "audit-02-mixer" in name:
         return 5 <= row <= 23
     return False
+
+
+def audit_pixel_artifacts(path: str, mask: List[List[bool]]) -> List[Issue]:
+    issues: List[Issue] = []
+    name = os.path.basename(path).lower()
+    if is_visual_workstation_screen(name) or "audit-14-power-menu" in name:
+        return issues
+
+    for comp in components(mask, min_pixels=90):
+        # Inverted tracker text produces legitimate 8px-tall solid selection
+        # rows. Stale waveform/meter artifacts are taller pixel-drawn blocks.
+        if comp.width < 20 or comp.height < 10:
+            continue
+        area = comp.width * comp.height
+        density = comp.pixels / float(area)
+        if density >= 0.58:
+            issues.append(Issue(
+                path,
+                "large solid pixel block outside a visual screen "
+                f"(bbox={comp.bbox}, density={density:.2f}); likely stale bar/wave artifact",
+            ))
+    return issues
 
 
 def audit_generic(path: str, img: Image.Image, mask: List[List[bool]]) -> List[Issue]:
@@ -358,6 +402,7 @@ def audit_paths(paths: Iterable[str]) -> List[Issue]:
         img = load_rgb(path)
         mask = foreground_mask(img)
         issues.extend(audit_generic(path, img, mask))
+        issues.extend(audit_pixel_artifacts(path, mask))
         issues.extend(audit_producer_screen(path, mask))
         issues.extend(audit_sample_lab(path, mask))
     return issues
