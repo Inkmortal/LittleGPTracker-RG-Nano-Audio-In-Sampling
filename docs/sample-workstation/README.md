@@ -93,6 +93,8 @@ Instrument Lab pages:
 - `L + Left/Right`: switch Instrument Lab page.
 - `L + Up/Down`: choose the active waveform marker on Source/Loop.
 - `L + A + Left/Right`: nudge the active waveform marker.
+- `R + A + Left/Up/Right`: audition the current sample low/root/high.
+- `R + A + Down`: stop sample audition.
 - `Start`: audition current instrument in phrase context.
 - `R + Start`: audition in song context.
 - `R + Left`: return to Phrase.
@@ -110,12 +112,15 @@ The Source/Loop direction matters most because sample-heavy production depends o
 - What note is it tuned to?
 - Does it still sound good when pitched low, normal, and high?
 
+The direct audition shortcut is intentionally shoulder-heavy: hold `R + A`, then tap `Left`, `Up`, or `Right` to hear the current sample below root, at root, or above root without leaving Source, Shape, Filter, Loop, or Motion. Tap `R + A + Down` to stop. That gives the small device a sound-design loop that feels more like a dedicated workstation than a parameter list.
+
 No synth engines yet. Make sample instruments feel great first.
 
 ## Current Limitations
 
 - The Source and Loop waveform is read from the loaded sample buffer, so it reflects the actual WAV shape.
 - Source/Loop marker edits now have waveform shortcuts, but there is not yet a dedicated trim/chop editor.
+- Sample audition is live from the Instrument Lab, but crop/normalize/resample are still future editor actions.
 - Motion is only a visual grouping for existing table/feedback settings; it is not an M8-style modulation matrix yet.
 - Sample import now has a selected-item info strip, but it is still primarily a text list. A waveform-aware library/browser is a separate next step.
 
@@ -130,7 +135,7 @@ python tools\run_sample_lab_layout_audit.py
 To audit existing captures manually after running `projects/resources/RGNANO_SIM/sample-lab-pages-preview.rgsim`, run from `projects`:
 
 ```powershell
-python ..\tools\rgnano_layout_audit.py .\sample-lab-source.bmp .\sample-lab-marker-edit.bmp .\sample-lab-shape.bmp .\sample-lab-filter.bmp .\sample-lab-loop.bmp .\sample-lab-motion.bmp
+python ..\tools\rgnano_layout_audit.py .\sample-lab-source.bmp .\sample-lab-source-audition.bmp .\sample-lab-marker-edit.bmp .\sample-lab-shape.bmp .\sample-lab-filter.bmp .\sample-lab-loop.bmp .\sample-lab-motion.bmp
 ```
 
 The audit fails on:

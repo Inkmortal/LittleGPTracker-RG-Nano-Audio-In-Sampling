@@ -264,7 +264,7 @@ void View::drawContextOverlay() {
 			cmd2="A activate/sample";
 			cmd3="A+Dpad edit value";
 			cmd4="L+A+LR nudge mark";
-			cmd5="B+A purge sample";
+			cmd5="R+A arrows audition";
 			cmd6="R+Down Inst Table";
 			cmd7="R+Left Phrase";
 			break;

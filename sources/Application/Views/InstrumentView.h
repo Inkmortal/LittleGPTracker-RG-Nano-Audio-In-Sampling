@@ -37,6 +37,7 @@ protected:
 	void drawMarkerLine(int x, int y, int height, ColorDefinition color) ;
 	void cycleWaveMarker(int offset) ;
 	void nudgeWaveMarker(int offset) ;
+	void auditionSamplePitch(int offset) ;
 	const char *getWaveMarkerName() ;
 	bool isWaveMarkerPage() ;
 	const char *getLabPageName() ;

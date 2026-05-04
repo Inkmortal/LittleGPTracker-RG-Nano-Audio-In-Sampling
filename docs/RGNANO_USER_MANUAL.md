@@ -195,6 +195,8 @@ The Instrument screen now splits sample design into five compact lab pages. Use 
 
 On the Source and Loop pages, the waveform has three editable markers: `START`, `LSTART`, and `END`. Use `L + Up/Down` to choose the active marker, then `L + A + Left/Right` to nudge it on the waveform. The normal field list remains available below the visual panel for exact parameter editing.
 
+To check whether a sample still feels musical after pitch shifts, hold `R + A` and tap `Left`, `Up`, or `Right` for low, root, or high audition notes. `R + A + Down` stops that audition. This keeps sample design on the Instrument screen instead of forcing a trip back to Phrase every time you tweak root note, loop points, filter, or volume.
+
 This fork aims for M8-like pocket production, but native M8-style synth engines and deep offline sample editing are still future work.
 
 ## Tables And Groove

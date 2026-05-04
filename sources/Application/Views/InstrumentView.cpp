@@ -359,6 +359,24 @@ void InstrumentView::nudgeWaveMarker(int offset) {
 	isDirty_=true;
 }
 
+void InstrumentView::auditionSamplePitch(int offset) {
+	if (getInstrumentType()!=IT_SAMPLE) {
+		return;
+	}
+	int i=viewData_->currentInstrument_;
+	InstrumentBank *bank=viewData_->project_->GetInstrumentBank();
+	SampleInstrument *instrument=(SampleInstrument *)bank->GetInstrument(i);
+	if (!instrument || instrument->IsEmpty()) {
+		return;
+	}
+	int root=GetVarInt(instrument,SIP_ROOTNOTE);
+	int note=root+offset;
+	if (note<0) note=0;
+	if (note>127) note=127;
+	Player::GetInstance()->AuditionInstrument(i,note);
+	isDirty_=true;
+}
+
 void InstrumentView::drawLabBar(int x, int y, int width, int value, int maxValue) {
 	if (width<=0) return;
 	if (maxValue<=0) maxValue=1;
@@ -593,9 +611,11 @@ void InstrumentView::drawSampleLabVisuals() {
 			strncpy(name,sampleName,24);
 			name[24]=0;
 			DrawString(2,14,name,props);
+			DrawString(2,15,"R+A: low root high stop",props);
 		} else {
 			sprintf(line,"mode %d S%05X L%05X E%05X",GetVarInt(instrument,SIP_LOOPMODE),start,loopStart,loopEnd);
 			DrawString(2,14,line,props);
+			DrawString(2,15,"R+A: low root high stop",props);
 		}
 #else
 		char wave[25];
@@ -770,6 +790,27 @@ void InstrumentView::ProcessButtonMask(unsigned short mask,bool pressed) {
 		}
 		if (mask&EPBM_RIGHT) {
 			nudgeWaveMarker(1);
+			return;
+		}
+	}
+
+	if (getInstrumentType()==IT_SAMPLE && (mask&EPBM_R) && (mask&EPBM_A) &&
+	    !(mask&(EPBM_B|EPBM_L|EPBM_START|EPBM_SELECT))) {
+		if (mask&EPBM_LEFT) {
+			auditionSamplePitch(-12);
+			return;
+		}
+		if (mask&EPBM_UP) {
+			auditionSamplePitch(0);
+			return;
+		}
+		if (mask&EPBM_RIGHT) {
+			auditionSamplePitch(12);
+			return;
+		}
+		if (mask&EPBM_DOWN) {
+			Player::GetInstance()->Stop();
+			isDirty_=true;
 			return;
 		}
 	}

@@ -212,6 +212,43 @@ void Player::Start(PlayMode mode,bool forceSongMode) {
 
  }
 
+void Player::AuditionInstrument(int instrument,int note) {
+	if (!project_ || !viewData_) {
+		return;
+	}
+	if (instrument<0 || instrument>=MAX_INSTRUMENT_COUNT) {
+		return;
+	}
+	if (note<0) note=0;
+	if (note>127) note=127;
+	mixer_->Lock();
+	if (isRunning_ && viewData_->playMode_==PM_AUDITION) {
+		for (int i=0;i<SONG_CHANNEL_COUNT;i++) {
+			mixer_->StopChannel(i);
+		}
+	}
+	viewData_->playMode_=PM_AUDITION;
+	mode_=PM_AUDITION;
+	int channel=viewData_->songX_;
+	if (channel<0 || channel>=SONG_CHANNEL_COUNT) channel=0;
+	for (int i=0;i<SONG_CHANNEL_COUNT;i++) {
+		if (i!=channel) {
+			mixer_->StopChannel(i);
+		}
+	}
+	I_Instrument *instr=project_->GetInstrumentBank()->GetInstrument(instrument);
+	if (instr) {
+		mixer_->StartChannel(channel);
+		mixer_->StopInstrument(channel);
+		mixer_->StartInstrument(channel,instr,(unsigned char)note,true);
+		isRunning_=true;
+		SetChanged();
+		PlayerEvent pe(PET_START);
+		NotifyObservers(&pe);
+	}
+	mixer_->Unlock();
+}
+
 void Player::Stop() {
 
 	mixer_->Lock() ;

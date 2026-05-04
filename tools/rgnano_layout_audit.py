@@ -307,8 +307,10 @@ def audit_sample_lab(path: str, mask: List[List[bool]]) -> List[Issue]:
         if y1 > 96:
             issues.append(Issue(path, f"waveform ends too low at y={y1}; collides with legend/field area"))
 
-        legend_ink = row_ink(mask, 12)
-        sample_or_value_ink = row_ink(mask, 14)
+        # Source/Loop now keep the marker legend in the page-title band and
+        # reserve rows 12-16 as breathing room before the parameter list.
+        legend_ink = row_ink(mask, 2)
+        sample_or_value_ink = row_ink(mask, 17)
         first_field_ink = row_ink(mask, 17)
         spacer_ink = row_ink(mask, 16)
         if legend_ink < 40:
