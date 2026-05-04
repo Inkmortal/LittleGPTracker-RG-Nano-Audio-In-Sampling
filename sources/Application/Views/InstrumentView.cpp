@@ -2,6 +2,7 @@
 #include "Application/Instruments/MidiInstrument.h"
 #include "Application/Instruments/SampleInstrument.h"
 #include "Application/Instruments/SamplePool.h"
+#include "Application/AppWindow.h"
 #include "Application/Model/Config.h"
 #include "BaseClasses/UIBigHexVarField.h"
 #include "BaseClasses/UIIntVarOffField.h"
@@ -458,6 +459,15 @@ void InstrumentView::drawPixelLabBar(int x, int y, int width, int height, int va
 #endif
 }
 
+void InstrumentView::drawLabText(int x, int y, const char *text, GUITextProperties &props) {
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+	GUIPoint pos(x,y);
+	w_.DrawString(text,pos,props,true);
+#else
+	DrawString(x,y,text,props);
+#endif
+}
+
 void InstrumentView::drawSampleWaveform(SampleInstrument *instrument, int x, int y,
                                         int width, int height, bool showMarkers) {
 #if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
@@ -604,24 +614,24 @@ void InstrumentView::drawSampleLabVisuals() {
 #if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
 		drawSampleWaveform(instrument,10,36,220,52,true);
 		sprintf(line,"%s  L+UD pick  L+A+LR",getWaveMarkerName());
-		DrawString(2,12,line,props);
+		drawLabText(2,12,line,props);
 		if (labPage_==0) {
 			const char *sampleName=GetVarString(instrument,SIP_SAMPLE);
 			char name[25];
 			strncpy(name,sampleName,24);
 			name[24]=0;
-			DrawString(2,14,name,props);
+			drawLabText(2,14,name,props);
 			int suggestedRoot=instrument->GetSuggestedRootNote();
 			if (suggestedRoot>=0) {
 				sprintf(line,"suggest root %03d Sel",suggestedRoot);
-				DrawString(2,15,line,props);
+				drawLabText(2,15,line,props);
 			} else {
-				DrawString(2,15,"R+A: low root high stop",props);
+				drawLabText(2,15,"R+A: low root high stop",props);
 			}
 		} else {
 			sprintf(line,"mode %d S%05X L%05X E%05X",GetVarInt(instrument,SIP_LOOPMODE),start,loopStart,loopEnd);
-			DrawString(2,14,line,props);
-			DrawString(2,15,"R+A: low root high stop",props);
+			drawLabText(2,14,line,props);
+			drawLabText(2,15,"R+A: low root high stop",props);
 		}
 #else
 		char wave[25];
@@ -663,14 +673,18 @@ void InstrumentView::drawSampleLabVisuals() {
 #endif
 	} else if (labPage_==1) {
 #if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
-		DrawString(2,5,"VOL",props);
+		SetColor(CD_NORMAL);
+		drawLabText(2,5,"VOL",props);
 		drawPixelLabBar(48,40,160,14,GetVarInt(instrument,SIP_VOLUME),255);
-		DrawString(2,8,"PAN",props);
+		SetColor(CD_NORMAL);
+		drawLabText(2,8,"PAN",props);
 		drawPixelLabBar(48,64,160,14,GetVarInt(instrument,SIP_PAN),254,true);
-		DrawString(2,11,"GRIT",props);
+		SetColor(CD_NORMAL);
+		drawLabText(2,11,"GRIT",props);
 		drawPixelLabBar(48,88,160,14,16-GetVarInt(instrument,SIP_CRUSH)+GetVarInt(instrument,SIP_DOWNSMPL)*2,31);
+		SetColor(CD_NORMAL);
 		sprintf(line,"drive %02X down %d interp %d",GetVarInt(instrument,SIP_CRUSHVOL),GetVarInt(instrument,SIP_DOWNSMPL),GetVarInt(instrument,SIP_INTERPOLATION));
-		DrawString(2,14,line,props);
+		drawLabText(2,14,line,props);
 #else
 		DrawString(3,5,"VOL",props);
 		drawLabBar(8,5,16,GetVarInt(instrument,SIP_VOLUME),255);
@@ -691,14 +705,18 @@ void InstrumentView::drawSampleLabVisuals() {
 #endif
 	} else if (labPage_==2) {
 #if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
-		DrawString(2,5,"CUT",props);
+		SetColor(CD_NORMAL);
+		drawLabText(2,5,"CUT",props);
 		drawPixelLabBar(48,40,160,14,GetVarInt(instrument,SIP_FILTCUTOFF),255);
-		DrawString(2,8,"RES",props);
+		SetColor(CD_NORMAL);
+		drawLabText(2,8,"RES",props);
 		drawPixelLabBar(48,64,160,14,GetVarInt(instrument,SIP_FILTRESO),255);
-		DrawString(2,11,"TYPE",props);
+		SetColor(CD_NORMAL);
+		drawLabText(2,11,"TYPE",props);
 		drawPixelLabBar(48,88,160,14,GetVarInt(instrument,SIP_FILTMIX),255);
+		SetColor(CD_NORMAL);
 		sprintf(line,"mode %d atten %02X",GetVarInt(instrument,SIP_FILTMODE),GetVarInt(instrument,SIP_ATTENUATE));
-		DrawString(2,14,line,props);
+		drawLabText(2,14,line,props);
 #else
 		DrawString(3,5,"CUT",props);
 		drawLabBar(8,5,16,GetVarInt(instrument,SIP_FILTCUTOFF),255);
@@ -711,17 +729,20 @@ void InstrumentView::drawSampleLabVisuals() {
 #endif
 	} else {
 #if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
-		DrawString(2,5,"TABLE",props);
+		SetColor(CD_NORMAL);
+		drawLabText(2,5,"TABLE",props);
 		int table=GetVarInt(instrument,SIP_TABLE);
 		for (int step=0; step<8; step++) {
 			int x=28+step*23;
 			int y=48+((step%2)?10:0);
 			drawPixelLabBar(x,y,14,42,(step*37+GetVarInt(instrument,SIP_FBTUNE))&0xFF,255);
 		}
+		SetColor(CD_NORMAL);
 		sprintf(line,"auto %s table %02X",GetVarInt(instrument,SIP_TABLEAUTO)?"on":"off",table<0?0:table);
-		DrawString(2,13,line,props);
+		drawLabText(2,13,line,props);
+		SetColor(CD_NORMAL);
 		sprintf(line,"fb tune %02X mix %02X",GetVarInt(instrument,SIP_FBTUNE),GetVarInt(instrument,SIP_FBMIX));
-		DrawString(2,15,line,props);
+		drawLabText(2,15,line,props);
 #else
 		DrawString(3,5,"INST TABLE MOTION",props);
 		int table=GetVarInt(instrument,SIP_TABLE);
@@ -1039,4 +1060,5 @@ void InstrumentView::OnFocus() { onInstrumentChange(); }
 
 void InstrumentView::Update(Observable &o,I_ObservableData *d) {
 	onInstrumentChange() ;
+	isDirty_=true;
 }

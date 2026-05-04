@@ -168,13 +168,20 @@ def is_framed_modal(name: str) -> bool:
         "audit-00-boot-project" in name
         or "audit-00-new-project" in name
         or "audit-12-sample-import" in name
+        or "sample-full-01-import-browser" in name
+        or name.startswith("sample-full-15-helper")
+        or name.startswith("sample-full-16-helper")
     )
 
 
 def dense_row_allowed(name: str, row: int) -> bool:
-    if ("instrument-lab-" in name or "sample-lab-" in name) and 4 <= row <= 11:
+    if ("instrument-lab-" in name or "sample-lab-" in name or "sample-full-" in name) and 4 <= row <= 11:
         return True
     if is_framed_modal(name):
+        if name.startswith("sample-full-15-helper") or name.startswith("sample-full-16-helper"):
+            return row in (2, 25)
+        if "sample-full-01-import-browser" in name:
+            return row in (4, 25)
         if "audit-12-sample-import" in name:
             return row in (4, 25)
         return row in (2, 28)
@@ -291,7 +298,9 @@ def largest_visual_component(mask: List[List[bool]], min_width: int = 80,
 def audit_sample_lab(path: str, mask: List[List[bool]]) -> List[Issue]:
     issues: List[Issue] = []
     name = os.path.basename(path).lower()
-    if "instrument-lab-" not in name and "sample-lab-" not in name:
+    if "sample-full-15-helper" in name or "sample-full-16-helper" in name:
+        return issues
+    if "instrument-lab-" not in name and "sample-lab-" not in name and "sample-full-" not in name:
         return issues
 
     # Rows 0-3 are title/status. Visual controls should live below that.

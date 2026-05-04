@@ -29,6 +29,7 @@ protected:
 	void fillMidiParameters() ;
 	InstrumentType getInstrumentType() ;
 	void drawSampleLabVisuals() ;
+	void drawLabText(int x, int y, const char *text, GUITextProperties &props) ;
 	void drawLabBar(int x, int y, int width, int value, int maxValue) ;
 	void drawPixelLabBar(int x, int y, int width, int height, int value, int maxValue,
 	                     bool bipolar=false) ;

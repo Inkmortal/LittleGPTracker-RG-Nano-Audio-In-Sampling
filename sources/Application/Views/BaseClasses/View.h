@@ -158,6 +158,7 @@ class View : public Observable {
     bool isDirty_; // .Do we need to redraw screeen
     ViewType viewType_;
     bool hasFocus_;
+    bool suppressPlaybackScope_;
 
   private:
     unsigned short mask_;

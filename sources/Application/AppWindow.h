@@ -33,6 +33,7 @@ class AppWindow : public GUIWindow, I_Observer, Status {
     void CloseProject();
 
     virtual void Clear(bool all = false);
+    void InvalidateCharCache();
     virtual void ClearRect(GUIRect &rect);
     virtual void SetColor(ColorDefinition cd);
     int GetVisibleColumns() const;

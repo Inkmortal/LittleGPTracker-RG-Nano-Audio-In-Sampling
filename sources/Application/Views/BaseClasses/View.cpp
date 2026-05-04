@@ -24,6 +24,7 @@ View::View(GUIWindow &w,ViewData *viewData):
 	modalViewCallback_(0),
 	hasFocus_(false)
 {
+	suppressPlaybackScope_=false;
   if (!initPrivate_)
   {
 	   GUIRect rect=w.GetRect() ;
@@ -506,8 +507,10 @@ void View::Redraw() {
 		modalView_->Redraw() ;
 	} else {
 		DrawView() ;
-		drawPlaybackScope();
-		if (contextOverlay_) {
+		if (!suppressPlaybackScope_) {
+			drawPlaybackScope();
+		}
+		if (!suppressPlaybackScope_ && contextOverlay_) {
 			drawContextOverlay();
 		}
 	}

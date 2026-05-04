@@ -198,6 +198,10 @@ void AppWindow::DrawString(const char *string, GUIPoint &pos,
     memcpy(_charScreen + index, buffer, len);
     unsigned char prop = colorIndex_ + (props.invert_ ? PROP_INVERT : 0);
     memset(_charScreenProp + index, prop, len);
+    if (force) {
+        memset(_preScreen + index, 0, len);
+        memset(_preScreenProp + index, 0xFF, len);
+    }
 };
 
 void AppWindow::Clear(bool all) {
@@ -208,6 +212,11 @@ void AppWindow::Clear(bool all) {
         memset(_preScreenProp, 0, 1200);
     };
 };
+
+void AppWindow::InvalidateCharCache() {
+    memset(_preScreen, 0, 1200);
+    memset(_preScreenProp, 0xFF, 1200);
+}
 
 void AppWindow::ClearRect(GUIRect &r) {
 
