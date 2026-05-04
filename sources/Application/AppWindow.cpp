@@ -251,13 +251,19 @@ void AppWindow::ClearRect(GUIRect &r) {
 
     unsigned char *st = _charScreen + x + (40 * y);
     unsigned char *pr = _charScreenProp + x + (40 * y);
+    unsigned char *pst = _preScreen + x + (40 * y);
+    unsigned char *ppr = _preScreenProp + x + (40 * y);
     for (int i = 0; i < h; i++) {
         for (int j = 0; j < w; j++) {
             *st++ = ' ';
             *pr++ = 0;
+            *pst++ = 0;
+            *ppr++ = 0xFF;
         }
         st += (40 - w);
         pr += (40 - w);
+        pst += (40 - w);
+        ppr += (40 - w);
     }
 };
 
