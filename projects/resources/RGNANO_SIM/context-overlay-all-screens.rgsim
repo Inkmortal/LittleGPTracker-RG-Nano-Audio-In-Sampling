@@ -1,0 +1,176 @@
+# Universal context/minimap overlay coverage for every main RG Nano tracker view.
+route boot.new_project_random
+expect_view song
+
+# Seed the navigation path: one song chain, one chain phrase, one phrase note.
+press a 80
+wait 80
+route song.to_chain
+expect_view chain
+press a 80
+wait 80
+route chain.to_phrase
+expect_view phrase
+press a 80
+wait 80
+
+# Phrase
+down n
+press q 80
+up n
+wait 120
+expect_screen_text PHRASE
+expect_screen_text MAP
+press d 80
+wait 80
+expect_screen_text COMMANDS
+expect_screen_text Select command picker
+down n
+press q 80
+up n
+wait 80
+expect_view phrase
+
+# Instrument
+route phrase.to_instrument
+expect_view instrument
+down n
+press q 80
+up n
+wait 120
+expect_screen_text INSTR
+expect_screen_text MAP
+press d 80
+wait 80
+expect_screen_text COMMANDS
+expect_screen_text R+A arrows audition
+down n
+press q 80
+up n
+wait 80
+expect_view instrument
+
+# Table opened from Instrument
+route instrument.to_table
+expect_view table
+down n
+press q 80
+up n
+wait 120
+expect_screen_text TABLE
+expect_screen_text MAP
+press d 80
+wait 80
+expect_screen_text COMMANDS
+expect_screen_text Select command picker
+down n
+press q 80
+up n
+wait 80
+expect_view table
+
+# Back to Phrase, then Groove.
+route table.to_parent
+expect_view instrument
+route instrument.to_phrase
+expect_view phrase
+route phrase.to_groove
+expect_view groove
+down n
+press q 80
+up n
+wait 120
+expect_screen_text GROOVE
+expect_screen_text MAP
+press d 80
+wait 80
+expect_screen_text COMMANDS
+expect_screen_text Groove changes feel
+down n
+press q 80
+up n
+wait 80
+expect_view groove
+
+# Chain
+route groove.to_phrase
+expect_view phrase
+route phrase.to_chain
+expect_view chain
+down n
+press q 80
+up n
+wait 120
+expect_screen_text CHAIN
+expect_screen_text MAP
+press d 80
+wait 80
+expect_screen_text COMMANDS
+expect_screen_text A paste/new phrase
+down n
+press q 80
+up n
+wait 80
+expect_view chain
+
+# Song
+route chain.to_song
+expect_view song
+down n
+press q 80
+up n
+wait 120
+expect_screen_text SONG
+expect_screen_text MAP
+press d 80
+wait 80
+expect_screen_text COMMANDS
+expect_screen_text A paste/new chain
+down n
+press q 80
+up n
+wait 80
+expect_view song
+
+# Project
+route song.to_project
+expect_view project
+down n
+press q 80
+up n
+wait 120
+expect_screen_text PROJECT
+expect_screen_text MAP
+press d 80
+wait 80
+expect_screen_text COMMANDS
+expect_screen_text Set tempo/key/scale
+down n
+press q 80
+up n
+wait 80
+expect_view project
+
+# Mixer
+route project.to_song
+expect_view song
+route song.to_mixer
+expect_view mixer
+down n
+press q 80
+up n
+wait 120
+expect_screen_text MIXER
+expect_screen_text MAP
+press d 80
+wait 80
+expect_screen_text COMMANDS
+expect_screen_text Master wave below
+down n
+press q 80
+up n
+wait 80
+expect_view mixer
+
+expect_no_error
+quit

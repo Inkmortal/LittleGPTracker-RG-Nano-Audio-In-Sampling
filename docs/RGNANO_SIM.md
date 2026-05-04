@@ -77,6 +77,12 @@ cd .\projects
 .\lgpt-rgnano-sim.exe -AUTO_LOAD_LAST=NO -RGNANOSIM_SCRIPT=resources\RGNANO_SIM\context-overlay-workflow.rgsim
 ```
 
+For release confidence, use the all-screens helper coverage script. It creates a project, walks the main producer views, opens the `R + Select` minimap, flips to the command page, verifies screen-specific helper text, then closes the helper without changing views:
+
+```powershell
+.\lgpt-rgnano-sim.exe -AUTO_LOAD_LAST=NO -RGNANOSIM_SCRIPT=resources\RGNANO_SIM\context-overlay-all-screens.rgsim
+```
+
 The command selector workflow verifies a core tracker producer move: create a song/chain/phrase, open the Phrase command selector with `Select`, confirm `ARPG`, edit its parameter, then open the same selector from Table view:
 
 ```powershell
