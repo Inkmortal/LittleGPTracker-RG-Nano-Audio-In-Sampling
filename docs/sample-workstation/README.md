@@ -149,3 +149,13 @@ The audit fails on:
 - rows that are too dense to be readable
 - Source/Loop waveforms colliding with legend or editable fields
 - Shape/Filter/Motion controls pushing into the field list
+
+## Root Detection Accuracy Audit
+
+The RG Nano root suggestion is intentionally lightweight enough to run on-device. For QA, use the desktop audit to compare it against stronger estimators on generated ground-truth notes and the local sample library:
+
+```powershell
+python tools\root_detection_accuracy_audit.py --show-all
+```
+
+The script mirrors the RG Nano detector in Python, runs desktop SwiftF0 when installed, falls back to pYIN/YIN from librosa, and writes `exports/root-detection-accuracy.csv`. Synthetic fixtures are true pass/fail cases; library samples are review cases because root note depends on the usable slice and musical intent.
