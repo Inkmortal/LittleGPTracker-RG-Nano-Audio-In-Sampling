@@ -265,7 +265,7 @@ void View::drawContextOverlay() {
 			cmd3="A+Dpad edit value";
 			cmd4="L+A+LR nudge mark";
 			cmd5="R+A arrows audition";
-			cmd6="R+Down Inst Table";
+			cmd6="Sel root detect/accept";
 			cmd7="R+Left Phrase";
 			break;
 		case VT_TABLE:

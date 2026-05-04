@@ -1001,19 +1001,41 @@ void SampleInstrument::AssignSample(int i) {
 	 suggestedRootNote_=-1;
 } ;
 
+static bool isSampleNameTokenBoundary(char c) {
+	if (c==0) return true;
+	if (isalnum((unsigned char)c)) return false;
+	return true;
+}
+
 static bool containsTokenNoCase(const char *name,const char *token) {
 	if (!name || !token) return false;
 	int tokenLen=strlen(token);
 	if (tokenLen<=0) return false;
 	for (const char *p=name;*p;p++) {
+		if (p!=name && !isSampleNameTokenBoundary(*(p-1))) continue;
 		int j=0;
 		while (j<tokenLen && p[j] &&
 		       tolower((unsigned char)p[j])==tolower((unsigned char)token[j])) {
 			j++;
 		}
-		if (j==tokenLen) return true;
+		if (j==tokenLen && isSampleNameTokenBoundary(p[j])) return true;
 	}
 	return false;
+}
+
+static double sampleRootCorrelation(short *buffer,int channels,int start,int window,int lag) {
+	double sum=0.0;
+	double e1=0.0;
+	double e2=0.0;
+	for (int n=0;n<window-lag;n++) {
+		double a=(double)buffer[(start+n)*channels];
+		double b=(double)buffer[(start+n+lag)*channels];
+		sum+=a*b;
+		e1+=a*a;
+		e2+=b*b;
+	}
+	if (e1<=0.0 || e2<=0.0) return 0.0;
+	return sum/sqrt(e1*e2);
 }
 
 static bool looksPercussiveByName(const char *name) {
@@ -1036,6 +1058,16 @@ static int frequencyToMidi(float freq) {
 }
 
 int SampleInstrument::DetectRootNoteSuggestion() {
+	return DetectRootNoteSuggestionInRange(0,-1);
+}
+
+int SampleInstrument::DetectRootNoteSuggestionFromTrim() {
+	int start=start_?start_->GetInt():0;
+	int end=loopEnd_?loopEnd_->GetInt():-1;
+	return DetectRootNoteSuggestionInRange(start,end);
+}
+
+int SampleInstrument::DetectRootNoteSuggestionInRange(int rangeStart, int rangeEnd) {
 	int sampleIndex=GetSampleIndex();
 	if (sampleIndex<0 || sampleIndex>=MAX_SAMPLEINSTRUMENT_COUNT) return -1;
 	SamplePool *pool=SamplePool::GetInstance();
@@ -1054,40 +1086,58 @@ int SampleInstrument::DetectRootNoteSuggestion() {
 	short *buffer=(short *)source->GetSampleBuffer(-1);
 	if (!buffer || size<256 || channels<1 || sampleRate<=0) return -1;
 
-	int scan=size<sampleRate?size:sampleRate;
+	if (rangeStart<0) rangeStart=0;
+	if (rangeStart>=size) rangeStart=0;
+	if (rangeEnd<=rangeStart || rangeEnd>size) rangeEnd=size;
+	int rangeSize=rangeEnd-rangeStart;
+	if (rangeSize<256) {
+		suggestedRootNote_=-1;
+		return -1;
+	}
+
+	int scan=rangeSize<sampleRate?rangeSize:sampleRate;
 	int peak=0;
 	double rmsSum=0.0;
 	for (int i=0;i<scan;i++) {
-		int v=buffer[i*channels];
+		int v=buffer[(rangeStart+i)*channels];
 		if (v<0) v=-v;
 		if (v>peak) peak=v;
 		rmsSum+=(double)v*(double)v;
 	}
-	if (peak<512) return -1;
+	if (peak<512) {
+		suggestedRootNote_=-1;
+		return -1;
+	}
 	double rms=sqrt(rmsSum/(double)scan);
-	if (rms<256.0) return -1;
+	if (rms<256.0) {
+		suggestedRootNote_=-1;
+		return -1;
+	}
 
-	int start=0;
+	int start=rangeStart;
 	int threshold=peak/8;
 	if (threshold<512) threshold=512;
 	for (int i=0;i<scan;i++) {
-		int v=buffer[i*channels];
+		int v=buffer[(rangeStart+i)*channels];
 		if (v<0) v=-v;
 		if (v>=threshold) {
-			start=i+(sampleRate/100);
+			start=rangeStart+i+(sampleRate/100);
 			break;
 		}
 	}
-	if (start<0 || start>=size) start=0;
+	if (start<rangeStart || start>=rangeEnd) start=rangeStart;
 
 	int window=sampleRate/3;
 	if (window>8192) window=8192;
 	if (window<1024) window=1024;
-	if (start+window>=size) {
-		start=0;
-		if (window>=size) window=size-1;
+	if (start+window>=rangeEnd) {
+		start=rangeStart;
+		if (window>=rangeSize) window=rangeSize-1;
 	}
-	if (window<256) return -1;
+	if (window<256) {
+		suggestedRootNote_=-1;
+		return -1;
+	}
 
 	int minLag=sampleRate/1200;
 	int maxLag=sampleRate/45;
@@ -1098,18 +1148,7 @@ int SampleInstrument::DetectRootNoteSuggestion() {
 	int bestLag=0;
 	double bestCorr=0.0;
 	for (int lag=minLag;lag<=maxLag;lag++) {
-		double sum=0.0;
-		double e1=0.0;
-		double e2=0.0;
-		for (int n=0;n<window-lag;n++) {
-			double a=(double)buffer[(start+n)*channels];
-			double b=(double)buffer[(start+n+lag)*channels];
-			sum+=a*b;
-			e1+=a*a;
-			e2+=b*b;
-		}
-		if (e1<=0.0 || e2<=0.0) continue;
-		double corr=sum/sqrt(e1*e2);
+		double corr=sampleRootCorrelation(buffer,channels,start,window,lag);
 		if (corr>bestCorr) {
 			bestCorr=corr;
 			bestLag=lag;
@@ -1122,17 +1161,34 @@ int SampleInstrument::DetectRootNoteSuggestion() {
 		suggestedRootNote_=-1;
 		return -1;
 	}
+	double strongCorr=bestCorr-0.08;
+	if (strongCorr<0.42) strongCorr=0.42;
+	double prevCorr=sampleRootCorrelation(buffer,channels,start,window,minLag);
+	for (int lag=minLag+1;lag<bestLag;lag++) {
+		double corr=sampleRootCorrelation(buffer,channels,start,window,lag);
+		double nextCorr=sampleRootCorrelation(buffer,channels,start,window,lag+1);
+		if (corr>=strongCorr && corr>=prevCorr && corr>=nextCorr) {
+			bestCorr=corr;
+			bestLag=lag;
+			break;
+		}
+		prevCorr=corr;
+	}
 	float freq=(float)sampleRate/(float)bestLag;
 	int note=frequencyToMidi(freq);
 	suggestedRootNote_=note;
 #ifdef PLATFORM_RGNANO_SIM
-	Trace::Log("SAMPLE_AUTOROOT","suggest name=%s freq=%.2f midi=%d corr=%.3f",name?name:"(null)",freq,note,bestCorr);
+	Trace::Log("SAMPLE_AUTOROOT","suggest name=%s start=%d end=%d freq=%.2f midi=%d corr=%.3f",name?name:"(null)",rangeStart,rangeEnd,freq,note,bestCorr);
 #endif
 	return note;
 }
 
 int SampleInstrument::GetSuggestedRootNote() {
 	return suggestedRootNote_;
+}
+
+void SampleInstrument::ClearRootNoteSuggestion() {
+	suggestedRootNote_=-1;
 }
 
 bool SampleInstrument::AcceptSuggestedRootNote() {
@@ -1219,6 +1275,12 @@ void SampleInstrument::Update(Observable &o,I_ObservableData *d)
 			} ;
 		}
 			break ;
+
+		case SIP_START:
+		case SIP_LOOPSTART:
+		case SIP_END:
+			suggestedRootNote_=-1;
+			break;
 
 
 

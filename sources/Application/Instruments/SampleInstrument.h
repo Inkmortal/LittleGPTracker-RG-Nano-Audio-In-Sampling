@@ -75,7 +75,9 @@ public:
 
 	   bool IsMulti() ;
 	   int DetectRootNoteSuggestion() ;
+	   int DetectRootNoteSuggestionFromTrim() ;
 	   int GetSuggestedRootNote() ;
+	   void ClearRootNoteSuggestion() ;
 	   bool AcceptSuggestedRootNote() ;
 
 	  // Engine playback  start callback
@@ -103,6 +105,7 @@ protected:
 		void updateFeedback(renderParams *rp) ;
 
 private:
+       int DetectRootNoteSuggestionInRange(int rangeStart, int rangeEnd) ;
        SoundSource *source_ ;
        struct renderParams renderParams_[SONG_CHANNEL_COUNT] ;
        bool running_ ;

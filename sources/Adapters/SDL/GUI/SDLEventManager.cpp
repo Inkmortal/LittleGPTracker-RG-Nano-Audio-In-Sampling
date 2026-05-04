@@ -505,8 +505,10 @@ bool SDLEventManager::AddSimScriptLine(const std::string &line, const char *scri
 		iss >> command.value >> command.value2;
 	} else if (command.op=="expect_phrase_row_count" || command.op=="expect_size") {
 		iss >> command.value >> command.value2;
-	} else if (command.op=="expect_instrument_sample" || command.op=="expect_playing_channel" || command.op=="sim_import_sample_to_instrument" || command.op=="expect_instrument_root" || command.op=="expect_instrument_root_suggestion") {
+	} else if (command.op=="expect_instrument_sample" || command.op=="expect_playing_channel" || command.op=="sim_import_sample_to_instrument" || command.op=="expect_instrument_root" || command.op=="expect_instrument_root_suggestion" || command.op=="sim_detect_trim_root") {
 		iss >> command.value >> command.arg;
+	} else if (command.op=="sim_set_sample_trim") {
+		iss >> command.value >> command.value2 >> command.arg;
 	} else if (command.op=="sim_set_song_chain") {
 		iss >> command.value >> command.value2 >> command.arg;
 	} else if (command.op=="sim_set_chain_phrase" || command.op=="sim_set_phrase_note") {
@@ -825,6 +827,16 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 	} else if (command.op=="sim_import_sample_to_instrument") {
 		if (!SimImportSampleToInstrument(command.value,command.arg)) {
 			FailSimScript("sample import setup failed");
+			return;
+		}
+	} else if (command.op=="sim_set_sample_trim") {
+		if (!SimSetSampleTrim(command.value,command.value2,atoi(command.arg.c_str()))) {
+			FailSimScript("sample trim setup failed");
+			return;
+		}
+	} else if (command.op=="sim_detect_trim_root") {
+		if (!SimDetectTrimRoot(command.value,atoi(command.arg.c_str()))) {
+			FailSimScript("trim root detection failed");
 			return;
 		}
 	} else if (command.op=="sim_set_song_chain") {
@@ -1709,6 +1721,52 @@ bool SDLEventManager::SimImportSampleToInstrument(int instrument, const std::str
 	}
 	Trace::Log("RGNANO_SIM","sim_import_sample_to_instrument inst=%d sample=%s index=%d root=%d",instrument,sampleName.c_str(),sampleIndex,rootNote);
 	return true;
+}
+
+bool SDLEventManager::SimSetSampleTrim(int instrument, int start, int end)
+{
+	ViewData *viewData=GetSimViewData();
+	if (!viewData || !viewData->project_ || instrument<0 || instrument>=MAX_SAMPLEINSTRUMENT_COUNT || start<0 || end<=start) {
+		Trace::Error("RGNANO_SIM sim_set_sample_trim invalid args instrument=%d start=%d end=%d",instrument,start,end);
+		return false;
+	}
+	InstrumentBank *bank=viewData->project_->GetInstrumentBank();
+	SampleInstrument *sampleInstrument=(SampleInstrument *)bank->GetInstrument(instrument);
+	if (!sampleInstrument) return false;
+	int sampleIndex=sampleInstrument->GetSampleIndex();
+	SoundSource *source=SamplePool::GetInstance()->GetSource(sampleIndex);
+	int sampleSize=source?source->GetSize(-1):0;
+	if (sampleSize<=0 || start>=sampleSize) {
+		Trace::Error("RGNANO_SIM sim_set_sample_trim sample bounds instrument=%d size=%d start=%d end=%d",instrument,sampleSize,start,end);
+		return false;
+	}
+	if (end>sampleSize) end=sampleSize;
+	Variable *startVar=sampleInstrument->FindVariable(SIP_START);
+	Variable *loopStartVar=sampleInstrument->FindVariable(SIP_LOOPSTART);
+	Variable *endVar=sampleInstrument->FindVariable(SIP_END);
+	if (!startVar || !loopStartVar || !endVar) return false;
+	startVar->SetInt(start);
+	loopStartVar->SetInt(start);
+	endVar->SetInt(end);
+	sampleInstrument->ClearRootNoteSuggestion();
+	Trace::Log("RGNANO_SIM","sim_set_sample_trim inst=%d start=%d end=%d",instrument,start,end);
+	return true;
+}
+
+bool SDLEventManager::SimDetectTrimRoot(int instrument, int expected)
+{
+	ViewData *viewData=GetSimViewData();
+	if (!viewData || !viewData->project_ || instrument<0 || instrument>=MAX_SAMPLEINSTRUMENT_COUNT) {
+		Trace::Error("RGNANO_SIM sim_detect_trim_root invalid instrument=%d",instrument);
+		return false;
+	}
+	InstrumentBank *bank=viewData->project_->GetInstrumentBank();
+	SampleInstrument *sampleInstrument=(SampleInstrument *)bank->GetInstrument(instrument);
+	if (!sampleInstrument) return false;
+	int actual=sampleInstrument->DetectRootNoteSuggestionFromTrim();
+	bool matches=(actual==expected);
+	Trace::Log("RGNANO_SIM","sim_detect_trim_root inst=%d actual=%d expected=%d => %s",instrument,actual,expected,matches?"match":"mismatch");
+	return matches;
 }
 
 bool SDLEventManager::SimSetSongChain(int row, int channel, int chain)

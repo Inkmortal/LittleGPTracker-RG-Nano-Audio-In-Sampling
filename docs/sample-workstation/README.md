@@ -112,7 +112,9 @@ The Source/Loop direction matters most because sample-heavy production depends o
 - What note is it tuned to?
 - Does it still sound good when pitched low, normal, and high?
 
-Imports now run a lightweight root-note assist for pitched material, but they do not change the playable root immediately. Obvious drum/noise filenames stay manual, while tonal samples store a suggestion when confidence is high enough. The Source page shows `suggest root ###` only when the producer is actually working with that sample; focus the `root` field and press `Select` to accept it, or ignore it and edit root normally.
+Imports now run a lightweight root-note assist for pitched material, but they do not change the playable root immediately. Obvious drum/noise filename tokens stay manual, while tonal samples store a suggestion when confidence is high enough. The Source page shows `suggest root ###` only when the producer is actually working with that sample; focus the `root` field and press `Select` to accept it, or ignore it and edit root normally.
+
+For long recordings or sample-pack phrases, edit `START` and `END` first, then focus `root` and press `Select`. If there is no stored suggestion, the app analyzes only that trimmed playback window and shows a new `suggest root ###`; press `Select` again to accept it. Moving the trim markers clears stale suggestions so the displayed root always belongs to the current slice.
 
 The direct audition shortcut is intentionally shoulder-heavy: hold `R + A`, then tap `Left`, `Up`, or `Right` to hear the current sample below root, at root, or above root without leaving Source, Shape, Filter, Loop, or Motion. Tap `R + A + Down` to stop. That gives the small device a sound-design loop that feels more like a dedicated workstation than a parameter list.
 

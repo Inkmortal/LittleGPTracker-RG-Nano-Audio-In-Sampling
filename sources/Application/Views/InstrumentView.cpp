@@ -831,6 +831,10 @@ void InstrumentView::ProcessButtonMask(unsigned short mask,bool pressed) {
 				isDirty_=true;
 				return;
 			}
+			if (instrument && instrument->DetectRootNoteSuggestionFromTrim()>=0) {
+				isDirty_=true;
+				return;
+			}
 		}
 	}
 

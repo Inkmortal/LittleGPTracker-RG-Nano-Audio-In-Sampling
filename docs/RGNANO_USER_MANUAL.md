@@ -183,7 +183,9 @@ The RG Nano has no built-in microphone. The practical workflow is uploaded sampl
 5. Use `Listen` to preview.
 6. Use `Import` to copy the sample into the project.
 
-When a sample imports, the app may create a quiet root-note suggestion, but it does not change the instrument `root` automatically. Obvious drum/noise filenames such as kick, snare, hat, drum, perc, vinyl, and FX stay manual. When you later open the Instrument Source page for a pitched sample, the page can show `suggest root ###`. Move focus to the `root` field and press `Select` to accept the suggestion, or edit the root normally by ear.
+When a sample imports, the app may create a quiet root-note suggestion, but it does not change the instrument `root` automatically. Obvious drum/noise filenames such as kick, snare, hat, drum, perc, vinyl, and FX stay manual. Percussion detection uses filename tokens, so a melodic file named something like `trimmed_erhu.wav` will not be mistaken for a rim shot just because it contains the letters `rim`.
+
+Long samples are different: the first obvious pitch may not be the part you actually want to play. Trim the sample first with the Source or Loop page markers, move focus to the `root` field, then press `Select`. If no suggestion is visible, `Select` analyzes only the current `START` to `END` window and shows `suggest root ###`. Press `Select` again to accept that suggestion, or ignore it and edit the root normally by ear.
 
 The Instrument screen now splits sample design into five compact lab pages. Use `L + Left/Right` to switch pages:
 
