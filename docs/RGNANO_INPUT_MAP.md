@@ -211,6 +211,7 @@ The sample workflow starts in `InstrumentView` with focus on the `sample:` field
 | `L + A + Left/Right` | On Source/Loop pages, nudge the active waveform marker. |
 | `R + A + Left/Up/Right` | Audition the current sample low/root/high without leaving the lab page. |
 | `R + A + Down` | Stop the current sample audition. |
+| `Select` on `root` | Accept the stored root suggestion when the Source page shows one. |
 | D-pad | Move field focus. |
 | `A + D-pad` | Edit focused parameter. |
 | `A` on `sample:` | Enter `VM_NEW`; next `A` opens sample import. |

@@ -74,7 +74,9 @@ public:
 	   virtual void SetTableState(TableSaveState &state) ;	 
 
 	   bool IsMulti() ;
-	   int AutoTuneRootNoteFromSample() ;
+	   int DetectRootNoteSuggestion() ;
+	   int GetSuggestedRootNote() ;
+	   bool AcceptSuggestedRootNote() ;
 
 	  // Engine playback  start callback
 
@@ -135,7 +137,8 @@ private:
 	   Variable *interpolation_ ;
        Variable *printFx_;
        Variable *irPad_;
-       Variable *irWet_;
+	   Variable *irWet_;
+	   int suggestedRootNote_;
 
        static bool useDirtyDownsampling_;
        char *fxPresets[4];

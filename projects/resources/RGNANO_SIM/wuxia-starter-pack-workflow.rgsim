@@ -14,11 +14,19 @@ sim_import_sample_to_instrument 7 lofi-vinyl.wav
 expect_instrument_root 0 60
 expect_instrument_root 1 60
 expect_instrument_root 2 60
-expect_instrument_root 3 76
-expect_instrument_root 4 71
-expect_instrument_root 5 62
-expect_instrument_root 6 43
+expect_instrument_root 3 60
+expect_instrument_root 4 60
+expect_instrument_root 5 60
+expect_instrument_root 6 60
 expect_instrument_root 7 60
+expect_instrument_root_suggestion 0 -1
+expect_instrument_root_suggestion 1 -1
+expect_instrument_root_suggestion 2 -1
+expect_instrument_root_suggestion 3 76
+expect_instrument_root_suggestion 4 71
+expect_instrument_root_suggestion 5 62
+expect_instrument_root_suggestion 6 43
+expect_instrument_root_suggestion 7 -1
 
 # Eight-channel arrangement: real beat first, Chinese instruments second.
 sim_set_song_chain 0 0 0

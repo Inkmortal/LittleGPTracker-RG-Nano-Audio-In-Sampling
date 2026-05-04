@@ -183,7 +183,7 @@ The RG Nano has no built-in microphone. The practical workflow is uploaded sampl
 5. Use `Listen` to preview.
 6. Use `Import` to copy the sample into the project.
 
-When a sample imports, the app now tries to set the sample instrument `root` automatically. It uses a confidence-based pitch estimate and skips obvious drum/noise filenames such as kick, snare, hat, drum, perc, vinyl, and FX. If the import line says `root manual`, set the root by ear on the Source page. The root field is still editable, so treat auto-root as a useful first guess, not a locked decision.
+When a sample imports, the app may create a quiet root-note suggestion, but it does not change the instrument `root` automatically. Obvious drum/noise filenames such as kick, snare, hat, drum, perc, vinyl, and FX stay manual. When you later open the Instrument Source page for a pitched sample, the page can show `suggest root ###`. Move focus to the `root` field and press `Select` to accept the suggestion, or edit the root normally by ear.
 
 The Instrument screen now splits sample design into five compact lab pages. Use `L + Left/Right` to switch pages:
 

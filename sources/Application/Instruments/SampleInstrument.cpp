@@ -38,6 +38,7 @@ SampleInstrument::SampleInstrument() {
      source_=0 ;
      dirty_=false ;
      running_=false ;
+	 suggestedRootNote_=-1 ;
      fxPresets[0] = "room";
      fxPresets[1] = "hall";
      fxPresets[2] = "spring";
@@ -997,6 +998,7 @@ void SampleInstrument::AssignSample(int i) {
 
 	 Variable *v=FindVariable(SIP_SAMPLE) ;
 	 v->SetInt(i) ;
+	 suggestedRootNote_=-1;
 } ;
 
 static bool containsTokenNoCase(const char *name,const char *token) {
@@ -1033,7 +1035,7 @@ static int frequencyToMidi(float freq) {
 	return note;
 }
 
-int SampleInstrument::AutoTuneRootNoteFromSample() {
+int SampleInstrument::DetectRootNoteSuggestion() {
 	int sampleIndex=GetSampleIndex();
 	if (sampleIndex<0 || sampleIndex>=MAX_SAMPLEINSTRUMENT_COUNT) return -1;
 	SamplePool *pool=SamplePool::GetInstance();
@@ -1043,6 +1045,7 @@ int SampleInstrument::AutoTuneRootNoteFromSample() {
 #ifdef PLATFORM_RGNANO_SIM
 		Trace::Log("SAMPLE_AUTOROOT","skip name=%s",name?name:"(null)");
 #endif
+		suggestedRootNote_=-1;
 		return -1;
 	}
 	int size=source->GetSize(-1);
@@ -1116,18 +1119,30 @@ int SampleInstrument::AutoTuneRootNoteFromSample() {
 #ifdef PLATFORM_RGNANO_SIM
 		Trace::Log("SAMPLE_AUTOROOT","low confidence name=%s corr=%.3f",name?name:"(null)",bestCorr);
 #endif
+		suggestedRootNote_=-1;
 		return -1;
 	}
 	float freq=(float)sampleRate/(float)bestLag;
 	int note=frequencyToMidi(freq);
-	if (note>=0) {
-		Variable *root=FindVariable(SIP_ROOTNOTE);
-		if (root) root->SetInt(note);
-	}
+	suggestedRootNote_=note;
 #ifdef PLATFORM_RGNANO_SIM
-	Trace::Log("SAMPLE_AUTOROOT","name=%s freq=%.2f midi=%d corr=%.3f",name?name:"(null)",freq,note,bestCorr);
+	Trace::Log("SAMPLE_AUTOROOT","suggest name=%s freq=%.2f midi=%d corr=%.3f",name?name:"(null)",freq,note,bestCorr);
 #endif
 	return note;
+}
+
+int SampleInstrument::GetSuggestedRootNote() {
+	return suggestedRootNote_;
+}
+
+bool SampleInstrument::AcceptSuggestedRootNote() {
+	if (suggestedRootNote_<0) return false;
+	Variable *root=FindVariable(SIP_ROOTNOTE);
+	if (!root) return false;
+	root->SetInt(suggestedRootNote_);
+	suggestedRootNote_=-1;
+	dirty_=true;
+	return true;
 }
 
 int SampleInstrument::GetSampleIndex() {

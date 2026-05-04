@@ -1,0 +1,29 @@
+# Root suggestions are deferred: import stores a suggestion, root stays manual
+# until the producer accepts it from the Source page.
+route boot.new_project_random
+expect_view song
+press a 80
+wait 120
+route song.to_chain
+press a 80
+wait 120
+route chain.to_phrase
+press a 80
+wait 120
+route phrase.to_instrument
+expect_view instrument
+
+sim_import_sample_to_instrument 0 wuxia-starter/wx_play-dizi-note.wav
+expect_instrument_root 0 60
+expect_instrument_root_suggestion 0 71
+wait 120
+expect_screen_text suggest root 071
+
+# Move from sample to root, then Select accepts the stored suggestion.
+press d 80
+press q 80
+wait 120
+expect_instrument_root 0 71
+expect_instrument_root_suggestion 0 -1
+expect_no_error
+quit

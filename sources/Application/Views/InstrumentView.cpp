@@ -611,7 +611,13 @@ void InstrumentView::drawSampleLabVisuals() {
 			strncpy(name,sampleName,24);
 			name[24]=0;
 			DrawString(2,14,name,props);
-			DrawString(2,15,"R+A: low root high stop",props);
+			int suggestedRoot=instrument->GetSuggestedRootNote();
+			if (suggestedRoot>=0) {
+				sprintf(line,"suggest root %03d Sel",suggestedRoot);
+				DrawString(2,15,line,props);
+			} else {
+				DrawString(2,15,"R+A: low root high stop",props);
+			}
 		} else {
 			sprintf(line,"mode %d S%05X L%05X E%05X",GetVarInt(instrument,SIP_LOOPMODE),start,loopStart,loopEnd);
 			DrawString(2,14,line,props);
@@ -812,6 +818,19 @@ void InstrumentView::ProcessButtonMask(unsigned short mask,bool pressed) {
 			Player::GetInstance()->Stop();
 			isDirty_=true;
 			return;
+		}
+	}
+
+	if (getInstrumentType()==IT_SAMPLE && mask==EPBM_SELECT) {
+		UIIntVarField *field=(UIIntVarField *)GetFocus();
+		if (field && field->GetVariableID()==SIP_ROOTNOTE) {
+			int i=viewData_->currentInstrument_;
+			InstrumentBank *bank=viewData_->project_->GetInstrumentBank();
+			SampleInstrument *instrument=(SampleInstrument *)bank->GetInstrument(i);
+			if (instrument && instrument->AcceptSuggestedRootNote()) {
+				isDirty_=true;
+				return;
+			}
 		}
 	}
 

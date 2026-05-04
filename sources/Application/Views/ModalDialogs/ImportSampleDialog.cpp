@@ -192,7 +192,7 @@ void ImportSampleDialog::endPreview() {
 
 void ImportSampleDialog::setImportStatus(int note) {
 	if (note>=0) {
-		sprintf(importStatus_,"imported root %03d",note);
+		sprintf(importStatus_,"suggest root %03d",note);
 	} else {
 		strcpy(importStatus_,"imported root manual");
 	}
@@ -210,7 +210,7 @@ void ImportSampleDialog::import(Path &element) {
 		if (instr->GetType()==IT_SAMPLE) {
 			SampleInstrument *sinstr=(SampleInstrument *)instr ;
 			sinstr->AssignSample(sampleID) ;
-			int rootNote=sinstr->AutoTuneRootNoteFromSample();
+			int rootNote=sinstr->DetectRootNoteSuggestion();
 			setImportStatus(rootNote);
 			toInstr_=viewData_->project_->GetInstrumentBank()->GetNext() ;
 		};

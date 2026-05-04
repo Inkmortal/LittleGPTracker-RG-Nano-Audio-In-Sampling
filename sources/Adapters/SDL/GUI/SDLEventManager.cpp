@@ -505,7 +505,7 @@ bool SDLEventManager::AddSimScriptLine(const std::string &line, const char *scri
 		iss >> command.value >> command.value2;
 	} else if (command.op=="expect_phrase_row_count" || command.op=="expect_size") {
 		iss >> command.value >> command.value2;
-	} else if (command.op=="expect_instrument_sample" || command.op=="expect_playing_channel" || command.op=="sim_import_sample_to_instrument" || command.op=="expect_instrument_root") {
+	} else if (command.op=="expect_instrument_sample" || command.op=="expect_playing_channel" || command.op=="sim_import_sample_to_instrument" || command.op=="expect_instrument_root" || command.op=="expect_instrument_root_suggestion") {
 		iss >> command.value >> command.arg;
 	} else if (command.op=="sim_set_song_chain") {
 		iss >> command.value >> command.value2 >> command.arg;
@@ -790,6 +790,11 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 	} else if (command.op=="expect_instrument_root") {
 		if (!ExpectSimInstrumentRoot(command.value,atoi(command.arg.c_str()))) {
 			FailSimScript("instrument root assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_instrument_root_suggestion") {
+		if (!ExpectSimInstrumentRootSuggestion(command.value,atoi(command.arg.c_str()))) {
+			FailSimScript("instrument root suggestion assertion failed");
 			return;
 		}
 	} else if (command.op=="sim_set_tempo") {
@@ -1533,6 +1538,21 @@ bool SDLEventManager::ExpectSimInstrumentRoot(int instrument, int note)
 	return matches;
 }
 
+bool SDLEventManager::ExpectSimInstrumentRootSuggestion(int instrument, int note)
+{
+	ViewData *viewData=GetSimViewData();
+	if (!viewData || !viewData->project_ || instrument<0 || instrument>=MAX_SAMPLEINSTRUMENT_COUNT) {
+		Trace::Error("RGNANO_SIM expect_instrument_root_suggestion invalid args instrument=%d note=%d",instrument,note);
+		return false;
+	}
+	InstrumentBank *bank=viewData->project_->GetInstrumentBank();
+	SampleInstrument *sampleInstrument=(SampleInstrument *)bank->GetInstrument(instrument);
+	int actual=sampleInstrument->GetSuggestedRootNote();
+	bool matches=(actual==note);
+	Trace::Log("RGNANO_SIM","expect_instrument_root_suggestion inst=%d actual=%d expected=%d => %s",instrument,actual,note,matches?"match":"mismatch");
+	return matches;
+}
+
 bool SDLEventManager::ExpectSimRenderMode(int mode)
 {
 	ViewData *viewData=GetSimViewData();
@@ -1682,7 +1702,11 @@ bool SDLEventManager::SimImportSampleToInstrument(int instrument, const std::str
 	InstrumentBank *bank=viewData->project_->GetInstrumentBank();
 	SampleInstrument *sampleInstrument=(SampleInstrument *)bank->GetInstrument(instrument);
 	sampleInstrument->AssignSample(sampleIndex);
-	int rootNote=sampleInstrument->AutoTuneRootNoteFromSample();
+	int rootNote=sampleInstrument->DetectRootNoteSuggestion();
+	AppWindow *appWindow=(AppWindow *)Application::GetInstance()->GetWindow();
+	if (appWindow) {
+		appWindow->RefreshCurrentView();
+	}
 	Trace::Log("RGNANO_SIM","sim_import_sample_to_instrument inst=%d sample=%s index=%d root=%d",instrument,sampleName.c_str(),sampleIndex,rootNote);
 	return true;
 }
