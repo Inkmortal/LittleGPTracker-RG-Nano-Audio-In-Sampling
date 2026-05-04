@@ -1,0 +1,153 @@
+# Use the downloadable Wuxia Starter Pack in the simulator and capture audio.
+route boot.new_project_random
+expect_view song
+
+sim_set_tempo 86
+sim_import_sample_to_instrument 0 lofi-kick.wav
+sim_import_sample_to_instrument 1 lofi-snare.wav
+sim_import_sample_to_instrument 2 lofi-hat.wav
+sim_import_sample_to_instrument 3 wuxia-starter/wx_play-pipa-hit.wav
+sim_import_sample_to_instrument 4 wuxia-starter/wx_play-dizi-note.wav
+sim_import_sample_to_instrument 5 wuxia-erhu.wav
+sim_import_sample_to_instrument 6 wuxia-starter/wx_play-zhongruan-hit.wav
+sim_import_sample_to_instrument 7 lofi-vinyl.wav
+
+# Eight-channel arrangement: real beat first, Chinese instruments second.
+sim_set_song_chain 0 0 0
+sim_set_song_chain 0 1 1
+sim_set_song_chain 0 2 2
+sim_set_song_chain 0 3 3
+sim_set_song_chain 0 4 4
+sim_set_song_chain 0 5 5
+sim_set_song_chain 0 6 6
+sim_set_song_chain 0 7 7
+sim_set_song_chain 1 0 0
+sim_set_song_chain 1 1 1
+sim_set_song_chain 1 2 2
+sim_set_song_chain 1 3 3
+sim_set_song_chain 1 4 4
+sim_set_song_chain 1 5 5
+sim_set_song_chain 1 6 6
+sim_set_song_chain 1 7 7
+sim_set_song_chain 2 0 0
+sim_set_song_chain 2 1 1
+sim_set_song_chain 2 2 2
+sim_set_song_chain 2 3 3
+sim_set_song_chain 2 4 4
+sim_set_song_chain 2 5 5
+sim_set_song_chain 2 6 6
+sim_set_song_chain 2 7 7
+sim_set_song_chain 3 0 0
+sim_set_song_chain 3 1 1
+sim_set_song_chain 3 2 2
+sim_set_song_chain 3 3 3
+sim_set_song_chain 3 4 4
+sim_set_song_chain 3 5 5
+sim_set_song_chain 3 6 6
+sim_set_song_chain 3 7 7
+
+sim_set_chain_phrase 0 0 0 0
+sim_set_chain_phrase 0 1 0 0
+sim_set_chain_phrase 0 2 0 0
+sim_set_chain_phrase 0 3 0 0
+sim_set_chain_phrase 1 0 2 0
+sim_set_chain_phrase 1 1 2 0
+sim_set_chain_phrase 1 2 2 0
+sim_set_chain_phrase 1 3 2 0
+sim_set_chain_phrase 2 0 4 0
+sim_set_chain_phrase 2 1 4 0
+sim_set_chain_phrase 2 2 4 0
+sim_set_chain_phrase 2 3 4 0
+sim_set_chain_phrase 3 0 6 0
+sim_set_chain_phrase 3 1 7 0
+sim_set_chain_phrase 3 2 8 0
+sim_set_chain_phrase 3 3 9 0
+sim_set_chain_phrase 4 0 10 0
+sim_set_chain_phrase 4 1 11 0
+sim_set_chain_phrase 4 2 12 0
+sim_set_chain_phrase 4 3 11 0
+sim_set_chain_phrase 5 0 13 0
+sim_set_chain_phrase 5 1 13 0
+sim_set_chain_phrase 5 2 14 0
+sim_set_chain_phrase 5 3 13 0
+sim_set_chain_phrase 6 0 15 0
+sim_set_chain_phrase 6 1 15 0
+sim_set_chain_phrase 6 2 16 0
+sim_set_chain_phrase 6 3 15 0
+sim_set_chain_phrase 7 0 17 0
+sim_set_chain_phrase 7 1 17 0
+sim_set_chain_phrase 7 2 17 0
+sim_set_chain_phrase 7 3 17 0
+
+# Beat: kick, snare, hats.
+sim_set_phrase_note 0 0 48 0
+sim_set_phrase_note 0 7 48 0
+sim_set_phrase_note 0 10 48 0
+sim_set_phrase_note 0 15 48 0
+sim_set_phrase_note 2 4 50 1
+sim_set_phrase_note 2 12 50 1
+sim_set_phrase_note 4 2 72 2
+sim_set_phrase_note 4 6 72 2
+sim_set_phrase_note 4 10 72 2
+sim_set_phrase_note 4 14 72 2
+
+# Pipa main motif in D pentatonic: D F G A C.
+sim_set_phrase_note 6 0 50 3
+sim_set_phrase_note 6 3 53 3
+sim_set_phrase_note 6 6 57 3
+sim_set_phrase_note 6 10 60 3
+sim_set_phrase_note 6 13 57 3
+sim_set_phrase_note 7 0 62 3
+sim_set_phrase_note 7 4 60 3
+sim_set_phrase_note 7 8 57 3
+sim_set_phrase_note 7 12 53 3
+sim_set_phrase_note 8 0 50 3
+sim_set_phrase_note 8 3 57 3
+sim_set_phrase_note 8 7 60 3
+sim_set_phrase_note 8 11 65 3
+sim_set_phrase_note 8 14 62 3
+sim_set_phrase_note 9 0 57 3
+sim_set_phrase_note 9 4 53 3
+sim_set_phrase_note 9 8 50 3
+sim_set_phrase_note 9 12 45 3
+
+# Dizi answers: sparse, not wall-to-wall.
+sim_set_phrase_note 10 0 74 4
+sim_set_phrase_note 10 8 72 4
+sim_set_phrase_note 11 4 69 4
+sim_set_phrase_note 11 12 72 4
+sim_set_phrase_note 12 0 77 4
+sim_set_phrase_note 12 10 74 4
+
+# Erhu pad and zhongruan bass, deliberately slow.
+sim_set_phrase_note 13 0 50 5
+sim_set_phrase_note 13 8 57 5
+sim_set_phrase_note 14 0 45 5
+sim_set_phrase_note 14 8 50 5
+sim_set_phrase_note 15 0 38 6
+sim_set_phrase_note 15 8 45 6
+sim_set_phrase_note 16 0 50 6
+sim_set_phrase_note 16 8 45 6
+
+# Vinyl/noise bed very sparse.
+sim_set_phrase_note 17 0 48 7
+sim_set_phrase_note 17 12 48 7
+
+expect_phrase_row_count 0 4
+expect_phrase_row_count 6 5
+expect_phrase_row_count 10 2
+
+reset_audio_stats
+start_audio_capture wuxia-starter-preview.wav
+press s 80
+wait 120
+expect_player_running yes
+expect_play_mode song
+expect_playing_channel 0 00
+wait 60000
+expect_audio_activity 32
+expect_audio_capture_bytes 9000000
+end_audio_capture
+screenshot_app wuxia-starter-playing.bmp
+expect_no_error
+quit
