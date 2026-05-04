@@ -324,6 +324,7 @@ void View::drawContextOverlay() {
 		default:
 			break;
 	}
+	CustomizeContextOverlay(name,where,edit,field,cmd1,cmd2,cmd3,cmd4,cmd5,cmd6,cmd7);
 
 	SetColor(CD_HILITE2);
 	DrawString(x+2,y+1,name,props);
@@ -366,6 +367,14 @@ void View::drawContextOverlay() {
 	SetColor(CD_HILITE2);
 	DrawString(x+2,y+boxH-2,"Up/Dn page R+Sel close",props);
 	SetColor(CD_NORMAL);
+}
+
+void View::CustomizeContextOverlay(const char *&name, const char *&where,
+                                   const char *&edit, const char *&field,
+                                   const char *&cmd1, const char *&cmd2,
+                                   const char *&cmd3, const char *&cmd4,
+                                   const char *&cmd5, const char *&cmd6,
+                                   const char *&cmd7) {
 }
 
 void View::drawPlaybackScope() {

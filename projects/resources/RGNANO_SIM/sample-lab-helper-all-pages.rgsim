@@ -1,0 +1,109 @@
+# Verify R+Select helper coverage on every sample workstation lab page.
+route boot.new_project_random
+expect_view song
+press a 80
+wait 100
+route song.to_chain
+press a 80
+wait 100
+route chain.to_phrase
+press a 80
+wait 100
+route phrase.to_instrument
+expect_view instrument
+
+sim_import_sample_to_instrument 0 wuxia-guzheng.wav
+expect_instrument_sample 0 wuxia-guzheng.wav
+expect_screen_text SOURCE
+
+# Source helper
+down n
+press q 80
+up n
+wait 100
+expect_screen_text INSTR
+expect_screen_text MAP
+expect_screen_text Source sample/root
+press d 80
+wait 80
+expect_screen_text COMMANDS
+expect_screen_text A import/listen sample
+expect_screen_text Select root detect
+expect_screen_text L+UD mark S/L/E
+down n
+press q 80
+up n
+wait 80
+
+# Shape helper
+route combo.l.right
+wait 100
+expect_screen_text SHAPE
+down n
+press q 80
+up n
+wait 100
+expect_screen_text Shape vol pan grit
+press d 80
+wait 80
+expect_screen_text Crush/drive/down
+down n
+press q 80
+up n
+wait 80
+
+# Filter helper
+route combo.l.right
+wait 100
+expect_screen_text FILTER
+down n
+press q 80
+up n
+wait 100
+expect_screen_text Filter cutoff/reso
+press d 80
+wait 80
+expect_screen_text Type mode atten
+down n
+press q 80
+up n
+wait 80
+
+# Loop helper
+route combo.l.right
+wait 100
+expect_screen_text LOOP
+down n
+press q 80
+up n
+wait 100
+expect_screen_text Loop S/L/E markers
+press d 80
+wait 80
+expect_screen_text L+A+LR nudge mark
+expect_screen_text Select root after trim
+down n
+press q 80
+up n
+wait 80
+
+# Motion helper
+route combo.l.right
+wait 100
+expect_screen_text MOTION
+down n
+press q 80
+up n
+wait 100
+expect_screen_text Motion table/feedback
+press d 80
+wait 80
+expect_screen_text Table controls motion
+expect_screen_text R+Down inst table
+down n
+press q 80
+up n
+wait 80
+
+expect_no_error
+quit

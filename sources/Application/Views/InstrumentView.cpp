@@ -1080,6 +1080,56 @@ void InstrumentView::DrawView() {
 
 void InstrumentView::OnFocus() { onInstrumentChange(); }
 
+void InstrumentView::CustomizeContextOverlay(const char *&name, const char *&where,
+                                             const char *&edit, const char *&field,
+                                             const char *&cmd1, const char *&cmd2,
+                                             const char *&cmd3, const char *&cmd4,
+                                             const char *&cmd5, const char *&cmd6,
+                                             const char *&cmd7) {
+	if (getInstrumentType()!=IT_SAMPLE) {
+		return;
+	}
+	name="INSTR";
+	where="R+Left Phrase";
+	cmd1="Dpad choose field";
+	cmd3="A+Dpad edit value";
+	cmd4="L+Left/Right page";
+	cmd5="R+A arrows audition";
+	cmd6="R+Left Phrase";
+	cmd7="R+Select close";
+	if (labPage_==0) {
+		field="Source sample/root";
+		edit="Sample root slices";
+		cmd2="A import/listen sample";
+		cmd3="Select root detect";
+		cmd6="L+UD mark S/L/E";
+		cmd7="L+A+LR nudge mark";
+	} else if (labPage_==1) {
+		field="Shape vol pan grit";
+		edit="Volume pan texture";
+		cmd2="A+Dpad vol/pan";
+		cmd3="Crush/drive/down";
+	} else if (labPage_==2) {
+		field="Filter cutoff/reso";
+		edit="Tone filter type";
+		cmd2="A+Dpad cut/res";
+		cmd3="Type mode atten";
+	} else if (labPage_==3) {
+		field="Loop S/L/E markers";
+		edit="Trim and loop window";
+		cmd2="L+UD mark S/L/E";
+		cmd3="L+A+LR nudge mark";
+		cmd6="A+Dpad exact values";
+		cmd7="Select root after trim";
+	} else {
+		field="Motion table/feedback";
+		edit="Table automation";
+		cmd2="A+Dpad table vals";
+		cmd3="Table controls motion";
+		cmd5="R+Down inst table";
+	}
+}
+
 void InstrumentView::Update(Observable &o,I_ObservableData *d) {
 	onInstrumentChange() ;
 	isDirty_=true;

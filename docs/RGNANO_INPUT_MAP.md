@@ -40,6 +40,8 @@ Page 1 is the minimap: it shows the current screen name, the core LGPT screen ch
 
 Press `Up` or `Down` while the helper is open to switch to page 2. Page 2 is the command helper for the current screen: it lists the highest-value inputs and short descriptions for exactly where the producer is standing. Use `R + Select` again to close it.
 
+Instrument Lab helper text is page-aware. Source, Shape, Filter, Loop, and Motion each describe their own edits when opened with `R + Select`.
+
 While the overlay is visible, normal tracker inputs are blocked so a producer can check the map without accidentally writing notes, changing chain slots, or previewing audio. Modal dialogs keep their own controls and do not use this overlay.
 
 ## Playback Scope Label

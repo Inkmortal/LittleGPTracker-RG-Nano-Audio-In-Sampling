@@ -71,6 +71,8 @@ Page 2 is the command page. It shows:
 - short descriptions for each input
 - playback/context hints
 
+On the Instrument screen, the helper follows the current sample lab page. Source, Shape, Filter, Loop, and Motion each show their own compact controls instead of one generic instrument reminder.
+
 Press `R + Select` again to close the helper. While the helper is open, normal tracker inputs are blocked so you can read without accidentally changing music.
 
 ## Playback Scope
