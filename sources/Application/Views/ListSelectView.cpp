@@ -19,6 +19,24 @@ void ListSelectView::ProcessButtonMask(unsigned short mask,bool pressed) {
 	FieldView::ProcessButtonMask(mask) ;
 }
 
+void ListSelectView::CustomizeContextOverlay(
+	const char *&name, const char *&where, const char *&edit,
+	const char *&field, const char *&cmd1, const char *&cmd2,
+	const char *&cmd3, const char *&cmd4, const char *&cmd5,
+	const char *&cmd6, const char *&cmd7) {
+	name="LIST";
+	where="A select item";
+	edit="Dpad choose";
+	field="Project/list picker";
+	cmd1="Up/Down choose item";
+	cmd2="A select";
+	cmd3="B cancel if shown";
+	cmd4="R+Select close";
+	cmd5="Use Project screen";
+	cmd6="Power menu exits";
+	cmd7="R+Select helper";
+}
+
 void ListSelectView::SetContent(T_SimpleList<Path> &content)  {
 
 	T_SimpleList<UIField>::Empty() ;

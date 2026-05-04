@@ -37,8 +37,12 @@ private:
 	static int exitConfirmSelection_ ;
 	static bool showDebugScreen_ ;
 	static int debugScreenSelection_ ;
+	static bool menuHelpOverlay_ ;
+	static int menuHelpPage_ ;
 	static bool menuInputHeld_[SDLK_LAST] ;
 	static int powerMenuKey_ ;
+	static int rShoulderKey_ ;
+	static int selectKey_ ;
 	const char *keyname_[SDLK_LAST] ;
 	SDL_Joystick *joystick_[MAX_JOY_COUNT];
 	ButtonControllerSource *buttonCS_[MAX_JOY_COUNT] ;
@@ -48,6 +52,11 @@ private:
 
 	void HandlePowerMenuInput(SDLKey key) ;
 	void HandleDebugScreenInput(SDLKey key) ;
+	bool HandleMenuHelpInput(SDLKey key) ;
+	void RenderMenuHelp(SDL_Surface *screen, SDLGUIWindowImp *window,
+						const char *name, const char *field,
+						const char *cmd1, const char *cmd2,
+						const char *cmd3, const char *cmd4) ;
 
 #ifdef PLATFORM_RGNANO_SIM
 	struct SimCommand {

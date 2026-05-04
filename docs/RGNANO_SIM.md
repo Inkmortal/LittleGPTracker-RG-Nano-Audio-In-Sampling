@@ -89,6 +89,7 @@ Modal helper coverage verifies that `R + Select` is also available before a song
 .\lgpt-rgnano-sim.exe -AUTO_LOAD_LAST=NO -RGNANOSIM_SCRIPT=resources\RGNANO_SIM\context-overlay-modal-screens.rgsim
 .\lgpt-rgnano-sim.exe -AUTO_LOAD_LAST=NO -RGNANOSIM_SCRIPT=resources\RGNANO_SIM\context-overlay-sample-import-modal.rgsim
 .\lgpt-rgnano-sim.exe -AUTO_LOAD_LAST=NO -RGNANOSIM_SCRIPT=resources\RGNANO_SIM\context-overlay-command-modal.rgsim
+.\lgpt-rgnano-sim.exe -AUTO_LOAD_LAST=NO -RGNANOSIM_SCRIPT=resources\RGNANO_SIM\context-overlay-global-menu-screens.rgsim
 ```
 
 The command selector workflow verifies a core tracker producer move: create a song/chain/phrase, open the Phrase command selector with `Select`, confirm `ARPG`, edit its parameter, then open the same selector from Table view:

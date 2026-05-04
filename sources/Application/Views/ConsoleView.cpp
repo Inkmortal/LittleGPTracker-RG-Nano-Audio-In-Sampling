@@ -13,6 +13,24 @@ ConsoleView::ConsoleView(GUIWindow &w,ViewData *viewData):View(w,viewData) {
 void ConsoleView::ProcessButtonMask(unsigned short mask,bool pressed) {
 };
 
+void ConsoleView::CustomizeContextOverlay(
+	const char *&name, const char *&where, const char *&edit,
+	const char *&field, const char *&cmd1, const char *&cmd2,
+	const char *&cmd3, const char *&cmd4, const char *&cmd5,
+	const char *&cmd6, const char *&cmd7) {
+	name="CONSOLE";
+	where="Diagnostic log";
+	edit="Read only";
+	field="Debug console";
+	cmd1="R+Select close";
+	cmd2="Up/Down helper page";
+	cmd3="No song edits here";
+	cmd4="Power menu exits";
+	cmd5="Logs are internal";
+	cmd6="Return via app flow";
+	cmd7="R+Select helper";
+}
+
 void ConsoleView::DrawView() {
 
 	GUITextProperties props ;

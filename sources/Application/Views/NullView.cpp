@@ -10,6 +10,24 @@ void NullView::ProcessButtonMask(unsigned short mask,bool pressed) {
 
 } ;
 
+void NullView::CustomizeContextOverlay(
+	const char *&name, const char *&where, const char *&edit,
+	const char *&field, const char *&cmd1, const char *&cmd2,
+	const char *&cmd3, const char *&cmd4, const char *&cmd5,
+	const char *&cmd6, const char *&cmd7) {
+	name="STARTUP";
+	where="Project picker opens";
+	edit="Wait/load project";
+	field="Startup holding screen";
+	cmd1="Project picker is next";
+	cmd2="Power opens menu";
+	cmd3="R+Select helper";
+	cmd4="No song loaded yet";
+	cmd5="Load or create song";
+	cmd6="Then edit tracks";
+	cmd7="R+Select close";
+}
+
 void NullView::DrawView() {
 
 	Clear() ;

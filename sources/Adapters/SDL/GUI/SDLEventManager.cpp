@@ -35,8 +35,12 @@ bool SDLEventManager::showExitConfirm_=false ;
 int SDLEventManager::exitConfirmSelection_=0;
 bool SDLEventManager::showDebugScreen_=false ;
 int SDLEventManager::debugScreenSelection_=0;
+bool SDLEventManager::menuHelpOverlay_=false ;
+int SDLEventManager::menuHelpPage_=0;
 bool SDLEventManager::menuInputHeld_[SDLK_LAST]={false};
 int SDLEventManager::powerMenuKey_=SDLK_POWER;
+int SDLEventManager::rShoulderKey_=SDLK_n;
+int SDLEventManager::selectKey_=SDLK_q;
 
 static void DrawSimOverlayText(SDL_Surface *screen, const char *text, int x, int y, Uint32 color, int scale)
 {
@@ -150,6 +154,20 @@ bool SDLEventManager::Init()
 			Trace::Error("EVENT invalid KEY_POWER=%s",powerKey);
 		}
 	}
+	const char *rKey=Config::GetInstance()->GetValue("KEY_RSHOULDER");
+	if (rKey && strlen(rKey)>0) {
+		int key=GetKeyCode(rKey);
+		if (key>0) {
+			rShoulderKey_=key;
+		}
+	}
+	const char *selectKey=Config::GetInstance()->GetValue("KEY_SELECT");
+	if (selectKey && strlen(selectKey)>0) {
+		int key=GetKeyCode(selectKey);
+		if (key>0) {
+			selectKey_=key;
+		}
+	}
   
 	return true ;
 } 
@@ -191,6 +209,8 @@ int SDLEventManager::MainLoop()
 						if (showPowerMenu_) {
 							powerMenuSelection_ = 0;  // Reset to first option
 							showExitConfirm_ = false;
+							menuHelpOverlay_ = false;
+							menuHelpPage_ = 0;
 						}
 						break;
 					}
@@ -204,6 +224,9 @@ int SDLEventManager::MainLoop()
 							}
 							menuInputHeld_[event.key.keysym.sym]=true;
 						}
+						if (HandleMenuHelpInput(event.key.keysym.sym)) {
+							break;
+						}
 						HandlePowerMenuInput(event.key.keysym.sym);
 						break;  // Don't pass to game when menu is active
 					}
@@ -215,6 +238,9 @@ int SDLEventManager::MainLoop()
 								break;
 							}
 							menuInputHeld_[event.key.keysym.sym]=true;
+						}
+						if (HandleMenuHelpInput(event.key.keysym.sym)) {
+							break;
 						}
 						HandleDebugScreenInput(event.key.keysym.sym);
 						break;  // Don't pass to game when debug screen is active
@@ -1190,6 +1216,11 @@ bool SDLEventManager::ExpectSimSelectedText(const std::string &needle)
 		selected += "; debug=";
 		selected += debugItems[debugScreenSelection_];
 	}
+	if (menuHelpOverlay_) {
+		selected += "; helper=";
+		selected += showDebugScreen_ ? "DEBUG" : (showExitConfirm_ ? "EXIT?" : "POWER");
+		selected += menuHelpPage_ == 0 ? ":MAP" : ":COMMANDS";
+	}
 	bool found=!needle.empty() && selected.find(needle)!=std::string::npos;
 	Trace::Log("RGNANO_SIM","expect_selected_text %s in %s => %s",needle.c_str(),selected.c_str(),found?"found":"missing");
 	if (!found) {
@@ -2117,6 +2148,71 @@ void SDLEventManager::RenderPowerMenu(SDL_Surface *screen, SDLGUIWindowImp *wind
 		DrawSimOverlayText(screen,"Debug",debugRect.x + 10,debugRect.y + 8,
 			SDL_MapRGB(screen->format, powerMenuSelection_ == 1 ? 255 : 20, powerMenuSelection_ == 1 ? 255 : 20, powerMenuSelection_ == 1 ? 255 : 20),scale);
 	}
+	RenderMenuHelp(screen,window,showExitConfirm_ ? "EXIT?" : "POWER",
+		showExitConfirm_ ? "Confirm app exit" : "Global app menu",
+		showExitConfirm_ ? "Up/Down choose" : "Up/Down choose",
+		showExitConfirm_ ? "A confirm" : "A open choice",
+		showExitConfirm_ ? "B back to menu" : "B or Power close",
+		"R+Select helper");
+}
+
+bool SDLEventManager::HandleMenuHelpInput(SDLKey key)
+{
+	bool combo = (key == selectKey_ && rShoulderKey_ >= 0 &&
+				 rShoulderKey_ < SDLK_LAST && menuInputHeld_[rShoulderKey_]) ||
+				(key == rShoulderKey_ && selectKey_ >= 0 &&
+				 selectKey_ < SDLK_LAST && menuInputHeld_[selectKey_]);
+	if (combo) {
+		menuHelpOverlay_ = !menuHelpOverlay_;
+		if (menuHelpOverlay_) menuHelpPage_ = 0;
+		return true;
+	}
+	if (menuHelpOverlay_) {
+		if (key == SDLK_u || key == SDLK_d) {
+			menuHelpPage_ = menuHelpPage_ == 0 ? 1 : 0;
+		}
+		return true;
+	}
+	return false;
+}
+
+void SDLEventManager::RenderMenuHelp(SDL_Surface *screen, SDLGUIWindowImp *window,
+									 const char *name, const char *field,
+									 const char *cmd1, const char *cmd2,
+									 const char *cmd3, const char *cmd4)
+{
+	if (!menuHelpOverlay_ || !screen) return;
+	int scale = window ? window->GetScale() : 1;
+	int boxW = 220;
+	int boxH = 150;
+	SDL_Rect box = { Sint16((screen->w - boxW) / 2), Sint16((screen->h - boxH) / 2),
+					 Uint16(boxW), Uint16(boxH) };
+	SDL_FillRect(screen,&box,SDL_MapRGB(screen->format,18,0,24));
+	SDL_Rect borderTop = { box.x, box.y, box.w, 2 };
+	SDL_Rect borderBottom = { box.x, Sint16(box.y + box.h - 2), box.w, 2 };
+	SDL_Rect borderLeft = { box.x, box.y, 2, box.h };
+	SDL_Rect borderRight = { Sint16(box.x + box.w - 2), box.y, 2, box.h };
+	Uint32 border=SDL_MapRGB(screen->format,240,0,150);
+	SDL_FillRect(screen,&borderTop,border);
+	SDL_FillRect(screen,&borderBottom,border);
+	SDL_FillRect(screen,&borderLeft,border);
+	SDL_FillRect(screen,&borderRight,border);
+	Uint32 pink=SDL_MapRGB(screen->format,255,80,220);
+	Uint32 white=SDL_MapRGB(screen->format,245,235,255);
+	DrawSimOverlayText(screen,name,box.x+12,box.y+12,pink,scale);
+	if (menuHelpPage_ == 0) {
+		DrawSimOverlayText(screen,"MAP",box.x+12,box.y+36,white,scale);
+		DrawSimOverlayText(screen,field,box.x+12,box.y+58,pink,scale);
+		DrawSimOverlayText(screen,"Global overlay",box.x+12,box.y+82,white,scale);
+		DrawSimOverlayText(screen,"Tracker below paused",box.x+12,box.y+102,white,scale);
+	} else {
+		DrawSimOverlayText(screen,"COMMANDS",box.x+12,box.y+36,white,scale);
+		DrawSimOverlayText(screen,cmd1,box.x+12,box.y+58,white,scale);
+		DrawSimOverlayText(screen,cmd2,box.x+12,box.y+78,white,scale);
+		DrawSimOverlayText(screen,cmd3,box.x+12,box.y+98,white,scale);
+		DrawSimOverlayText(screen,cmd4,box.x+12,box.y+118,white,scale);
+	}
+	DrawSimOverlayText(screen,"Up/Dn page R+Sel close",box.x+12,box.y+134,pink,scale);
 }
 
 void SDLEventManager::HandlePowerMenuInput(SDLKey key)
@@ -2140,6 +2236,7 @@ void SDLEventManager::HandlePowerMenuInput(SDLKey key)
 					// Yes - quit
 					showPowerMenu_ = false;
 					showExitConfirm_ = false;
+					menuHelpOverlay_ = false;
 					PostQuitMessage();
 				} else {
 					// No - back to main menu
@@ -2162,6 +2259,7 @@ void SDLEventManager::HandlePowerMenuInput(SDLKey key)
 		if (key == powerMenuKey_) {
 			showPowerMenu_ = false;
 			showExitConfirm_ = false;
+			menuHelpOverlay_ = false;
 			exitConfirmSelection_ = 0;
 			return;
 		}
@@ -2188,6 +2286,7 @@ void SDLEventManager::HandlePowerMenuInput(SDLKey key)
 					// Debug screen - open it
 					showPowerMenu_ = false;
 					showDebugScreen_ = true;
+					menuHelpOverlay_ = false;
 					debugScreenSelection_ = 0;
 				}
 				break;
@@ -2195,6 +2294,7 @@ void SDLEventManager::HandlePowerMenuInput(SDLKey key)
 			case SDLK_b:  // B button - cancel
 			case SDLK_ESCAPE:
 				showPowerMenu_ = false;
+				menuHelpOverlay_ = false;
 				break;
 
 			default:
@@ -2227,13 +2327,15 @@ void SDLEventManager::HandleDebugScreenInput(SDLKey key)
 			} else if (debugScreenSelection_ == 2) {
 				// Exit Debug
 				showDebugScreen_ = false;
+				menuHelpOverlay_ = false;
 				debugScreenSelection_ = 0;
 			}
 			break;
 
-		case SDLK_b:  // B button - back
+			case SDLK_b:  // B button - back
 		case SDLK_ESCAPE:
 			showDebugScreen_ = false;
+			menuHelpOverlay_ = false;
 			debugScreenSelection_ = 0;
 			break;
 
@@ -2286,4 +2388,9 @@ void SDLEventManager::RenderDebugScreen(SDL_Surface *screen, SDLGUIWindowImp *wi
 		DrawSimOverlayText(screen,items[i],itemRect.x + 6,itemRect.y + 8,
 			SDL_MapRGB(screen->format, debugScreenSelection_ == i ? 255 : 20, debugScreenSelection_ == i ? 255 : 20, debugScreenSelection_ == i ? 255 : 20),scale);
 	}
+	RenderMenuHelp(screen,window,"DEBUG","Diagnostics",
+		"Up/Down choose",
+		"A select",
+		"B back",
+		"R+Select helper");
 }

@@ -34,7 +34,7 @@ The power menu is intentionally separate from `Select`. `Select` remains an LGPT
 
 ## Universal Context Overlay
 
-`R + Select` opens a small context/helper overlay from tracker views and modal dialogs, including the boot project selector. Hold `R`, tap `Select`, then release `R`. The overlay is meant for power-user navigation, not full manual reading.
+`R + Select` opens a small context/helper overlay from every visible screen: tracker views, modal dialogs, the boot project selector, and the global power/debug menus. Hold `R`, tap `Select`, then release `R`. The overlay is meant for power-user navigation, not full manual reading.
 
 Page 1 is the minimap: it shows the current screen name, the core LGPT screen chain, the fastest exits from the current screen, and the primary editing gesture for that screen.
 
@@ -42,7 +42,7 @@ Press `Up` or `Down` while the helper is open to switch to page 2. Page 2 is the
 
 Instrument Lab helper text is page-aware. Source, Shape, Filter, Loop, and Motion each describe their own edits when opened with `R + Select`.
 
-While the overlay is visible, normal tracker inputs are blocked so a producer can check the map without accidentally writing notes, changing chain slots, deleting a project, or previewing audio. Modal dialogs have their own helper text, so `R + Select` stays reliable on Project select, New song, confirmation dialogs, Sample import, Command picker, and Record.
+While the overlay is visible, normal inputs are blocked so a producer can check the map without accidentally writing notes, changing chain slots, deleting a project, moving a power-menu selection, or previewing audio. Modal dialogs and global menus have their own helper text, so `R + Select` stays reliable everywhere.
 
 ## Playback Scope Label
 

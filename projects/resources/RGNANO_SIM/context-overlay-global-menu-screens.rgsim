@@ -1,0 +1,46 @@
+# Verify R+Select helper coverage on non-View global menu screens.
+route boot.new_project_random
+expect_view song
+
+# Power menu helper.
+press p 80
+wait 120
+expect_selected_text powerMenu=Exit
+down n
+press q 80
+up n
+wait 120
+expect_selected_text helper=POWER:MAP
+press d 80
+wait 120
+expect_selected_text helper=POWER:COMMANDS
+down n
+press q 80
+up n
+wait 80
+expect_selected_text powerMenu=Exit
+
+# Debug menu helper.
+press d 80
+wait 80
+press a 80
+wait 120
+expect_selected_text debug=Audio Input Monitor
+down n
+press q 80
+up n
+wait 120
+expect_selected_text helper=DEBUG:MAP
+press d 80
+wait 120
+expect_selected_text helper=DEBUG:COMMANDS
+down n
+press q 80
+up n
+wait 80
+expect_selected_text debug=Audio Input Monitor
+press b 80
+wait 80
+expect_view song
+expect_no_error
+quit
