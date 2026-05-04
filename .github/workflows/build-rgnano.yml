@@ -1,0 +1,56 @@
+name: RG Nano build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/sample-workstation-ui
+    paths:
+      - ".github/workflows/build-rgnano.yml"
+      - "projects/**"
+      - "sources/**"
+      - "docs/RGNANO_USER_MANUAL.md"
+      - "docs/RGNANO_INPUT_MAP.md"
+
+jobs:
+  rgnano:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install host tools
+        run: sudo apt-get update && sudo apt-get install -y make zip
+
+      - name: Install FunKey SDK
+        run: |
+          mkdir -p sdk
+          curl -L \
+            -o /tmp/FunKey-sdk-2.3.0.tar.gz \
+            https://github.com/FunKey-Project/FunKey-OS/releases/download/FunKey-OS-2.3.0/FunKey-sdk-2.3.0.tar.gz
+          tar -xzf /tmp/FunKey-sdk-2.3.0.tar.gz -C sdk
+          mv sdk/FunKey-sdk-2.3.0 sdk/FunKey-sdk-DrUm78
+
+      - name: Build RG Nano ELF
+        working-directory: projects
+        run: make PLATFORM=RGNANO
+
+      - name: Package RG Nano test build
+        run: |
+          mkdir -p dist/lgpt-rgnano
+          cp projects/lgpt-rgnano.elf dist/lgpt-rgnano/
+          cp projects/resources/RGNANO/config.xml dist/lgpt-rgnano/
+          cp projects/resources/RGNANO/lgpt.funkey-s.desktop dist/lgpt-rgnano/
+          cp projects/resources/RGNANO/lgpt.png dist/lgpt-rgnano/
+          cp projects/resources/RGNANO/INSTALL_HOW_TO.txt dist/lgpt-rgnano/
+          cp docs/RGNANO_USER_MANUAL.md dist/lgpt-rgnano/
+          cp docs/RGNANO_INPUT_MAP.md dist/lgpt-rgnano/
+          cd dist
+          zip -9 -r lgpt-rgnano-test-build.zip lgpt-rgnano
+
+      - name: Upload RG Nano artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lgpt-rgnano-test-build-${{ github.sha }}
+          path: dist/lgpt-rgnano-test-build.zip
+          if-no-files-found: error
