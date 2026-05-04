@@ -100,6 +100,7 @@ private:
 	bool ExpectSimTableActive(int channel, int table);
 	bool ExpectSimTempo(int bpm);
 	bool ExpectSimInstrumentSample(int instrument, const std::string &sampleName);
+	bool ExpectSimInstrumentRoot(int instrument, int note);
 	bool ExpectSimRenderMode(int mode);
 	bool SimSetTempo(int bpm);
 	bool SimSetRenderMode(int mode);

@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <ctype.h>
 
 #include "SampleInstrumentDatas.h"
 #include "Application/Player/SyncMaster.h"
@@ -997,6 +998,137 @@ void SampleInstrument::AssignSample(int i) {
 	 Variable *v=FindVariable(SIP_SAMPLE) ;
 	 v->SetInt(i) ;
 } ;
+
+static bool containsTokenNoCase(const char *name,const char *token) {
+	if (!name || !token) return false;
+	int tokenLen=strlen(token);
+	if (tokenLen<=0) return false;
+	for (const char *p=name;*p;p++) {
+		int j=0;
+		while (j<tokenLen && p[j] &&
+		       tolower((unsigned char)p[j])==tolower((unsigned char)token[j])) {
+			j++;
+		}
+		if (j==tokenLen) return true;
+	}
+	return false;
+}
+
+static bool looksPercussiveByName(const char *name) {
+	const char *tokens[]={
+		"kick","snare","hat","hihat","clap","rim","tom","cym","crash",
+		"ride","drum","perc","shaker","noise","vinyl","fx",0
+	};
+	for (int i=0;tokens[i];i++) {
+		if (containsTokenNoCase(name,tokens[i])) return true;
+	}
+	return false;
+}
+
+static int frequencyToMidi(float freq) {
+	if (freq<=0.0f) return -1;
+	int note=(int)(69.0f+12.0f*(log(freq/440.0f)/log(2.0f))+0.5f);
+	if (note<0) note=0;
+	if (note>127) note=127;
+	return note;
+}
+
+int SampleInstrument::AutoTuneRootNoteFromSample() {
+	int sampleIndex=GetSampleIndex();
+	if (sampleIndex<0 || sampleIndex>=MAX_SAMPLEINSTRUMENT_COUNT) return -1;
+	SamplePool *pool=SamplePool::GetInstance();
+	SoundSource *source=pool->GetSource(sampleIndex);
+	const char *name=pool->GetName(sampleIndex);
+	if (!source || looksPercussiveByName(name)) {
+#ifdef PLATFORM_RGNANO_SIM
+		Trace::Log("SAMPLE_AUTOROOT","skip name=%s",name?name:"(null)");
+#endif
+		return -1;
+	}
+	int size=source->GetSize(-1);
+	int channels=source->GetChannelCount(-1);
+	int sampleRate=source->GetSampleRate(-1);
+	short *buffer=(short *)source->GetSampleBuffer(-1);
+	if (!buffer || size<256 || channels<1 || sampleRate<=0) return -1;
+
+	int scan=size<sampleRate?size:sampleRate;
+	int peak=0;
+	double rmsSum=0.0;
+	for (int i=0;i<scan;i++) {
+		int v=buffer[i*channels];
+		if (v<0) v=-v;
+		if (v>peak) peak=v;
+		rmsSum+=(double)v*(double)v;
+	}
+	if (peak<512) return -1;
+	double rms=sqrt(rmsSum/(double)scan);
+	if (rms<256.0) return -1;
+
+	int start=0;
+	int threshold=peak/8;
+	if (threshold<512) threshold=512;
+	for (int i=0;i<scan;i++) {
+		int v=buffer[i*channels];
+		if (v<0) v=-v;
+		if (v>=threshold) {
+			start=i+(sampleRate/100);
+			break;
+		}
+	}
+	if (start<0 || start>=size) start=0;
+
+	int window=sampleRate/3;
+	if (window>8192) window=8192;
+	if (window<1024) window=1024;
+	if (start+window>=size) {
+		start=0;
+		if (window>=size) window=size-1;
+	}
+	if (window<256) return -1;
+
+	int minLag=sampleRate/1200;
+	int maxLag=sampleRate/45;
+	if (minLag<8) minLag=8;
+	if (maxLag>=window/2) maxLag=window/2;
+	if (maxLag<=minLag) return -1;
+
+	int bestLag=0;
+	double bestCorr=0.0;
+	for (int lag=minLag;lag<=maxLag;lag++) {
+		double sum=0.0;
+		double e1=0.0;
+		double e2=0.0;
+		for (int n=0;n<window-lag;n++) {
+			double a=(double)buffer[(start+n)*channels];
+			double b=(double)buffer[(start+n+lag)*channels];
+			sum+=a*b;
+			e1+=a*a;
+			e2+=b*b;
+		}
+		if (e1<=0.0 || e2<=0.0) continue;
+		double corr=sum/sqrt(e1*e2);
+		if (corr>bestCorr) {
+			bestCorr=corr;
+			bestLag=lag;
+		}
+	}
+	if (bestLag<=0 || bestCorr<0.42) {
+#ifdef PLATFORM_RGNANO_SIM
+		Trace::Log("SAMPLE_AUTOROOT","low confidence name=%s corr=%.3f",name?name:"(null)",bestCorr);
+#endif
+		return -1;
+	}
+	float freq=(float)sampleRate/(float)bestLag;
+	int note=frequencyToMidi(freq);
+	if (note>=0) {
+		Variable *root=FindVariable(SIP_ROOTNOTE);
+		if (root) root->SetInt(note);
+	}
+#ifdef PLATFORM_RGNANO_SIM
+	Trace::Log("SAMPLE_AUTOROOT","name=%s freq=%.2f midi=%d corr=%.3f",name?name:"(null)",freq,note,bestCorr);
+#endif
+	return note;
+}
 
 int SampleInstrument::GetSampleIndex() {
 	 Variable *v=FindVariable(SIP_SAMPLE) ;

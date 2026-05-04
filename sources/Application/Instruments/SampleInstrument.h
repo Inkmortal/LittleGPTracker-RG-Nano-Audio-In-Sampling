@@ -74,6 +74,7 @@ public:
 	   virtual void SetTableState(TableSaveState &state) ;	 
 
 	   bool IsMulti() ;
+	   int AutoTuneRootNoteFromSample() ;
 
 	  // Engine playback  start callback
 

@@ -21,6 +21,7 @@ press d 80
 press d 80
 press d 80
 press d 80
+press d 80
 route sample_import.quick_import_selected
 expect_project_sample wuxia-guzheng.wav
 route sample_import.exit

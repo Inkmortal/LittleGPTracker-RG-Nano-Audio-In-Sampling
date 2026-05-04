@@ -116,6 +116,11 @@ SoundSource *SamplePool::GetSource(int i) {
 	return wav_[i] ;
 } ;
 
+const char *SamplePool::GetName(int i) {
+	if (i<0 || i>=count_) return 0;
+	return names_[i];
+} ;
+
 char **SamplePool::GetNameList() {
 	return names_ ;
 } ;

@@ -22,6 +22,7 @@ protected:
 	void import(Path &element) ;
 	void preview(Path &element) ;
 	void endPreview() ;
+	void setImportStatus(int note) ;
 	void drawSelectedInfo(Path *element, int total) ;
 	long getFileSizeKb(Path &element) ;
 private:
@@ -33,6 +34,7 @@ private:
 	int topIndex_ ;
 	int toInstr_ ;
 	int selected_ ;
+	char importStatus_[40] ;
 	static bool initStatic_ ;
 	static Path sampleLib_ ;
 	static Path currentPath_ ;

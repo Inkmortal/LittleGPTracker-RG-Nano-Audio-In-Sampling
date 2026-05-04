@@ -27,6 +27,7 @@ public:
 	void Reset() ;
 	~SamplePool() ;
 	SoundSource *GetSource(int i) ;
+	const char *GetName(int i) ;
 	char **GetNameList() ;
 	int GetNameListSize();
     int ImportSample(Path &path);

@@ -25,6 +25,7 @@ ImportSampleDialog::ImportSampleDialog(View &view):ModalView(view) {
 		initStatic_=true ;
 	}
 	selected_=0 ;
+	importStatus_[0]=0 ;
 } ;
 
 ImportSampleDialog::~ImportSampleDialog() {
@@ -154,6 +155,9 @@ void ImportSampleDialog::drawSelectedInfo(Path *element, int total) {
 	if (!element->IsDirectory() && SamplePool::GetInstance()->IsImported(name)) {
 		name+=" *in project";
 	}
+	if (importStatus_[0] && !element->IsDirectory()) {
+		name=importStatus_;
+	}
 	strncpy(line,name.c_str(),LIST_WIDTH-1);
 	line[LIST_WIDTH-1]=0;
 	DrawString(1,y,line,props);
@@ -186,6 +190,14 @@ void ImportSampleDialog::endPreview() {
 	Player::GetInstance()->StopStreaming() ;
 }
 
+void ImportSampleDialog::setImportStatus(int note) {
+	if (note>=0) {
+		sprintf(importStatus_,"imported root %03d",note);
+	} else {
+		strcpy(importStatus_,"imported root manual");
+	}
+}
+
 void ImportSampleDialog::import(Path &element) {
 
 #ifdef PLATFORM_RGNANO_SIM
@@ -198,6 +210,8 @@ void ImportSampleDialog::import(Path &element) {
 		if (instr->GetType()==IT_SAMPLE) {
 			SampleInstrument *sinstr=(SampleInstrument *)instr ;
 			sinstr->AssignSample(sampleID) ;
+			int rootNote=sinstr->AutoTuneRootNoteFromSample();
+			setImportStatus(rootNote);
 			toInstr_=viewData_->project_->GetInstrumentBank()->GetNext() ;
 		};
 	} else {

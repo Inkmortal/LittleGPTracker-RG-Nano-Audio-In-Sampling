@@ -112,6 +112,8 @@ The Source/Loop direction matters most because sample-heavy production depends o
 - What note is it tuned to?
 - Does it still sound good when pitched low, normal, and high?
 
+Imports now run a lightweight root-note assist for pitched material. Obvious drum/noise filenames stay on the default root, while tonal samples get a detected root note when confidence is high enough. This follows the same practical shape as modern sample tools: automatic root help, visible confidence/override behavior later, and manual editing when the audio is too noisy or polyphonic.
+
 The direct audition shortcut is intentionally shoulder-heavy: hold `R + A`, then tap `Left`, `Up`, or `Right` to hear the current sample below root, at root, or above root without leaving Source, Shape, Filter, Loop, or Motion. Tap `R + A + Down` to stop. That gives the small device a sound-design loop that feels more like a dedicated workstation than a parameter list.
 
 No synth engines yet. Make sample instruments feel great first.

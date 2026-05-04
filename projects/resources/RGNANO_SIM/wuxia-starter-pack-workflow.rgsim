@@ -11,6 +11,14 @@ sim_import_sample_to_instrument 4 wuxia-starter/wx_play-dizi-note.wav
 sim_import_sample_to_instrument 5 wuxia-erhu.wav
 sim_import_sample_to_instrument 6 wuxia-starter/wx_play-zhongruan-hit.wav
 sim_import_sample_to_instrument 7 lofi-vinyl.wav
+expect_instrument_root 0 60
+expect_instrument_root 1 60
+expect_instrument_root 2 60
+expect_instrument_root 3 76
+expect_instrument_root 4 71
+expect_instrument_root 5 62
+expect_instrument_root 6 43
+expect_instrument_root 7 60
 
 # Eight-channel arrangement: real beat first, Chinese instruments second.
 sim_set_song_chain 0 0 0
@@ -91,25 +99,25 @@ sim_set_phrase_note 4 6 72 2
 sim_set_phrase_note 4 10 72 2
 sim_set_phrase_note 4 14 72 2
 
-# Pipa main motif in D pentatonic: D F G A C.
-sim_set_phrase_note 6 0 50 3
-sim_set_phrase_note 6 3 53 3
-sim_set_phrase_note 6 6 57 3
-sim_set_phrase_note 6 10 60 3
-sim_set_phrase_note 6 13 57 3
-sim_set_phrase_note 7 0 62 3
-sim_set_phrase_note 7 4 60 3
-sim_set_phrase_note 7 8 57 3
-sim_set_phrase_note 7 12 53 3
-sim_set_phrase_note 8 0 50 3
-sim_set_phrase_note 8 3 57 3
-sim_set_phrase_note 8 7 60 3
-sim_set_phrase_note 8 11 65 3
-sim_set_phrase_note 8 14 62 3
-sim_set_phrase_note 9 0 57 3
-sim_set_phrase_note 9 4 53 3
-sim_set_phrase_note 9 8 50 3
-sim_set_phrase_note 9 12 45 3
+# Pipa main motif in D pentatonic near the detected root: D F G A C.
+sim_set_phrase_note 6 0 74 3
+sim_set_phrase_note 6 3 77 3
+sim_set_phrase_note 6 6 81 3
+sim_set_phrase_note 6 10 84 3
+sim_set_phrase_note 6 13 81 3
+sim_set_phrase_note 7 0 86 3
+sim_set_phrase_note 7 4 84 3
+sim_set_phrase_note 7 8 81 3
+sim_set_phrase_note 7 12 77 3
+sim_set_phrase_note 8 0 74 3
+sim_set_phrase_note 8 3 81 3
+sim_set_phrase_note 8 7 84 3
+sim_set_phrase_note 8 11 89 3
+sim_set_phrase_note 8 14 86 3
+sim_set_phrase_note 9 0 81 3
+sim_set_phrase_note 9 4 77 3
+sim_set_phrase_note 9 8 74 3
+sim_set_phrase_note 9 12 69 3
 
 # Dizi answers: sparse, not wall-to-wall.
 sim_set_phrase_note 10 0 74 4
@@ -120,14 +128,14 @@ sim_set_phrase_note 12 0 77 4
 sim_set_phrase_note 12 10 74 4
 
 # Erhu pad and zhongruan bass, deliberately slow.
-sim_set_phrase_note 13 0 50 5
-sim_set_phrase_note 13 8 57 5
-sim_set_phrase_note 14 0 45 5
-sim_set_phrase_note 14 8 50 5
-sim_set_phrase_note 15 0 38 6
-sim_set_phrase_note 15 8 45 6
-sim_set_phrase_note 16 0 50 6
-sim_set_phrase_note 16 8 45 6
+sim_set_phrase_note 13 0 62 5
+sim_set_phrase_note 13 8 69 5
+sim_set_phrase_note 14 0 57 5
+sim_set_phrase_note 14 8 62 5
+sim_set_phrase_note 15 0 43 6
+sim_set_phrase_note 15 8 50 6
+sim_set_phrase_note 16 0 55 6
+sim_set_phrase_note 16 8 50 6
 
 # Vinyl/noise bed very sparse.
 sim_set_phrase_note 17 0 48 7
