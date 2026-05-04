@@ -601,7 +601,7 @@ void InstrumentView::drawSampleLabVisuals() {
 	char line[40];
 	SetColor(CD_HILITE2);
 	sprintf(line,"<L %d/5 %s L>",labPage_+1,getLabPageName());
-	DrawString(1,2,line,props);
+	DrawString((40-(int)strlen(line))/2,2,line,props);
 	SetColor(CD_NORMAL);
 
 #if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
@@ -627,7 +627,7 @@ void InstrumentView::drawSampleLabVisuals() {
 #if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
 		drawSampleWaveform(instrument,10,36,220,52,true);
 		sprintf(line,"MARK:%s  L+UD  L+A+LR",getWaveMarkerShortName());
-		drawLabText(2,12,line,props);
+		drawLabText((40-(int)strlen(line))/2,12,line,props);
 		if (labPage_==0) {
 			const char *sampleName=GetVarString(instrument,SIP_SAMPLE);
 			char name[25];
@@ -686,15 +686,17 @@ void InstrumentView::drawSampleLabVisuals() {
 #endif
 	} else if (labPage_==1) {
 #if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+		const int barX=44;
+		const int barW=152;
 		SetColor(CD_NORMAL);
 		drawLabText(2,5,"VOL",props);
-		drawPixelLabBar(48,40,160,14,GetVarInt(instrument,SIP_VOLUME),255);
+		drawPixelLabBar(barX,40,barW,14,GetVarInt(instrument,SIP_VOLUME),255);
 		SetColor(CD_NORMAL);
 		drawLabText(2,8,"PAN",props);
-		drawPixelLabBar(48,64,160,14,GetVarInt(instrument,SIP_PAN),254,true);
+		drawPixelLabBar(barX,64,barW,14,GetVarInt(instrument,SIP_PAN),254,true);
 		SetColor(CD_NORMAL);
 		drawLabText(2,11,"GRIT",props);
-		drawPixelLabBar(48,88,160,14,16-GetVarInt(instrument,SIP_CRUSH)+GetVarInt(instrument,SIP_DOWNSMPL)*2,31);
+		drawPixelLabBar(barX,88,barW,14,16-GetVarInt(instrument,SIP_CRUSH)+GetVarInt(instrument,SIP_DOWNSMPL)*2,31);
 		SetColor(CD_NORMAL);
 		sprintf(line,"drive %02X down %d interp %d",GetVarInt(instrument,SIP_CRUSHVOL),GetVarInt(instrument,SIP_DOWNSMPL),GetVarInt(instrument,SIP_INTERPOLATION));
 		drawLabText(2,14,line,props);
@@ -718,15 +720,17 @@ void InstrumentView::drawSampleLabVisuals() {
 #endif
 	} else if (labPage_==2) {
 #if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+		const int barX=44;
+		const int barW=152;
 		SetColor(CD_NORMAL);
 		drawLabText(2,5,"CUT",props);
-		drawPixelLabBar(48,40,160,14,GetVarInt(instrument,SIP_FILTCUTOFF),255);
+		drawPixelLabBar(barX,40,barW,14,GetVarInt(instrument,SIP_FILTCUTOFF),255);
 		SetColor(CD_NORMAL);
 		drawLabText(2,8,"RES",props);
-		drawPixelLabBar(48,64,160,14,GetVarInt(instrument,SIP_FILTRESO),255);
+		drawPixelLabBar(barX,64,barW,14,GetVarInt(instrument,SIP_FILTRESO),255);
 		SetColor(CD_NORMAL);
 		drawLabText(2,11,"TYPE",props);
-		drawPixelLabBar(48,88,160,14,GetVarInt(instrument,SIP_FILTMIX),255);
+		drawPixelLabBar(barX,88,barW,14,GetVarInt(instrument,SIP_FILTMIX),255);
 		SetColor(CD_NORMAL);
 		sprintf(line,"mode %d atten %02X",GetVarInt(instrument,SIP_FILTMODE),GetVarInt(instrument,SIP_ATTENUATE));
 		drawLabText(2,14,line,props);
@@ -743,10 +747,15 @@ void InstrumentView::drawSampleLabVisuals() {
 	} else {
 #if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
 		SetColor(CD_NORMAL);
-		drawLabText(2,5,"TABLE",props);
+		drawLabText(17,5,"TABLE",props);
 		int table=GetVarInt(instrument,SIP_TABLE);
+		const int motionCount=8;
+		const int motionW=14;
+		const int motionStep=23;
+		const int motionTotal=(motionCount-1)*motionStep+motionW;
+		const int motionStart=(240-motionTotal)/2;
 		for (int step=0; step<8; step++) {
-			int x=28+step*23;
+			int x=motionStart+step*motionStep;
 			int y=48+((step%2)?10:0);
 			drawPixelLabBar(x,y,14,42,(step*37+GetVarInt(instrument,SIP_FBTUNE))&0xFF,255);
 		}
