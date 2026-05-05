@@ -19,7 +19,7 @@ The simulator must preserve LGPT's button-mask behavior. `AppWindow` keeps a liv
 | L | `m` | `m` |
 | R | `n` | `n` |
 | Start | `s` | `s` |
-| Select / FN on RG Nano hardware | `k` on hardware, `q` in simulator | `q` in simulator |
+| Select / FN | `k` | `k` |
 | OS menu / power | OS-owned on hardware, `p` in simulator | `p` in simulator |
 
 Use `down <key>`, `press <key>`, and `up <key>` in scripts to make held combos exact. For example, `R + Down` is:
@@ -30,7 +30,7 @@ press d 80
 up n
 ```
 
-The RG Nano OS input map sends physical `FN`/Select as `KEY_K`; physical Menu/Power sends `KEY_Q` and belongs to the OS menu. Hardware builds therefore map LGPT `Select` to `k` and do not claim Menu/Power as an app shortcut. The simulator keeps `q` for Select and `p` for its fake power/debug overlay so automated scripts remain easy to type.
+The RG Nano OS input map sends physical `FN`/Select as `KEY_K`; physical Menu/Power sends `KEY_Q` and belongs to the OS menu. Hardware and simulator builds therefore map LGPT `Select` to `k` and do not claim Menu/Power as an app shortcut. The simulator keeps `p` for its fake power/debug overlay so automated scripts can still exercise that harness-only menu.
 
 ## Universal Context Overlay
 

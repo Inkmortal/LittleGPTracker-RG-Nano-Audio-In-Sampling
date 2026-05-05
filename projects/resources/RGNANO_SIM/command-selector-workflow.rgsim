@@ -13,12 +13,12 @@ expect_view phrase
 # Phrase command slot 1: Select opens the command picker, Select confirms.
 press r 80
 press r 80
-press q 80
+press k 80
 wait 120
 screenshot_app command-selector-phrase.bmp
 expect_screen_text ARPG
 expect_screen_text ARPeGgio
-press q 80
+press k 80
 wait 120
 expect_phrase_command 0 0 1 ARPG
 
@@ -31,7 +31,7 @@ expect_player_running no
 # The same Select-to-command-picker gesture works in table command columns.
 route phrase.to_table
 expect_view table
-press q 80
+press k 80
 wait 120
 screenshot_app command-selector-table.bmp
 expect_screen_text ARPG

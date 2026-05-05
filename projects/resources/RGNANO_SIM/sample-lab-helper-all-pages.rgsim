@@ -18,7 +18,7 @@ expect_screen_text SOURCE
 
 # Source helper
 down n
-press q 80
+press k 80
 up n
 wait 100
 expect_screen_text INSTR
@@ -31,7 +31,7 @@ expect_screen_text A import/listen sample
 expect_screen_text Select root detect
 expect_screen_text L+UD mark S/L/E
 down n
-press q 80
+press k 80
 up n
 wait 80
 
@@ -40,7 +40,7 @@ route combo.l.right
 wait 100
 expect_screen_text SHAPE
 down n
-press q 80
+press k 80
 up n
 wait 100
 expect_screen_text Shape vol pan grit
@@ -48,7 +48,7 @@ press d 80
 wait 80
 expect_screen_text Crush/drive/down
 down n
-press q 80
+press k 80
 up n
 wait 80
 
@@ -57,7 +57,7 @@ route combo.l.right
 wait 100
 expect_screen_text FILTER
 down n
-press q 80
+press k 80
 up n
 wait 100
 expect_screen_text Filter cutoff/reso
@@ -65,7 +65,7 @@ press d 80
 wait 80
 expect_screen_text Type mode atten
 down n
-press q 80
+press k 80
 up n
 wait 80
 
@@ -74,7 +74,7 @@ route combo.l.right
 wait 100
 expect_screen_text LOOP
 down n
-press q 80
+press k 80
 up n
 wait 100
 expect_screen_text Loop S/L/E markers
@@ -83,7 +83,7 @@ wait 80
 expect_screen_text L+A+LR nudge mark
 expect_screen_text Select root after trim
 down n
-press q 80
+press k 80
 up n
 wait 80
 
@@ -92,7 +92,7 @@ route combo.l.right
 wait 100
 expect_screen_text MOTION
 down n
-press q 80
+press k 80
 up n
 wait 100
 expect_screen_text Motion table/feedback
@@ -101,7 +101,7 @@ wait 80
 expect_screen_text Table controls motion
 expect_screen_text R+Down inst table
 down n
-press q 80
+press k 80
 up n
 wait 80
 

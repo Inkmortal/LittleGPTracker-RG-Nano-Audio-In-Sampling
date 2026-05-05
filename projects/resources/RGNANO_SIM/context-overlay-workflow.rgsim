@@ -4,7 +4,7 @@ expect_view song
 press a 80
 wait 80
 down n
-press q 80
+press k 80
 up n
 wait 120
 screenshot_app context-overlay-song.bmp
@@ -22,13 +22,13 @@ press u 80
 wait 80
 expect_screen_text MAP
 down n
-press q 80
+press k 80
 up n
 wait 80
 route song.to_chain
 expect_view chain
 down n
-press q 80
+press k 80
 up n
 wait 120
 screenshot_app context-overlay-chain.bmp

@@ -15,7 +15,8 @@
 	<KEY_LSHOULDER value="m"/>
 	<KEY_RSHOULDER value="n"/>
 	<KEY_START value="s"/>
-	<KEY_SELECT value="q"/>
+	<!-- Match the RG Nano OS: FN/Select sends KEY_K. MENU/Power is separate. -->
+	<KEY_SELECT value="k"/>
 	<KEY_POWER value="p"/>
 	<KEYDELAY value="200"/>
 	<KEYREPEAT value="100"/>

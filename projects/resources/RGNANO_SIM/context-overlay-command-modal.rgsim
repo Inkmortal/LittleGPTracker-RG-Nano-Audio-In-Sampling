@@ -13,12 +13,12 @@ expect_view phrase
 # Move to the first command column and open the command selector.
 press r 80
 press r 80
-press q 80
+press k 80
 wait 120
 expect_screen_text ARPG
 
 down n
-press q 80
+press k 80
 up n
 wait 120
 screenshot_app context-overlay-modal-command-map.bmp
@@ -30,7 +30,7 @@ screenshot_app context-overlay-modal-command-commands.bmp
 expect_screen_text A choose command
 expect_screen_text B cancel
 down n
-press q 80
+press k 80
 up n
 wait 80
 press b 80

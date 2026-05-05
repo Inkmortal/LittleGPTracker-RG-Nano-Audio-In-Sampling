@@ -29,7 +29,7 @@ press d 80
 wait 80
 expect_screen_text root
 screenshot_app sample-full-03-root-focus.bmp
-press q 80
+press k 80
 wait 120
 screenshot_app sample-full-04-root-accepted.bmp
 
@@ -104,7 +104,7 @@ wait 80
 screenshot_app sample-full-14-motion-edit.bmp
 
 down n
-press q 80
+press k 80
 up n
 wait 120
 screenshot_app sample-full-15-helper-map.bmp
@@ -112,7 +112,7 @@ press d 80
 wait 80
 screenshot_app sample-full-16-helper-commands.bmp
 down n
-press q 80
+press k 80
 up n
 
 expect_no_error

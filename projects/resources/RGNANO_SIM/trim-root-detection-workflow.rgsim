@@ -24,7 +24,7 @@ expect_instrument_root_suggestion 0 69
 
 # Move from sample to root. Select accepts the trim-derived suggestion.
 press d 80
-press q 80
+press k 80
 wait 120
 expect_instrument_root 0 69
 expect_instrument_root_suggestion 0 -1

@@ -7,7 +7,7 @@ press p 80
 wait 120
 expect_selected_text powerMenu=Exit
 down n
-press q 80
+press k 80
 up n
 wait 120
 expect_selected_text helper=POWER:MAP
@@ -15,7 +15,7 @@ press d 80
 wait 120
 expect_selected_text helper=POWER:COMMANDS
 down n
-press q 80
+press k 80
 up n
 wait 80
 expect_selected_text powerMenu=Exit
@@ -27,7 +27,7 @@ press a 80
 wait 120
 expect_selected_text debug=Audio Input Monitor
 down n
-press q 80
+press k 80
 up n
 wait 120
 expect_selected_text helper=DEBUG:MAP
@@ -35,7 +35,7 @@ press d 80
 wait 120
 expect_selected_text helper=DEBUG:COMMANDS
 down n
-press q 80
+press k 80
 up n
 wait 80
 expect_selected_text debug=Audio Input Monitor

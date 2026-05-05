@@ -132,7 +132,7 @@ The producer persistence pair creates a multi-instrument project, saves it, rela
 | L | `m` |
 | R | `n` |
 | Start | `s` |
-| Select | `q` |
+| Select / FN | `k` |
 | Power menu | `p` |
 
 In skin mode, these controls can also be clicked directly on the device shell.
@@ -162,7 +162,7 @@ press r 80
 
 # hold/release
 down m
-press q 80
+press k 80
 up m
 
 # click x y duration-ms

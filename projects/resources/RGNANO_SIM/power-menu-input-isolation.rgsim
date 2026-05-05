@@ -1,10 +1,10 @@
 # The power menu must be isolated from tracker controls.
-# Select stays KEY_SELECT=q; Power is KEY_POWER=p in the simulator.
+# Select matches RG Nano FN/Select (KEY_SELECT=k); Power stays KEY_POWER=p in the simulator.
 route boot.new_project_random
 expect_view song
 dump_state after boot
 reset_audio_stats
-press q 80
+press k 80
 wait 120
 expect_view song
 expect_audio_silence 0

@@ -2,7 +2,7 @@
 
 # Boot project selector opens as a modal before a song is loaded.
 down n
-press q 80
+press k 80
 up n
 wait 120
 screenshot_app context-overlay-modal-projects-map.bmp
@@ -15,7 +15,7 @@ screenshot_app context-overlay-modal-projects-commands.bmp
 expect_screen_text COMMANDS
 expect_screen_text A+B delete project
 down n
-press q 80
+press k 80
 up n
 wait 80
 
@@ -25,7 +25,7 @@ wait 80
 press a 80
 wait 120
 down n
-press q 80
+press k 80
 up n
 wait 120
 screenshot_app context-overlay-modal-new-song-map.bmp
@@ -36,7 +36,7 @@ wait 120
 screenshot_app context-overlay-modal-new-song-commands.bmp
 expect_screen_text A Random makes name
 down n
-press q 80
+press k 80
 up n
 wait 80
 
