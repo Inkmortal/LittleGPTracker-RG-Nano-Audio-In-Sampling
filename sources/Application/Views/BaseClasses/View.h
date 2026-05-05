@@ -154,6 +154,7 @@ class View : public Observable {
     void drawPlaybackScope();
     void drawNotes();
     void drawMiniMeters();
+    void drawMiniWaveform(bool force = false);
 
   public: // temp hack for modl windo constructors
     GUIWindow &w_;

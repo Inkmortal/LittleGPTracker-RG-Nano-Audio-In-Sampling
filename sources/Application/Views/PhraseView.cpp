@@ -29,7 +29,6 @@ PhraseView::PhraseView(GUIWindow &w, ViewData *viewData)
     : View(w, viewData), cmdEdit_("edit", FCC_EDIT, 0) {
     phrase_ = viewData_->song_->phrase_;
     lastPlayingPos_ = 0;
-    lastMiniWaveformDrawMs_ = 0;
     GUIPoint pos(0, 10);
     cmdEditField_ =
         new UIBigHexVarField(pos, cmdEdit_, 4, "%4.4X", 0, 0xFFFF, 16, true);
@@ -1466,7 +1465,7 @@ void PhraseView::DrawView() {
 
     drawMap();
     drawNotes();
-    drawMiniWaveform(true);
+    View::drawMiniWaveform(true);
 
     Player *player = Player::GetInstance();
     if (player->IsRunning()) {
@@ -1483,7 +1482,7 @@ void PhraseView::OnPlayerUpdate(PlayerEventType eventType, unsigned int tick) {
 
     GUITextProperties props;
     drawNotes();
-    drawMiniWaveform(eventType == PET_STOP);
+    View::drawMiniWaveform(eventType == PET_STOP);
 
     GUIPoint anchor = GetAnchor();
     GUIPoint pos = anchor;
@@ -1564,112 +1563,6 @@ void PhraseView::OnPlayerUpdate(PlayerEventType eventType, unsigned int tick) {
         }
     */
 };
-
-void PhraseView::drawMiniWaveform(bool force) {
-#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
-    Player *player = Player::GetInstance();
-    unsigned int now = SDL_GetTicks();
-    if (!force && lastMiniWaveformDrawMs_ != 0 &&
-        now - lastMiniWaveformDrawMs_ < 33) {
-        return;
-    }
-    lastMiniWaveformDrawMs_ = now;
-
-    SDLGUIWindowImp *imp = (SDLGUIWindowImp *)w_.GetImpWindow();
-    MixerService *mixer = MixerService::GetInstance();
-    const int x = 0;
-    const int y = 26;
-    const int width = 240;
-    const int height = 12;
-    const int mid = y + (height / 2);
-    const int columns = AudioMixer::WAVEFORM_SIZE;
-    GUIColor scopeBackground(0x1D, 0x0A, 0x1F);
-    GUIColor scopeTrace(0xDB, 0x33, 0xDB);
-    GUIColor scopeCenter(0x5E, 0x24, 0x62);
-
-    imp->SetColor(scopeBackground);
-    GUIRect clear(x, y, x + width, y + height);
-    imp->DrawRect(clear);
-
-    if (!player->IsRunning()) {
-        return;
-    }
-
-    int peakAbs = 1;
-    for (int i = 0; i < columns; i++) {
-        int sample = mixer->GetMasterWaveformSample(i);
-        int absSample = sample < 0 ? -sample : sample;
-        if (absSample > peakAbs) {
-            peakAbs = absSample;
-        }
-    }
-    int gain = (peakAbs < 110) ? ((110 * 100) / peakAbs) : 100;
-    if (gain > 620) {
-        gain = 620;
-    }
-
-    imp->SetColor(scopeCenter);
-    for (int col = 0; col < width; col += 12) {
-        GUIRect center(x + col, mid, x + col + 2, mid + 1);
-        imp->DrawRect(center);
-    }
-
-    for (int col = 0; col < width; col++) {
-        int scaled = (col * (columns - 1) * 256) / (width - 1);
-        int sampleIndex = scaled / 256;
-        int frac = scaled - (sampleIndex * 256);
-        int nextIndex = sampleIndex + 1;
-        if (nextIndex >= columns) nextIndex = columns - 1;
-        int sample = mixer->GetMasterWaveformSample(sampleIndex);
-        int nextSample = mixer->GetMasterWaveformSample(nextIndex);
-        int smoothed = sample + (((nextSample - sample) * frac) / 256);
-        int waveY = mid - ((smoothed * gain * (height / 2 - 1)) / 10000);
-        if (waveY < y + 1) {
-            waveY = y + 1;
-        }
-        if (waveY >= y + height - 1) {
-            waveY = y + height - 2;
-        }
-
-        int top = waveY;
-        int bottom = waveY;
-        if (col > 0) {
-            int prevScaled = ((col - 1) * (columns - 1) * 256) / (width - 1);
-            int prevIndex = prevScaled / 256;
-            int prevFrac = prevScaled - (prevIndex * 256);
-            int prevNextIndex = prevIndex + 1;
-            if (prevNextIndex >= columns) prevNextIndex = columns - 1;
-            int prevSample = mixer->GetMasterWaveformSample(prevIndex);
-            int prevNextSample = mixer->GetMasterWaveformSample(prevNextIndex);
-            int prevSmoothed =
-                prevSample + (((prevNextSample - prevSample) * prevFrac) / 256);
-            int prevY = mid - ((prevSmoothed * gain * (height / 2 - 1)) / 10000);
-            if (prevY < y + 1) prevY = y + 1;
-            if (prevY >= y + height - 1) prevY = y + height - 2;
-
-            int delta = prevY > waveY ? prevY - waveY : waveY - prevY;
-            if (delta <= 3) {
-                top = prevY < waveY ? prevY : waveY;
-                bottom = prevY > waveY ? prevY : waveY;
-            } else if (prevY < waveY) {
-                top = waveY - 2;
-            } else {
-                bottom = waveY + 3;
-            }
-        }
-        if (top < y + 1) {
-            top = y + 1;
-        }
-        if (bottom >= y + height - 1) {
-            bottom = y + height - 2;
-        }
-
-        imp->SetColor(scopeTrace);
-        GUIRect wave(x + col, top, x + col + 1, bottom + 1);
-        imp->DrawRect(wave);
-    }
-#endif
-}
 
 void PhraseView::printHelpLegend(FourCC command, GUITextProperties props) {
     SetColor(CD_NORMAL);

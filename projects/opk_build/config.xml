@@ -14,8 +14,8 @@
 	<KEY_LSHOULDER value="m" />
 	<KEY_RSHOULDER value="n" />
 	<KEY_START value="s" />
-	<!-- FunKey/RG Nano OS maps FN/Select to KEY_K. MENU/Power sends KEY_Q. -->
-	<KEY_SELECT value="k" />
+	<!-- This RG Nano OS path reports physical FN/Select as KEY_O. -->
+	<KEY_SELECT value="o" />
 	<KEY_POWER value="q" />
 	<KEYDELAY value="200"/>
 	<KEYREPEAT value="100" />

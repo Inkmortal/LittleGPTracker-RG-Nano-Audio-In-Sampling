@@ -1026,6 +1026,7 @@ void SongView::DrawView() {
     drawMap();
     drawNotes();
     drawMiniMeters();
+    drawMiniWaveform(true);
 
     if (player->IsRunning()) {
         OnPlayerUpdate(PET_UPDATE);
@@ -1042,6 +1043,7 @@ void SongView::DrawView() {
 void SongView::OnPlayerUpdate(PlayerEventType eventType, unsigned int tick) {
 
     Player *player = Player::GetInstance();
+    drawMiniWaveform(eventType == PET_STOP);
 
     GUIPoint anchor = GetAnchor();
     GUIPoint pos = anchor;

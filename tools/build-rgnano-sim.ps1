@@ -17,5 +17,5 @@ if ($resolvedProjects -match '^([A-Za-z]):\\(.*)$') {
   throw "Cannot convert project path for MSYS2: $resolvedProjects"
 }
 
-& $bash -lc "cd '$msysProjects' && PATH=/usr/bin:/mingw32/bin make PLATFORM=RGNANO_SIM -j2"
+& $bash -lc "cd '$msysProjects' && PATH=/mingw32/bin:/usr/bin make PLATFORM=RGNANO_SIM PREFIX=/mingw32/bin/ -j2"
 exit $LASTEXITCODE

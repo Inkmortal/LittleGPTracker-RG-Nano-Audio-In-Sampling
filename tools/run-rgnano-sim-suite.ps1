@@ -60,6 +60,11 @@ $suite = @(
     Args = @("-ResetLastProject", "-SeedLofiFixture", "-Skin")
   },
   @{
+    Name = "song-mini-waveform-workflow"
+    Script = "song-mini-waveform-workflow.rgsim"
+    Args = @("-ResetLastProject", "-SeedLofiFixture", "-Skin")
+  },
+  @{
     Name = "note-spelling-workflow"
     Script = "note-spelling-workflow.rgsim"
     Args = @("-ResetLastProject")

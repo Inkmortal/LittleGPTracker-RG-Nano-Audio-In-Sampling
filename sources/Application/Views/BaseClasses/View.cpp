@@ -5,6 +5,7 @@
 #include "Application/Utils/char.h"
 #include "Application/AppWindow.h"
 #include "Application/Model/Config.h"
+#include "Adapters/SDL/GUI/SDLGUIWindowImp.h"
 #include "ModalView.h"
 #include <string.h>
 
@@ -500,6 +501,97 @@ void View::drawMiniMeters() {
 		}
 		x+=3;
 	}
+}
+
+void View::drawMiniWaveform(bool force) {
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+	if (!ultraCompactLayout_) {
+		return;
+	}
+
+	Player *player = Player::GetInstance();
+	unsigned int now = SDL_GetTicks();
+	static unsigned int lastDrawMs = 0;
+	if (!force && lastDrawMs != 0 && now - lastDrawMs < 33) {
+		return;
+	}
+	lastDrawMs = now;
+
+	SDLGUIWindowImp *imp = (SDLGUIWindowImp *)w_.GetImpWindow();
+	MixerService *mixer = MixerService::GetInstance();
+	GUIRect rect = w_.GetRect();
+	const int x = 0;
+	const int width = rect.Width();
+	const int height = 16;
+	const int y = rect.Height() - height;
+	const int mid = y + (height / 2);
+	const int columns = AudioMixer::WAVEFORM_SIZE;
+	GUIColor scopeBackground(0x1D, 0x0A, 0x1F);
+	GUIColor scopeTrace(0xDB, 0x33, 0xDB);
+	GUIColor scopeCenter(0x5E, 0x24, 0x62);
+
+	imp->SetColor(scopeBackground);
+	GUIRect clear(x, y, x + width, y + height);
+	imp->DrawRect(clear);
+
+	if (!player || !player->IsRunning()) {
+		return;
+	}
+
+	int peakAbs = 1;
+	for (int i = 0; i < columns; i++) {
+		int sample = mixer->GetMasterWaveformSample(i);
+		int absSample = sample < 0 ? -sample : sample;
+		if (absSample > peakAbs) {
+			peakAbs = absSample;
+		}
+	}
+	int gain = (peakAbs < 110) ? ((110 * 100) / peakAbs) : 100;
+	if (gain > 620) {
+		gain = 620;
+	}
+
+	imp->SetColor(scopeCenter);
+	for (int col = 0; col < width; col += 12) {
+		GUIRect center(x + col, mid, x + col + 2, mid + 1);
+		imp->DrawRect(center);
+	}
+
+	int prevY = mid;
+	for (int col = 0; col < width; col++) {
+		int scaled = (col * (columns - 1) * 256) / (width - 1);
+		int sampleIndex = scaled / 256;
+		int frac = scaled - (sampleIndex * 256);
+		int nextIndex = sampleIndex + 1;
+		if (nextIndex >= columns) {
+			nextIndex = columns - 1;
+		}
+		int sample = mixer->GetMasterWaveformSample(sampleIndex);
+		int nextSample = mixer->GetMasterWaveformSample(nextIndex);
+		int smoothed = sample + (((nextSample - sample) * frac) / 256);
+		int waveY = mid - ((smoothed * gain * (height / 2 - 2)) / 10000);
+		if (waveY < y + 2) {
+			waveY = y + 2;
+		}
+		if (waveY >= y + height - 2) {
+			waveY = y + height - 3;
+		}
+
+		int top = waveY < prevY ? waveY : prevY;
+		int bottom = waveY > prevY ? waveY : prevY;
+		if (top < y + 2) {
+			top = y + 2;
+		}
+		if (bottom >= y + height - 2) {
+			bottom = y + height - 3;
+		}
+
+		imp->SetColor(scopeTrace);
+		GUIRect wave(x + col, top, x + col + 1, bottom + 1);
+		imp->DrawRect(wave);
+		prevY = waveY;
+	}
+#endif
 }
 
 void View::DoModal(ModalView *view,ModalViewCallback cb) {

@@ -39,6 +39,7 @@ Key mappings are optimized for the RG Nano button layout:
 - Physical FN/Select is LGPT Select.
 - Physical Menu/Power opens the LGPT app menu.
 - **R + FN/Select** opens the LGPT helper/minimap from every LGPT screen.
+- Hardware logs report FN/Select as `KEY_O` on this RG Nano OS path; the app config maps that to LGPT Select.
 
 ## Configuration
 
