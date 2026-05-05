@@ -59,6 +59,7 @@ Hold `R` and tap a D-pad direction to move between major screens:
 Page 1 is the minimap. It shows:
 
 - the current screen name
+- the current screen highlighted inside the screen map
 - the main Song > Chain > Phrase relationship
 - where to navigate next
 - the main edit gesture for the current screen
@@ -71,7 +72,7 @@ Page 2 is the command page. It shows:
 - short descriptions for each input
 - playback/context hints
 
-On the Instrument screen, the helper follows the current sample lab page. Source, Shape, Filter, Loop, and Motion each show their own compact controls instead of one generic instrument reminder.
+On the Instrument screen, the helper follows the current sample lab page. Source, Shape, Filter, Loop, and Motion each show their own compact controls instead of one generic instrument reminder. Source and Loop explicitly list the trim controls: `L + Up/Down` chooses `S`, `L`, or `E`; `L + A + Left/Right` nudges the active marker; the normal field list below the waveform remains available for exact start, loop-start, and end values.
 
 Press `R + Select` again to close the helper. While the helper is open, normal inputs are blocked so you can read without accidentally changing music, confirming a dialog, or deleting a project.
 
@@ -199,7 +200,7 @@ The Instrument screen now splits sample design into five compact lab pages. Use 
 | Loop | Loop mode, slices, sample start, loop start, loop end. |
 | Motion | Instrument table automation and feedback movement. |
 
-On the Source and Loop pages, the waveform has three editable markers: `START`, `LSTART`, and `END`. The tiny waveform labels them compactly as `S`, `L`, and `E` so the marker text does not cover the audio shape. Use `L + Up/Down` to choose the active marker, then `L + A + Left/Right` to nudge it on the waveform. The normal field list remains available below the visual panel for exact parameter editing.
+On the Source and Loop pages, the waveform has three editable markers: `START`, `LSTART`, and `END`. The tiny waveform labels them compactly as `S`, `L`, and `E` so the marker text does not cover the audio shape. Use `L + Up/Down` to choose the active marker, then `L + A + Left/Right` to nudge it on the waveform. The normal field list remains available below the visual panel for exact parameter editing. The waveform itself stays magenta; bright white is reserved for the active marker so the trim selection is easier to read on the tiny screen.
 
 To check whether a sample still feels musical after pitch shifts, hold `R + A` and tap `Left`, `Up`, or `Right` for low, root, or high audition notes. `R + A + Down` stops that audition. This keeps sample design on the Instrument screen instead of forcing a trip back to Phrase every time you tweak root note, loop points, filter, or volume.
 

@@ -165,16 +165,104 @@ void View::drawMap() {
 	}//!minilayout
 }
 
+void View::drawOverlayLine(int x, int y, int width, const char *text,
+                           GUITextProperties &props) {
+	if (width<=0) return;
+	char buffer[40];
+	int maxWidth=width;
+	if (maxWidth>38) maxWidth=38;
+	int len=text ? (int)strlen(text) : 0;
+	if (len>maxWidth) len=maxWidth;
+	if (len>0) {
+		strncpy(buffer,text,len);
+	}
+	for (int i=len;i<maxWidth;i++) {
+		buffer[i]=' ';
+	}
+	buffer[maxWidth]=0;
+	DrawString(x,y,buffer,props);
+}
+
+void View::drawContextMap(int x, int y, int width, GUITextProperties &props) {
+	const char *row1="Project     Groove";
+	const char *row2="   |           |";
+	const char *row3="Song > Chain > Phrase";
+	const char *row4="  |       |       |";
+	const char *row5="Mixer   Table   Instr";
+	drawOverlayLine(x,y,width,row1,props);
+	drawOverlayLine(x,y+1,width,row2,props);
+	drawOverlayLine(x,y+2,width,row3,props);
+	drawOverlayLine(x,y+3,width,row4,props);
+	drawOverlayLine(x,y+4,width,row5,props);
+
+	int hx=x;
+	int hy=y+2;
+	const char *label="Song";
+	switch(viewType_) {
+		case VT_PROJECT:
+			hx=x;
+			hy=y;
+			label="Project";
+			break;
+		case VT_GROOVE:
+			hx=x+12;
+			hy=y;
+			label="Groove";
+			break;
+		case VT_CHAIN:
+			hx=x+7;
+			label="Chain";
+			break;
+		case VT_PHRASE:
+			hx=x+15;
+			label="Phrase";
+			break;
+		case VT_INSTRUMENT:
+			hx=x+16;
+			hy=y+4;
+			label="Instr";
+			break;
+		case VT_MIXER:
+			hx=x;
+			hy=y+4;
+			label="Mixer";
+			break;
+		case VT_TABLE:
+			hx=x+8;
+			hy=y+4;
+			label="Table";
+			break;
+		case VT_TABLE2:
+			hx=x+16;
+			hy=y+4;
+			label="Instr";
+			break;
+		default:
+			hx=x;
+			label="Song";
+			break;
+	}
+	if (hx+((int)strlen(label))>x+width) {
+		hx=x+width-(int)strlen(label);
+	}
+	if (hx<x) hx=x;
+	SetColor(CD_HILITE1);
+	props.invert_=true;
+	drawOverlayLine(hx,hy,(int)strlen(label),label,props);
+	props.invert_=false;
+	SetColor(CD_NORMAL);
+}
+
 void View::drawContextOverlay() {
 	GUITextProperties props;
 	props.invert_=false;
 	GUIRect rect=w_.GetRect();
 	int width=rect.Width()/8;
 	int height=rect.Height()/8;
-	int x=ultraCompactLayout_ ? 1 : 6;
-	int y=ultraCompactLayout_ ? 2 : 3;
-	int boxW=ultraCompactLayout_ ? width-2 : width-12;
-	int boxH=ultraCompactLayout_ ? height-4 : height-6;
+	int x=ultraCompactLayout_ ? 0 : 6;
+	int y=ultraCompactLayout_ ? 0 : 3;
+	int boxW=ultraCompactLayout_ ? width : width-12;
+	int boxH=ultraCompactLayout_ ? height : height-6;
 	if (boxW<24) boxW=24;
 	if (boxH<18) boxH=18;
 
@@ -328,46 +416,46 @@ void View::drawContextOverlay() {
 	}
 	CustomizeContextOverlay(name,where,edit,field,cmd1,cmd2,cmd3,cmd4,cmd5,cmd6,cmd7);
 
+	int innerX=x+1;
+	int innerW=boxW-2;
+	if (innerW>28) innerW=28;
+
 	SetColor(CD_HILITE2);
-	DrawString(x+2,y+1,name,props);
+	drawOverlayLine(innerX,y+1,innerW,name,props);
 	SetColor(CD_NORMAL);
 	if (contextOverlayPage_ < 0 || contextOverlayPage_ > 1) {
 		contextOverlayPage_ = 0;
 	}
 	if (contextOverlayPage_ == 0) {
-		DrawString(x+2,y+3,"MAP",props);
-		DrawString(x+2,y+4,"Project",props);
-		DrawString(x+2,y+5,"  |",props);
-		DrawString(x+2,y+6,"Song>Chain>Phrase",props);
-		DrawString(x+2,y+7,"             |",props);
-		DrawString(x+2,y+8,"          Instrument",props);
-		DrawString(x+2,y+9,"          Table",props);
-		DrawString(x+2,y+10,"Mixer< Song  Groove",props);
+		drawOverlayLine(innerX,y+3,innerW,"MAP",props);
+		drawContextMap(innerX,y+4,innerW,props);
 
 		SetColor(CD_HILITE1);
-		DrawString(x+2,y+12,field,props);
+		drawOverlayLine(innerX,y+11,innerW,field,props);
 		SetColor(CD_NORMAL);
-		DrawString(x+2,y+14,where,props);
-		DrawString(x+2,y+15,edit,props);
+		drawOverlayLine(innerX,y+13,innerW,where,props);
+		drawOverlayLine(innerX,y+14,innerW,edit,props);
+		SetColor(CD_HILITE2);
+		drawOverlayLine(innerX,y+16,innerW,"Down: command list",props);
 	} else {
-		DrawString(x+2,y+3,"COMMANDS",props);
+		drawOverlayLine(innerX,y+3,innerW,"COMMANDS",props);
 		SetColor(CD_HILITE1);
-		DrawString(x+2,y+4,field,props);
+		drawOverlayLine(innerX,y+4,innerW,field,props);
 		SetColor(CD_NORMAL);
-		DrawString(x+2,y+6,cmd1,props);
-		DrawString(x+2,y+7,cmd2,props);
-		DrawString(x+2,y+8,cmd3,props);
-		DrawString(x+2,y+9,cmd4,props);
-		DrawString(x+2,y+10,cmd5,props);
-		DrawString(x+2,y+11,cmd6,props);
-		DrawString(x+2,y+12,cmd7,props);
+		drawOverlayLine(innerX,y+6,innerW,cmd1,props);
+		drawOverlayLine(innerX,y+7,innerW,cmd2,props);
+		drawOverlayLine(innerX,y+8,innerW,cmd3,props);
+		drawOverlayLine(innerX,y+9,innerW,cmd4,props);
+		drawOverlayLine(innerX,y+10,innerW,cmd5,props);
+		drawOverlayLine(innerX,y+11,innerW,cmd6,props);
+		drawOverlayLine(innerX,y+12,innerW,cmd7,props);
 		SetColor(CD_HILITE1);
-		DrawString(x+2,y+14,where,props);
+		drawOverlayLine(innerX,y+14,innerW,where,props);
 		SetColor(CD_NORMAL);
-		DrawString(x+2,y+15,edit,props);
+		drawOverlayLine(innerX,y+15,innerW,edit,props);
 	}
 	SetColor(CD_HILITE2);
-	DrawString(x+2,y+boxH-2,"Up/Dn page R+Sel close",props);
+	drawOverlayLine(innerX,y+boxH-2,innerW,"Up/Dn page R+Sel close",props);
 	SetColor(CD_NORMAL);
 }
 

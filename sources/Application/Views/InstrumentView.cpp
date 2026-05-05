@@ -562,7 +562,7 @@ void InstrumentView::drawSampleWaveform(SampleInstrument *instrument, int x, int
 		if (top<y+3) top=y+3;
 		if (bottom>y+height-4) bottom=y+height-4;
 		if (bottom<top) bottom=top;
-		imp->SetColor((bottom-top)>drawableHeight/2?traceHot:trace);
+		imp->SetColor(trace);
 		GUIRect wave(x+2+col,top,x+3+col,bottom+1);
 		imp->DrawRect(wave);
 	}
@@ -1089,7 +1089,17 @@ void InstrumentView::CustomizeContextOverlay(const char *&name, const char *&whe
 	if (getInstrumentType()!=IT_SAMPLE) {
 		return;
 	}
-	name="INSTR";
+	if (labPage_==0) {
+		name="INSTR SOURCE";
+	} else if (labPage_==1) {
+		name="INSTR SHAPE";
+	} else if (labPage_==2) {
+		name="INSTR FILTER";
+	} else if (labPage_==3) {
+		name="INSTR LOOP";
+	} else {
+		name="INSTR MOTION";
+	}
 	where="R+Left Phrase";
 	cmd1="Dpad choose field";
 	cmd3="A+Dpad edit value";
@@ -1098,35 +1108,49 @@ void InstrumentView::CustomizeContextOverlay(const char *&name, const char *&whe
 	cmd6="R+Left Phrase";
 	cmd7="R+Select close";
 	if (labPage_==0) {
-		field="Source sample/root";
-		edit="Sample root slices";
-		cmd2="A import/listen sample";
-		cmd3="Select root detect";
-		cmd6="L+UD mark S/L/E";
-		cmd7="L+A+LR nudge mark";
+		field="Source: sample/root";
+		edit="A sample, Sel root";
+		cmd1="Dpad choose sample/root";
+		cmd2="A on sample: import";
+		cmd3="Sel on root: suggest/use";
+		cmd4="L+UD choose S/L/E mark";
+		cmd5="L+A+LR nudge mark";
+		cmd6="R+A L/U/R audition";
+		cmd7="R+A Down stop sound";
 	} else if (labPage_==1) {
-		field="Shape vol pan grit";
-		edit="Volume pan texture";
-		cmd2="A+Dpad vol/pan";
-		cmd3="Crush/drive/down";
+		field="Shape: level/pan/grit";
+		edit="A+Dpad changes values";
+		cmd1="Dpad choose value";
+		cmd2="A+LR coarse/fine edit";
+		cmd3="A+UD larger changes";
+		cmd4="L+Left/Right page";
+		cmd5="R+A L/U/R audition";
 	} else if (labPage_==2) {
-		field="Filter cutoff/reso";
-		edit="Tone filter type";
-		cmd2="A+Dpad cut/res";
-		cmd3="Type mode atten";
+		field="Filter: cutoff/reso";
+		edit="Tone shaping";
+		cmd1="Dpad choose filter row";
+		cmd2="A+Dpad edit value";
+		cmd3="Cut/res/type/mode";
+		cmd4="L+Left/Right page";
+		cmd5="R+A L/U/R audition";
 	} else if (labPage_==3) {
-		field="Loop S/L/E markers";
-		edit="Trim and loop window";
-		cmd2="L+UD mark S/L/E";
-		cmd3="L+A+LR nudge mark";
-		cmd6="A+Dpad exact values";
-		cmd7="Select root after trim";
+		field="Loop: trim window";
+		edit="S=start L=loop E=end";
+		cmd1="L+UD choose S/L/E mark";
+		cmd2="L+A+LR nudge mark";
+		cmd3="Dpad to start/lstart/end";
+		cmd4="A+Dpad exact values";
+		cmd5="Sel root from trim";
+		cmd6="R+A L/U/R audition";
+		cmd7="R+A Down stop sound";
 	} else {
-		field="Motion table/feedback";
-		edit="Table automation";
-		cmd2="A+Dpad table vals";
-		cmd3="Table controls motion";
-		cmd5="R+Down inst table";
+		field="Motion: table/fb";
+		edit="Automation source";
+		cmd1="Dpad choose value";
+		cmd2="A+Dpad edit value";
+		cmd3="A on table: make/open";
+		cmd4="R+Down inst table";
+		cmd5="L+Left/Right page";
 	}
 }
 

@@ -19,7 +19,7 @@ The simulator must preserve LGPT's button-mask behavior. `AppWindow` keeps a liv
 | L | `m` | `m` |
 | R | `n` | `n` |
 | Start | `s` | `s` |
-| Select / FN | `k` | `k` |
+| Select / FN | `k` in simulator, `o` on current hardware OS path | `k` in simulator |
 | App power menu | `q` on hardware, `p` in simulator | `p` in simulator |
 
 Use `down <key>`, `press <key>`, and `up <key>` in scripts to make held combos exact. For example, `R + Down` is:
@@ -30,13 +30,13 @@ press d 80
 up n
 ```
 
-The RG Nano OS input map sends physical `FN`/Select as `KEY_K`; physical Menu/Power sends `KEY_Q`. Hardware and simulator builds therefore map LGPT `Select` to `k`. Hardware maps the app power menu to `q`; the simulator keeps `p` for its fake power/debug overlay so automated scripts can exercise that menu without colliding with desktop typing.
+The simulator maps LGPT `Select` to `k`. The current RG Nano hardware OS path logs physical `FN`/Select as `KEY_O`, so the hardware OPK config maps LGPT `Select` to `o`. Hardware maps the app power menu to `q`; the simulator keeps `p` for its fake power/debug overlay so automated scripts can exercise that menu without colliding with desktop typing.
 
 ## Universal Context Overlay
 
-`R + Select` opens a small context/helper overlay from every visible screen: tracker views, modal dialogs, and the boot project selector. On real hardware this means hold `R`, tap physical `FN`/Select, then release `R`. The overlay is meant for power-user navigation, not full manual reading.
+`R + Select` opens a full-screen context/helper overlay from every visible screen: tracker views, modal dialogs, and the boot project selector. On real hardware this means hold `R`, tap physical `FN`/Select, then release `R`. The overlay is meant for power-user navigation, not full manual reading.
 
-Page 1 is the minimap: it shows the current screen name, the core LGPT screen chain, the fastest exits from the current screen, and the primary editing gesture for that screen.
+Page 1 is the minimap: it shows the current screen name, a highlighted current screen position, the core LGPT screen chain, the fastest exits from the current screen, and the primary editing gesture for that screen.
 
 Press `Up` or `Down` while the helper is open to switch to page 2. Page 2 is the command helper for the current screen: it lists the highest-value inputs and short descriptions for exactly where the producer is standing. Use `R + Select` again to close it.
 

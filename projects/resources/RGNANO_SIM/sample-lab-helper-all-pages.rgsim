@@ -23,13 +23,15 @@ up n
 wait 100
 expect_screen_text INSTR
 expect_screen_text MAP
-expect_screen_text Source sample/root
+expect_screen_text Source: sample/root
+screenshot_app helper-source-map.bmp
 press d 80
 wait 80
 expect_screen_text COMMANDS
-expect_screen_text A import/listen sample
-expect_screen_text Select root detect
-expect_screen_text L+UD mark S/L/E
+expect_screen_text A on sample: import
+expect_screen_text Sel on root: suggest/use
+expect_screen_text L+UD choose S/L/E mark
+screenshot_app helper-source-commands.bmp
 down n
 press k 80
 up n
@@ -43,10 +45,12 @@ down n
 press k 80
 up n
 wait 100
-expect_screen_text Shape vol pan grit
+expect_screen_text Shape: level/pan/grit
+screenshot_app helper-shape-map.bmp
 press d 80
 wait 80
-expect_screen_text Crush/drive/down
+expect_screen_text A+UD larger changes
+screenshot_app helper-shape-commands.bmp
 down n
 press k 80
 up n
@@ -60,10 +64,12 @@ down n
 press k 80
 up n
 wait 100
-expect_screen_text Filter cutoff/reso
+expect_screen_text Filter: cutoff/reso
+screenshot_app helper-filter-map.bmp
 press d 80
 wait 80
-expect_screen_text Type mode atten
+expect_screen_text Cut/res/type/mode
+screenshot_app helper-filter-commands.bmp
 down n
 press k 80
 up n
@@ -77,11 +83,13 @@ down n
 press k 80
 up n
 wait 100
-expect_screen_text Loop S/L/E markers
+expect_screen_text Loop: trim window
+screenshot_app helper-loop-map.bmp
 press d 80
 wait 80
-expect_screen_text L+A+LR nudge mark
-expect_screen_text Select root after trim
+expect_screen_text Dpad to start/lstart/end
+expect_screen_text Sel root from trim
+screenshot_app helper-loop-commands.bmp
 down n
 press k 80
 up n
@@ -95,11 +103,13 @@ down n
 press k 80
 up n
 wait 100
-expect_screen_text Motion table/feedback
+expect_screen_text Motion: table/fb
+screenshot_app helper-motion-map.bmp
 press d 80
 wait 80
-expect_screen_text Table controls motion
+expect_screen_text A on table: make/open
 expect_screen_text R+Down inst table
+screenshot_app helper-motion-commands.bmp
 down n
 press k 80
 up n

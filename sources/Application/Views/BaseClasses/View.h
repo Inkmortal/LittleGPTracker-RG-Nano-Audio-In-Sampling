@@ -155,6 +155,9 @@ class View : public Observable {
     void drawNotes();
     void drawMiniMeters();
     void drawMiniWaveform(bool force = false);
+    void drawOverlayLine(int x, int y, int width, const char *text,
+                         GUITextProperties &props);
+    void drawContextMap(int x, int y, int width, GUITextProperties &props);
 
   public: // temp hack for modl windo constructors
     GUIWindow &w_;
