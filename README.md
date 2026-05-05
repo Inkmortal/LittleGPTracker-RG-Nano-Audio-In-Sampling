@@ -87,6 +87,7 @@ The fork keeps LGPT controls but adds RG Nano screen/layout behavior.
 | Trim-aware root suggestion | `Select` on Instrument Source `root` |
 | Sample trim marker select | `L + Up/Down` on Instrument Source/Loop |
 | Sample trim marker nudge | `L + A + Left/Right` on Instrument Source/Loop |
+| Preview current sample trim | `Start` on Instrument sample pages |
 | Play/stop current context | `Start` |
 | Play/stop in song context | `R + Start` on Chain/Phrase-style screens |
 | App exit/debug menu | Menu/Power button |

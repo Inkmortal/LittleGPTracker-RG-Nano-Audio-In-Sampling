@@ -1,0 +1,35 @@
+# Start on Instrument should preview the current sample instrument trim window.
+route boot.new_project_random
+expect_view song
+press a 80
+wait 100
+route song.to_chain
+press a 80
+wait 100
+route chain.to_phrase
+press a 80
+wait 100
+route phrase.to_instrument
+expect_view instrument
+
+sim_import_sample_to_instrument 0 wuxia-guzheng.wav
+sim_set_sample_trim 0 1200 5200
+expect_instrument_sample 0 wuxia-guzheng.wav
+expect_screen_text SOURCE
+
+reset_audio_stats
+start_audio_capture instrument-start-trim-preview.wav
+press s 80
+wait 500
+expect_player_running yes
+expect_play_mode audition
+expect_screen_text AUDITION
+expect_audio_activity 32
+expect_audio_capture_bytes 80000
+press s 80
+wait 160
+expect_player_running no
+end_audio_capture
+expect_view instrument
+expect_no_error
+quit

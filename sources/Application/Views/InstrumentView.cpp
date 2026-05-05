@@ -864,6 +864,17 @@ void InstrumentView::ProcessButtonMask(unsigned short mask,bool pressed) {
 		}
 	}
 
+	if (getInstrumentType()==IT_SAMPLE && mask==EPBM_START) {
+		Player *player=Player::GetInstance();
+		if (player && player->IsRunning() && viewData_->playMode_==PM_AUDITION) {
+			player->Stop();
+		} else {
+			auditionSamplePitch(0);
+		}
+		isDirty_=true;
+		return;
+	}
+
 	if (getInstrumentType()==IT_SAMPLE && mask==EPBM_SELECT) {
 		UIIntVarField *field=(UIIntVarField *)GetFocus();
 		if (field && field->GetVariableID()==SIP_ROOTNOTE) {
@@ -1039,7 +1050,7 @@ void InstrumentView::ProcessButtonMask(unsigned short mask,bool pressed) {
                                           viewData_->chainRow_);
                 }
             } else {
-                // No modifier
+				// No modifier
                 if (mask & EPBM_START) {
                     player->OnStartButton(PM_PHRASE, viewData_->songX_, false,
                                           viewData_->chainRow_);
@@ -1115,7 +1126,7 @@ void InstrumentView::CustomizeContextOverlay(const char *&name, const char *&whe
 		cmd3="Sel on root: suggest/use";
 		cmd4="L+UD choose S/L/E mark";
 		cmd5="L+A+LR nudge mark";
-		cmd6="R+A L/U/R audition";
+		cmd6="Start trim preview";
 		cmd7="R+A Down stop sound";
 	} else if (labPage_==1) {
 		field="Shape: level/pan/grit";
@@ -1141,7 +1152,7 @@ void InstrumentView::CustomizeContextOverlay(const char *&name, const char *&whe
 		cmd3="Dpad to start/lstart/end";
 		cmd4="A+Dpad exact values";
 		cmd5="Sel root from trim";
-		cmd6="R+A L/U/R audition";
+		cmd6="Start trim preview";
 		cmd7="R+A Down stop sound";
 	} else {
 		field="Motion: table/fb";

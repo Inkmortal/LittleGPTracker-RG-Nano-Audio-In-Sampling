@@ -213,6 +213,7 @@ The sample workflow starts in `InstrumentView` with focus on the `sample:` field
 | `L + A + Left/Right` | On Source/Loop pages, nudge the active waveform marker. |
 | `R + A + Left/Up/Right` | Audition the current sample low/root/high without leaving the lab page. |
 | `R + A + Down` | Stop the current sample audition. |
+| Start | Preview/stop the current sample trim at root pitch. Loop mode loops the configured loop region. |
 | `Select` on `root` | If `suggest root ###` is already shown, accept it. If no suggestion is shown, analyze the current `START` to `END` trim window and show a new suggestion. |
 | D-pad | Move field focus. |
 | `A + D-pad` | Edit focused parameter. |

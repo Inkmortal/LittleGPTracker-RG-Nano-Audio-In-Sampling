@@ -31,6 +31,7 @@ expect_screen_text COMMANDS
 expect_screen_text A on sample: import
 expect_screen_text Sel on root: suggest/use
 expect_screen_text L+UD choose S/L/E mark
+expect_screen_text Start trim preview
 screenshot_app helper-source-commands.bmp
 down n
 press k 80
@@ -89,6 +90,7 @@ press d 80
 wait 80
 expect_screen_text Dpad to start/lstart/end
 expect_screen_text Sel root from trim
+expect_screen_text Start trim preview
 screenshot_app helper-loop-commands.bmp
 down n
 press k 80

@@ -40,6 +40,11 @@ $suite = @(
     Args = @("-ResetLastProject", "-SeedSampleFixture")
   },
   @{
+    Name = "instrument-start-trim-preview"
+    Script = "instrument-start-trim-preview.rgsim"
+    Args = @("-ResetLastProject", "-SeedLofiFixture", "-Skin")
+  },
+  @{
     Name = "basic-music-workflow"
     Script = "basic-music-workflow.rgsim"
     Args = @("-ResetLastProject")
