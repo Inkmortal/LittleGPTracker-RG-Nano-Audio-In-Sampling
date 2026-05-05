@@ -13,8 +13,8 @@
 	<KEY_LSHOULDER value="m" />
 	<KEY_RSHOULDER value="n" />
 	<KEY_START value="s" />
-	<KEY_SELECT value="q" />
-	<KEY_POWER value="power" />
+	<!-- FunKey/RG Nano OS maps FN/Select to KEY_K. MENU/Power is KEY_Q and stays OS-owned. -->
+	<KEY_SELECT value="k" />
 	<KEYDELAY value="200"/>
 	<KEYREPEAT value="100" />
 	<FONTTYPE  value = '0' />     <!-- '0':original '1':digital '2':monster 'CUSTOM': load custom_font.xml-->

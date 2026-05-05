@@ -14,8 +14,8 @@ The short version: Song chooses chains, chains choose phrases, phrases contain n
 | L | Left shoulder modifier for jumps, chromatic note override, and some clipboard actions. |
 | R | Right shoulder modifier for screen navigation and song-context actions. |
 | Start | Play or stop the current context. |
-| Select | Contextual helper or command picker, depending on where you are. |
-| Power | Global app/power menu. It is intentionally separate from tracker Select. |
+| Select / FN | Contextual helper or command picker, depending on where you are. |
+| Menu / Power | OS menu for system actions such as volume/brightness. LGPT does not own this button on hardware. |
 
 The simulator keyboard mapping is listed in [RGNANO_SIM.md](RGNANO_SIM.md).
 
@@ -54,7 +54,7 @@ Hold `R` and tap a D-pad direction to move between major screens:
 
 ## Universal Helper
 
-`R + Select` opens the universal helper from every visible screen: tracker views, modal dialogs, the Project selector you see before a song is loaded, and the global power/debug menus.
+`R + Select` opens the universal helper from every visible LGPT screen: tracker views, modal dialogs, and the Project selector you see before a song is loaded. On the RG Nano hardware, `Select` means the physical `FN`/Select button; the OS Menu/Power button is not LGPT Select.
 
 Page 1 is the minimap. It shows:
 
@@ -73,7 +73,7 @@ Page 2 is the command page. It shows:
 
 On the Instrument screen, the helper follows the current sample lab page. Source, Shape, Filter, Loop, and Motion each show their own compact controls instead of one generic instrument reminder.
 
-Press `R + Select` again to close the helper. While the helper is open, normal inputs are blocked so you can read without accidentally changing music, confirming a dialog, deleting a project, or moving a power-menu selection.
+Press `R + Select` again to close the helper. While the helper is open, normal inputs are blocked so you can read without accidentally changing music, confirming a dialog, or deleting a project.
 
 ## Playback Scope
 

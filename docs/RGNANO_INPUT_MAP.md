@@ -19,8 +19,8 @@ The simulator must preserve LGPT's button-mask behavior. `AppWindow` keeps a liv
 | L | `m` | `m` |
 | R | `n` | `n` |
 | Start | `s` | `s` |
-| Select | `q` | `q` |
-| Power menu | `p` in simulator, `KEY_POWER=power` on RG Nano | `p` in simulator |
+| Select / FN on RG Nano hardware | `k` on hardware, `q` in simulator | `q` in simulator |
+| OS menu / power | OS-owned on hardware, `p` in simulator | `p` in simulator |
 
 Use `down <key>`, `press <key>`, and `up <key>` in scripts to make held combos exact. For example, `R + Down` is:
 
@@ -30,11 +30,11 @@ press d 80
 up n
 ```
 
-The power menu is intentionally separate from `Select`. `Select` remains an LGPT tracker input, while `KEY_POWER` is a global app/menu input that is swallowed before it reaches tracker playback or note preview handling.
+The RG Nano OS input map sends physical `FN`/Select as `KEY_K`; physical Menu/Power sends `KEY_Q` and belongs to the OS menu. Hardware builds therefore map LGPT `Select` to `k` and do not claim Menu/Power as an app shortcut. The simulator keeps `q` for Select and `p` for its fake power/debug overlay so automated scripts remain easy to type.
 
 ## Universal Context Overlay
 
-`R + Select` opens a small context/helper overlay from every visible screen: tracker views, modal dialogs, the boot project selector, and the global power/debug menus. Hold `R`, tap `Select`, then release `R`. The overlay is meant for power-user navigation, not full manual reading.
+`R + Select` opens a small context/helper overlay from every visible screen: tracker views, modal dialogs, and the boot project selector. On real hardware this means hold `R`, tap physical `FN`/Select, then release `R`. The overlay is meant for power-user navigation, not full manual reading.
 
 Page 1 is the minimap: it shows the current screen name, the core LGPT screen chain, the fastest exits from the current screen, and the primary editing gesture for that screen.
 
@@ -42,7 +42,7 @@ Press `Up` or `Down` while the helper is open to switch to page 2. Page 2 is the
 
 Instrument Lab helper text is page-aware. Source, Shape, Filter, Loop, and Motion each describe their own edits when opened with `R + Select`.
 
-While the overlay is visible, normal inputs are blocked so a producer can check the map without accidentally writing notes, changing chain slots, deleting a project, moving a power-menu selection, or previewing audio. Modal dialogs and global menus have their own helper text, so `R + Select` stays reliable everywhere.
+While the overlay is visible, normal inputs are blocked so a producer can check the map without accidentally writing notes, changing chain slots, deleting a project, or previewing audio. Modal dialogs have their own helper text, so `R + Select` stays reliable everywhere inside LGPT.
 
 ## Playback Scope Label
 

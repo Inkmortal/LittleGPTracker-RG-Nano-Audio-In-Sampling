@@ -19,7 +19,7 @@
 ## Controls
 
 ### Display Modes
-- **L + SELECT**: Toggle between Split-Row and Paged modes
+- **L + FN/Select**: Toggle between Split-Row and Paged modes
   - **Split-Row** (default): See all 8 channels at once, 2 rows per song row
   - **Paged**: Show 4 channels at a time with auto-paging
 
@@ -32,7 +32,10 @@
 
 ### Standard Controls
 See main LGPT documentation for full control reference.
-Key mappings optimized for RG Nano button layout.
+Key mappings are optimized for the RG Nano button layout:
+- Physical FN/Select is LGPT Select.
+- Physical Menu/Power is handled by the RG Nano OS for system actions such as volume and brightness.
+- **R + FN/Select** opens the LGPT helper/minimap from every LGPT screen.
 
 ## Configuration
 
@@ -80,7 +83,7 @@ This is plenty for LGPT! Expect smooth performance with:
    - When you want more visible rows
    - Traditional tracker feel
 
-3. Use L + SELECT to quickly switch modes based on what you're working on!
+3. Use L + FN/Select to quickly switch modes based on what you're working on!
 
 ## Credits
 

@@ -87,7 +87,7 @@ The fork keeps LGPT controls but adds RG Nano screen/layout behavior.
 | Trim-aware root suggestion | `Select` on Instrument Source `root` |
 | Play/stop current context | `Start` |
 | Play/stop in song context | `R + Start` on Chain/Phrase-style screens |
-| Power menu | Power button |
+| OS menu / volume / brightness | Menu/Power button, handled by the RG Nano OS |
 
 The app shows a small playback-scope label on main views: `STOP`, `PLAY:SONG`, `PLAY:CHAIN`, `PLAY:PHR`, `PLAY:LIVE`, or `AUDITION`. Use it to confirm whether you are hearing the full arrangement or only the current chain/phrase.
 
