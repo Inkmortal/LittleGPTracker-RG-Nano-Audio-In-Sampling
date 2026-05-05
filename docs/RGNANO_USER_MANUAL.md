@@ -72,7 +72,7 @@ Page 2 is the command page. It shows:
 - short descriptions for each input
 - playback/context hints
 
-On the Instrument screen, the helper follows the current sample lab page. Source, Shape, Filter, Loop, and Motion each show their own compact controls instead of one generic instrument reminder. Source and Loop explicitly list the trim controls: `L + Up/Down` chooses `S`, `L`, or `E`; `L + A + Left/Right` nudges the active marker; the normal field list below the waveform remains available for exact start, loop-start, and end values.
+On the Instrument screen, the helper follows the current sample lab page. Source, Shape, Filter, Loop, and Motion each show their own compact controls instead of one generic instrument reminder. Source and Loop explicitly list the trim controls. On the Source sample row, `Select` opens sample import, `A + Up/Down` chooses `S`, `L`, or `E`, and `A + Left/Right` nudges the active marker without changing the assigned sample. The shoulder combo still works too: `L + Up/Down` chooses the marker and `L + A + Left/Right` nudges it. The normal field list below the waveform remains available for exact start, loop-start, and end values.
 
 Press `R + Select` again to close the helper. While the helper is open, normal inputs are blocked so you can read without accidentally changing music, confirming a dialog, or deleting a project.
 
@@ -182,7 +182,7 @@ The RG Nano has no built-in microphone. The practical workflow is uploaded sampl
 1. Put `.wav` files in the configured sample folder.
 2. Open Instrument View from Phrase with `R + Right`.
 3. Move to the sample field.
-4. Open sample import.
+4. Press `Select` to open sample import.
 5. Use `Listen` to preview.
 6. Use `Import` to copy the sample into the project.
 
@@ -200,7 +200,7 @@ The Instrument screen now splits sample design into five compact lab pages. Use 
 | Loop | Loop mode, slices, sample start, loop start, loop end. |
 | Motion | Instrument table automation and feedback movement. |
 
-On the Source and Loop pages, the waveform has three editable markers: `START`, `LSTART`, and `END`. The tiny waveform labels them compactly as `S`, `L`, and `E` so the marker text does not cover the audio shape. Use `L + Up/Down` to choose the active marker, then `L + A + Left/Right` to nudge it on the waveform. The normal field list remains available below the visual panel for exact parameter editing. The waveform itself stays magenta; bright white is reserved for the active marker so the trim selection is easier to read on the tiny screen.
+On the Source and Loop pages, the waveform has three editable markers: `START`, `LSTART`, and `END`. The tiny waveform labels them compactly as `S`, `L`, and `E` so the marker text does not cover the audio shape. On Source, keep focus on the `sample` row and use `A + Up/Down` to choose the active marker, then `A + Left/Right` to nudge it. These shortcuts never change the assigned sample; `Select` is the import action. The original shoulder controls also remain: `L + Up/Down` chooses the active marker and `L + A + Left/Right` nudges it. The normal field list remains available below the visual panel for exact parameter editing. The waveform itself stays magenta; bright white is reserved for the active marker so the trim selection is easier to read on the tiny screen.
 
 To check whether a sample still feels musical after pitch shifts, hold `R + A` and tap `Left`, `Up`, or `Right` for low, root, or high audition notes. `R + A + Down` stops that audition. This keeps sample design on the Instrument screen instead of forcing a trip back to Phrase every time you tweak root note, loop points, filter, or volume.
 

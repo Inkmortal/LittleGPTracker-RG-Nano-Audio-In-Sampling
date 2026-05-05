@@ -52,7 +52,7 @@ function Get-RGNanoSimRoutes {
   $routes["table.to_parent"] = $routes["combo.r.up"]
   $routes["table.to_instrument_table"] = $routes["combo.r.right"]
   $routes["instrument_table.to_table"] = $routes["combo.r.left"]
-  $routes["instrument.open_sample_import"] = @("press a 80", "press a 80", "wait 300")
+  $routes["instrument.open_sample_import"] = @("press k 80", "wait 300")
   $routes["sample_import.to_import"] = @("press r 80")
   $routes["sample_import.to_first_file"] = @("press d 80", "wait 120")
   $routes["sample_import.import_selected"] = @("press r 80", "press a 80", "wait 500")

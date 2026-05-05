@@ -84,9 +84,11 @@ The fork keeps LGPT controls but adds RG Nano screen/layout behavior.
 | Universal helper/minimap | `R + Select` |
 | Helper page switch | `Up` / `Down` while helper is open |
 | Command picker | `Select` on Phrase/Table command columns |
+| Sample import | `Select` on Instrument Source `sample` |
 | Trim-aware root suggestion | `Select` on Instrument Source `root` |
 | Sample trim marker select | `L + Up/Down` on Instrument Source/Loop |
 | Sample trim marker nudge | `L + A + Left/Right` on Instrument Source/Loop |
+| Source-row quick trim | `A + D-pad` on Instrument Source `sample` row |
 | Preview current sample trim | `Start` on Instrument sample pages |
 | Play/stop current context | `Start` |
 | Play/stop in song context | `R + Start` on Chain/Phrase-style screens |

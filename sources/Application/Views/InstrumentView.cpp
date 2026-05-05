@@ -121,7 +121,9 @@ void InstrumentView::fillSampleParameters() {
 void InstrumentView::fillSampleSourcePage(SampleInstrument *instrument, GUIPoint position) {
 	Variable *v=instrument->FindVariable(SIP_SAMPLE) ;
 	SamplePool *sp=SamplePool::GetInstance() ;
-	UIIntVarField *f1=new UIIntVarField(position,*v,"sample %s",0,sp->GetNameListSize()-1,1,0x10) ;
+	int sampleMax=sp->GetNameListSize()-1;
+	if (sampleMax<0) sampleMax=0;
+	UIIntVarField *f1=new UIIntVarField(position,*v,"sample %s",0,sampleMax,1,0x10) ;
 	T_SimpleList<UIField>::Insert(f1) ;
 	position._y+=1 ;
 	v=instrument->FindVariable(SIP_ROOTNOTE) ;
@@ -831,6 +833,32 @@ void InstrumentView::ProcessButtonMask(unsigned short mask,bool pressed) {
 		}
 	}
 
+	if (getInstrumentType()==IT_SAMPLE && isWaveMarkerPage() && (mask&EPBM_A) &&
+	    !(mask&(EPBM_B|EPBM_L|EPBM_R|EPBM_START|EPBM_SELECT))) {
+		UIIntVarField *field=(UIIntVarField *)GetFocus();
+		if (field && field->GetVariableID()==SIP_SAMPLE) {
+			if (mask&EPBM_LEFT) {
+				nudgeWaveMarker(-1);
+				return;
+			}
+			if (mask&EPBM_RIGHT) {
+				nudgeWaveMarker(1);
+				return;
+			}
+			if (mask&EPBM_UP) {
+				cycleWaveMarker(-1);
+				return;
+			}
+			if (mask&EPBM_DOWN) {
+				cycleWaveMarker(1);
+				return;
+			}
+			if (mask==EPBM_A) {
+				return;
+			}
+		}
+	}
+
 	if (isWaveMarkerPage() && (mask&EPBM_L) && (mask&EPBM_A) &&
 	    !(mask&(EPBM_B|EPBM_R|EPBM_START|EPBM_SELECT))) {
 		if (mask&EPBM_LEFT) {
@@ -877,6 +905,18 @@ void InstrumentView::ProcessButtonMask(unsigned short mask,bool pressed) {
 
 	if (getInstrumentType()==IT_SAMPLE && mask==EPBM_SELECT) {
 		UIIntVarField *field=(UIIntVarField *)GetFocus();
+		if (field && field->GetVariableID()==SIP_SAMPLE) {
+			Path sampleLib(SamplePool::GetInstance()->GetSampleLib()) ;
+			if (FileSystem::GetInstance()->GetFileType(sampleLib.GetPath().c_str())!=FT_DIR) {
+				MessageBox *mb=new MessageBox(*this,"Can't access the samplelib",MBBF_OK) ;
+				DoModal(mb) ;
+			} else { ;
+				ImportSampleDialog *isd=new ImportSampleDialog(*this) ;
+				DoModal(isd) ;
+			}
+			isDirty_=true;
+			return;
+		}
 		if (field && field->GetVariableID()==SIP_ROOTNOTE) {
 			int i=viewData_->currentInstrument_;
 			InstrumentBank *bank=viewData_->project_->GetInstrumentBank();
@@ -1001,7 +1041,7 @@ void InstrumentView::ProcessButtonMask(unsigned short mask,bool pressed) {
         if (mask == EPBM_A) {
             FourCC varID = ((UIIntVarField *)GetFocus())->GetVariableID();
             if ((varID == SIP_TABLE) || (varID == MIP_TABLE) ||
-                (varID == SIP_SAMPLE) || (varID == SIP_PRINTFX)) {
+                (varID == SIP_PRINTFX)) {
                 viewMode_ = VM_NEW;
 			}
         } else {
@@ -1120,12 +1160,12 @@ void InstrumentView::CustomizeContextOverlay(const char *&name, const char *&whe
 	cmd7="R+Select close";
 	if (labPage_==0) {
 		field="Source: sample/root";
-		edit="A sample, Sel root";
+		edit="Sel sample/root";
 		cmd1="Dpad choose sample/root";
-		cmd2="A on sample: import";
+		cmd2="Sel on sample: import";
 		cmd3="Sel on root: suggest/use";
-		cmd4="L+UD choose S/L/E mark";
-		cmd5="L+A+LR nudge mark";
+		cmd4="A+UD sample: S/L/E";
+		cmd5="A+LR sample: nudge";
 		cmd6="Start trim preview";
 		cmd7="R+A Down stop sound";
 	} else if (labPage_==1) {

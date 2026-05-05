@@ -459,8 +459,7 @@ bool SDLEventManager::AppendSimRoute(const std::string &routeName, const char *s
 	} else if (routeName=="instrument_table.to_table") {
 		lines.push_back("route combo.r.left");
 	} else if (routeName=="instrument.open_sample_import") {
-		lines.push_back("press a 80");
-		lines.push_back("press a 80");
+		lines.push_back("press k 80");
 		lines.push_back("wait 300");
 	} else if (routeName=="sample_import.to_import") {
 		lines.push_back("press r 80");

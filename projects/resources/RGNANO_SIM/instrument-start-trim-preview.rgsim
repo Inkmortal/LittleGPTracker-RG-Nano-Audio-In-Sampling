@@ -17,6 +17,20 @@ sim_set_sample_trim 0 1200 5200
 expect_instrument_sample 0 wuxia-guzheng.wav
 expect_screen_text SOURCE
 
+# Source sample row quick-trim aliases must not change the assigned sample.
+down a
+press d 80
+up a
+wait 120
+expect_screen_text MARK:L
+expect_instrument_sample 0 wuxia-guzheng.wav
+down a
+press r 80
+up a
+wait 120
+expect_screen_text MARK:L
+expect_instrument_sample 0 wuxia-guzheng.wav
+
 reset_audio_stats
 start_audio_capture instrument-start-trim-preview.wav
 press s 80
