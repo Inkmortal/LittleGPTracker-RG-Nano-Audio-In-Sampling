@@ -20,7 +20,7 @@ void NullView::CustomizeContextOverlay(
 	edit="Wait/load project";
 	field="Startup holding screen";
 	cmd1="Project picker is next";
-	cmd2="Menu handles OS";
+	cmd2="Power app menu";
 	cmd3="R+Select helper";
 	cmd4="No song loaded yet";
 	cmd5="Load or create song";

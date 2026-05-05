@@ -34,7 +34,7 @@
 See main LGPT documentation for full control reference.
 Key mappings are optimized for the RG Nano button layout:
 - Physical FN/Select is LGPT Select.
-- Physical Menu/Power is handled by the RG Nano OS for system actions such as volume and brightness.
+- Physical Menu/Power opens the LGPT app menu.
 - **R + FN/Select** opens the LGPT helper/minimap from every LGPT screen.
 
 ## Configuration

@@ -145,7 +145,7 @@ bool SDLEventManager::Init()
 		keyname_[i]=SDL_GetKeyName((SDLKey)i) ;
 	} 
 
-#ifdef PLATFORM_RGNANO_SIM
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
 	const char *powerKey=Config::GetInstance()->GetValue("KEY_POWER");
 	if (powerKey && strlen(powerKey)>0) {
 		int key=GetKeyCode(powerKey);
@@ -204,7 +204,7 @@ int SDLEventManager::MainLoop()
 						break;
 					}
 
-#ifdef PLATFORM_RGNANO_SIM
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
 					if (event.key.keysym.sym == powerMenuKey_) {
 						menuInputHeld_[event.key.keysym.sym]=true;
 						showPowerMenu_ = !showPowerMenu_;

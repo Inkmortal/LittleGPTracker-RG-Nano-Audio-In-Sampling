@@ -15,7 +15,7 @@ The short version: Song chooses chains, chains choose phrases, phrases contain n
 | R | Right shoulder modifier for screen navigation and song-context actions. |
 | Start | Play or stop the current context. |
 | Select / FN | Contextual helper or command picker, depending on where you are. |
-| Menu / Power | OS menu for system actions such as volume/brightness. LGPT does not own this button on hardware. |
+| Menu / Power | LGPT app exit/debug menu on single press. |
 
 The simulator keyboard mapping is listed in [RGNANO_SIM.md](RGNANO_SIM.md).
 
@@ -54,7 +54,7 @@ Hold `R` and tap a D-pad direction to move between major screens:
 
 ## Universal Helper
 
-`R + Select` opens the universal helper from every visible LGPT screen: tracker views, modal dialogs, and the Project selector you see before a song is loaded. On the RG Nano hardware, `Select` means the physical `FN`/Select button; the OS Menu/Power button is not LGPT Select.
+`R + Select` opens the universal helper from every visible LGPT screen: tracker views, modal dialogs, and the Project selector you see before a song is loaded. On the RG Nano hardware, `Select` means the physical `FN`/Select button; the Menu/Power button opens the app menu.
 
 Page 1 is the minimap. It shows:
 

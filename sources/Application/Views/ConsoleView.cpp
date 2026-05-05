@@ -25,7 +25,7 @@ void ConsoleView::CustomizeContextOverlay(
 	cmd1="R+Select close";
 	cmd2="Up/Down helper page";
 	cmd3="No song edits here";
-	cmd4="Menu handles OS";
+	cmd4="Power app menu";
 	cmd5="Logs are internal";
 	cmd6="Return via app flow";
 	cmd7="R+Select helper";

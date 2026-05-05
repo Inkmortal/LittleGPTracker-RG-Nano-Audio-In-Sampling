@@ -23,7 +23,7 @@ const screens = {
   command: { name: "Command Help", status: "partial", ref: "M8 p48 / local code", summary: "Command picker/help. RG has command selector in command columns but needs a clear tutorial/test.", columns: ["command", "description", "value"], actions: ["A+Up/Down on command column"], rows: ["VOL volume", "PIT pitch", "TBL table"] },
   sampler: { name: "Sampler / Editor", status: "partial", ref: "M8 p54-56 / RG import", summary: "RG imports/previews WAVs. Deep crop/normalize/slice editor is missing.", columns: ["sample", "start", "loop", "slice"], actions: ["RG A on Import assigns sample"], capture: "assets/rg-sample-import.png", rows: ["LISTEN", "IMPORT", "SLICE --"] },
   boot: { name: "Project Select", status: "implemented", ref: "RG sim", summary: "Load/new/exit boot modal.", columns: ["project list", "Load/New/Exit"], actions: ["A activates"], capture: "assets/rg-project-select.png", rows: ["LOAD", "NEW", "EXIT"] },
-  power: { name: "OS Menu", status: "sim-only", ref: "RG OS", summary: "Real Menu/Power is owned by the RG Nano OS; the simulator keeps a debug overlay for test harness use.", columns: ["OS actions"], actions: ["Menu/Power"], capture: "assets/rg-power-menu.png", rows: ["VOLUME", "BRIGHTNESS"] }
+  power: { name: "Power Menu", status: "implemented", ref: "RG app", summary: "Menu/Power opens the app exit/debug overlay; FN/Select remains the tracker Select key.", columns: ["exit/debug actions"], actions: ["Menu/Power"], capture: "assets/rg-power-menu.png", rows: ["EXIT", "DEBUG"] }
 };
 
 const m8ManualRefs = {
@@ -481,7 +481,7 @@ const screenManuals = {
     power: {
       purpose: "Power Menu is the global RG Nano app-exit overlay, not a tracker composition screen.",
       workflow: "Use Power when you need to leave the app or cancel back to the tracker.",
-      navigation: "On real RG Nano hardware, Menu/Power is handled by the OS for system actions such as volume and brightness. LGPT's universal helper is R+FN/Select, not Menu/Power.",
+      navigation: "On real RG Nano hardware, Menu/Power opens the app exit/debug overlay. LGPT's universal helper is R+FN/Select, not Menu/Power.",
       fields: ["Exit", "Cancel"],
       tips: ["This screen exists to protect normal music input from accidental app exits."]
     },

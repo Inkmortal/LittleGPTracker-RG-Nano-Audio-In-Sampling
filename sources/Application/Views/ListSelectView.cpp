@@ -33,7 +33,7 @@ void ListSelectView::CustomizeContextOverlay(
 	cmd3="B cancel if shown";
 	cmd4="R+Select close";
 	cmd5="Use Project screen";
-	cmd6="Menu handles OS";
+	cmd6="Power app menu";
 	cmd7="R+Select helper";
 }
 

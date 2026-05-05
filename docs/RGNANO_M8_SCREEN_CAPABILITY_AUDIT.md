@@ -69,7 +69,7 @@ Modal and overlay workflows also matter:
 | Project selector/new project | `SelectProjectDialog`, `NewProjectDialog` | Start or create a project. |
 | Import sample dialog | `ImportSampleDialog` | Preview/import WAVs into sample library/instruments. |
 | Record sample dialog | `RecordSampleDialog` | Live recording path exists in code, but RG Nano hardware input is not current scope. |
-| Power menu/debug overlay | `SDLEventManager`/SDL UI | Simulator-only exit/debug path. Real RG Nano Menu/Power remains OS-owned. |
+| Power menu/debug overlay | `SDLEventManager`/SDL UI | App exit/debug path. Real RG Nano Menu/Power maps to `q`; simulator maps to `p`. |
 
 ## Structural Capability Audit
 

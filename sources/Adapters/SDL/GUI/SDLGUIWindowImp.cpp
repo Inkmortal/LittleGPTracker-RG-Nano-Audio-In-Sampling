@@ -732,7 +732,7 @@ void SDLGUIWindowImp::Unlock()
 
 void SDLGUIWindowImp::Flush()
 {
-#ifdef PLATFORM_RGNANO_SIM
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
     // Render power menu overlay if active
     SDLEventManager::GetInstance()->RenderPowerMenu(screen_,this);
     // Render debug screen overlay if active
