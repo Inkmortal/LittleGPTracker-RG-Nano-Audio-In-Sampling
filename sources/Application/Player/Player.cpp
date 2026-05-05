@@ -1258,7 +1258,7 @@ void Player::StopStreaming() {
 #endif
 }
 
-#ifdef PLATFORM_RGNANO_SIM
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
 static const char *SimPlayModeName(PlayMode mode) {
 	switch (mode) {
 		case PM_SONG: return "song";
@@ -1299,10 +1299,12 @@ std::string Player::GetSimDebugSummary() {
 	if (isRunning_) {
 		out << " time=" << GetPlayTime();
 	}
+#ifdef PLATFORM_RGNANO_SIM
 	out << " streaming=" << (simStreaming_ ? "yes" : "no");
 	if (simStreaming_) {
 		out << " streamPath=\"" << simStreamingPath_ << "\"";
 	}
+#endif
 	out << ")";
 	if (viewData_) {
 		out << " channels=[";
@@ -1340,7 +1342,9 @@ std::string Player::GetSimDebugSummary() {
 	}
 	return out.str();
 }
+#endif
 
+#ifdef PLATFORM_RGNANO_SIM
 std::string Player::GetSimStreamingPath() const {
 	return simStreamingPath_;
 }

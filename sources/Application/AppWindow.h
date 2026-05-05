@@ -41,13 +41,14 @@ class AppWindow : public GUIWindow, I_Observer, Status {
     void SetDirty();
     void SetCurrentViewDirty();
     void RefreshCurrentView();
-#ifdef PLATFORM_RGNANO_SIM
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
     const char *GetCurrentViewName() const;
     ViewData *GetViewData() const;
     bool ScreenContains(const char *needle) const;
     std::string GetSimDebugSummary() const;
     std::string GetSimScreenDump() const;
     std::string GetSimSelectionSummary() const;
+    void LogDebugState(const char *label, bool includeScreen) const;
 #endif
 
   protected: // GUIWindow implementation

@@ -77,8 +77,10 @@ public:
 	void StartStreaming(const Path &path) ;
 	void StopStreaming() ;
 
-#ifdef PLATFORM_RGNANO_SIM
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
 	std::string GetSimDebugSummary() ;
+#endif
+#ifdef PLATFORM_RGNANO_SIM
 	std::string GetSimStreamingPath() const ;
 	bool IsSimStreaming() const ;
 #endif

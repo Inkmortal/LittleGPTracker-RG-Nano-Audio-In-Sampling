@@ -43,6 +43,7 @@ private:
 	static int powerMenuKey_ ;
 	static int rShoulderKey_ ;
 	static int selectKey_ ;
+	static unsigned long replayLastEventMs_ ;
 	const char *keyname_[SDLK_LAST] ;
 	SDL_Joystick *joystick_[MAX_JOY_COUNT];
 	ButtonControllerSource *buttonCS_[MAX_JOY_COUNT] ;
@@ -53,6 +54,8 @@ private:
 	void HandlePowerMenuInput(SDLKey key) ;
 	void HandleDebugScreenInput(SDLKey key) ;
 	bool HandleMenuHelpInput(SDLKey key) ;
+	void LogReplayKey(SDLKey key, bool pressed) ;
+	const char *GetReplayKeyName(SDLKey key) ;
 	void RenderMenuHelp(SDL_Surface *screen, SDLGUIWindowImp *window,
 						const char *name, const char *field,
 						const char *cmd1, const char *cmd2,

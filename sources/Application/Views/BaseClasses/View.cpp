@@ -6,6 +6,7 @@
 #include "Application/AppWindow.h"
 #include "Application/Model/Config.h"
 #include "ModalView.h"
+#include <string.h>
 
 bool View::initPrivate_=false ;
 
@@ -532,6 +533,17 @@ void View::SetDirty(bool isDirty) {
 
 void View::ProcessButton(unsigned short mask, bool pressed) {
 	isDirty_=false ;
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+	const char *dumpInput = Config::GetInstance()->GetValue("DUMPEVENT");
+	bool shouldLogInput = dumpInput && !strcmp(dumpInput, "YES");
+	if (shouldLogInput) {
+		Trace::Log("RGNANO_INPUT",
+				   "view-button mask=0x%04X pressed=%d contextOverlay=%d page=%d modal=%d dirty=%d",
+				   mask, pressed ? 1 : 0, contextOverlay_ ? 1 : 0,
+				   contextOverlayPage_, modalView_ ? 1 : 0, isDirty_ ? 1 : 0);
+		((AppWindow &)w_).LogDebugState("before-view-button", false);
+	}
+#endif
 
 	// Increment cursor animation frame
 	cursorAnimFrame_++;
@@ -545,6 +557,13 @@ void View::ProcessButton(unsigned short mask, bool pressed) {
 			}
 			isDirty_ = true;
 			((AppWindow &)w_).SetDirty();
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+			if (shouldLogInput) {
+				Trace::Log("RGNANO_INPUT", "context-helper toggled open=%d page=%d",
+						   contextOverlay_ ? 1 : 0, contextOverlayPage_);
+				((AppWindow &)w_).LogDebugState("after-context-helper-toggle", true);
+			}
+#endif
 			return;
 		}
 		if (contextOverlay_) {
@@ -552,11 +571,22 @@ void View::ProcessButton(unsigned short mask, bool pressed) {
 				contextOverlayPage_ = contextOverlayPage_ == 0 ? 1 : 0;
 				isDirty_ = true;
 				((AppWindow &)w_).SetDirty();
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+				if (shouldLogInput) {
+					Trace::Log("RGNANO_INPUT", "context-helper page=%d", contextOverlayPage_);
+					((AppWindow &)w_).LogDebugState("after-context-helper-page", true);
+				}
+#endif
 			}
 			return;
 		}
 	}
 	if (!pressed && contextOverlay_ && !modalView_) {
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+		if (shouldLogInput) {
+			Trace::Log("RGNANO_INPUT", "release ignored by context helper mask=0x%04X", mask);
+		}
+#endif
 		return;
 	}
 
@@ -578,6 +608,11 @@ void View::ProcessButton(unsigned short mask, bool pressed) {
 		}
 	}
 	if (isDirty_) ((AppWindow &)w_).SetDirty() ;
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+	if (shouldLogInput) {
+		((AppWindow &)w_).LogDebugState("after-view-button", pressed);
+	}
+#endif
 } ;
 
 void View::OnPlayerUpdate(PlayerEventType type, unsigned int currentTick) {

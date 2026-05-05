@@ -3,6 +3,7 @@
 #include "Application/Commands/EventDispatcher.h"
 #include "Application/Instruments/SamplePool.h"
 #include "Application/Mixer/MixerService.h"
+#include "Application/Model/Config.h"
 #include "Application/Persistency/PersistencyService.h"
 #include "Application/Player/TablePlayback.h"
 #include "Application/Utils/char.h"
@@ -610,7 +611,7 @@ void AppWindow::onUpdate() {
 
 void AppWindow::LayoutChildren() {};
 
-#ifdef PLATFORM_RGNANO_SIM
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
 const char *AppWindow::GetCurrentViewName() const {
     if (_currentView == _songView)
         return "song";
@@ -758,6 +759,24 @@ std::string AppWindow::GetSimDebugSummary() const {
     out << " selected=" << GetSimSelectionSummary();
     return out.str();
 }
+
+void AppWindow::LogDebugState(const char *label, bool includeScreen) const {
+    std::string summary = GetSimDebugSummary();
+    Player *player = Player::GetInstance();
+    if (player) {
+        summary += " ";
+        summary += player->GetSimDebugSummary();
+    }
+    Trace::Log("RGNANO_STATE", "%s %s", label ? label : "state", summary.c_str());
+    if (includeScreen) {
+        std::string dump = GetSimScreenDump();
+        std::istringstream lines(dump);
+        std::string line;
+        while (std::getline(lines, line)) {
+            Trace::Log("RGNANO_SCREEN", "%s", line.c_str());
+        }
+    }
+}
 #endif
 
 void AppWindow::Update(Observable &o, I_ObservableData *d) {
@@ -805,6 +824,14 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
         GUIWindow::Clear(backgroundColor_, true);
         Clear(true);
         Redraw();
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+        {
+            const char *dumpInput = Config::GetInstance()->GetValue("DUMPEVENT");
+            if (dumpInput && !strcmp(dumpInput, "YES")) {
+                LogDebugState("after-view-switch", true);
+            }
+        }
+#endif
         break;
     }
 
@@ -815,6 +842,14 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
             SysMutexLocker locker(drawMutex_);
             _currentView->OnPlayerUpdate(pt->GetType(), pt->GetTickCount());
             Invalidate();
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+            const char *dumpInput = Config::GetInstance()->GetValue("DUMPEVENT");
+            if (dumpInput && !strcmp(dumpInput, "YES")) {
+                Trace::Log("RGNANO_PLAYER", "event=%d tick=%u %s",
+                           pt->GetType(), pt->GetTickCount(),
+                           Player::GetInstance()->GetSimDebugSummary().c_str());
+            }
+#endif
         }
 
         break;

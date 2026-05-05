@@ -41,6 +41,7 @@ bool SDLEventManager::menuInputHeld_[SDLK_LAST]={false};
 int SDLEventManager::powerMenuKey_=SDLK_POWER;
 int SDLEventManager::rShoulderKey_=SDLK_n;
 int SDLEventManager::selectKey_=SDLK_q;
+unsigned long SDLEventManager::replayLastEventMs_=0;
 
 static void DrawSimOverlayText(SDL_Surface *screen, const char *text, int x, int y, Uint32 color, int scale)
 {
@@ -199,6 +200,7 @@ int SDLEventManager::MainLoop()
 					if (dumpEvent_)
           {
 						Trace::Log("EVENT","key(%s):%d",keyname_[event.key.keysym.sym],1) ;
+						LogReplayKey(event.key.keysym.sym,true);
 					}
 					if (event.key.keysym.sym>=0 && event.key.keysym.sym<SDLK_LAST && menuInputHeld_[event.key.keysym.sym]) {
 						break;
@@ -214,6 +216,14 @@ int SDLEventManager::MainLoop()
 							menuHelpOverlay_ = false;
 							menuHelpPage_ = 0;
 						}
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+						if (dumpEvent_) {
+							AppWindow *appWindow=(AppWindow *)Application::GetInstance()->GetWindow();
+							if (appWindow) {
+								appWindow->LogDebugState(showPowerMenu_ ? "after-power-menu-open" : "after-power-menu-close", true);
+							}
+						}
+#endif
 						break;
 					}
 #endif
@@ -230,6 +240,14 @@ int SDLEventManager::MainLoop()
 							break;
 						}
 						HandlePowerMenuInput(event.key.keysym.sym);
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+						if (dumpEvent_) {
+							AppWindow *appWindow=(AppWindow *)Application::GetInstance()->GetWindow();
+							if (appWindow) {
+								appWindow->LogDebugState("after-power-menu-input", true);
+							}
+						}
+#endif
 						break;  // Don't pass to game when menu is active
 					}
 
@@ -245,6 +263,14 @@ int SDLEventManager::MainLoop()
 							break;
 						}
 						HandleDebugScreenInput(event.key.keysym.sym);
+#if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
+						if (dumpEvent_) {
+							AppWindow *appWindow=(AppWindow *)Application::GetInstance()->GetWindow();
+							if (appWindow) {
+								appWindow->LogDebugState("after-debug-menu-input", true);
+							}
+						}
+#endif
 						break;  // Don't pass to game when debug screen is active
 					}
 
@@ -257,9 +283,10 @@ int SDLEventManager::MainLoop()
 					break ;
 
 				case SDL_KEYUP:
-					if (dumpEvent_) 
+					if (dumpEvent_)
           {
 						Trace::Log("EVENT","key(%s):%d",keyname_[event.key.keysym.sym],0) ;
+						LogReplayKey(event.key.keysym.sym,false);
 					}
 					if (event.key.keysym.sym>=0 && event.key.keysym.sym<SDLK_LAST && menuInputHeld_[event.key.keysym.sym]) {
 						menuInputHeld_[event.key.keysym.sym]=false;
@@ -2179,9 +2206,9 @@ bool SDLEventManager::HandleMenuHelpInput(SDLKey key)
 }
 
 void SDLEventManager::RenderMenuHelp(SDL_Surface *screen, SDLGUIWindowImp *window,
-									 const char *name, const char *field,
-									 const char *cmd1, const char *cmd2,
-									 const char *cmd3, const char *cmd4)
+								 const char *name, const char *field,
+								 const char *cmd1, const char *cmd2,
+								 const char *cmd3, const char *cmd4)
 {
 	if (!menuHelpOverlay_ || !screen) return;
 	int scale = window ? window->GetScale() : 1;
@@ -2215,6 +2242,46 @@ void SDLEventManager::RenderMenuHelp(SDL_Surface *screen, SDLGUIWindowImp *windo
 		DrawSimOverlayText(screen,cmd4,box.x+12,box.y+118,white,scale);
 	}
 	DrawSimOverlayText(screen,"Up/Dn page R+Sel close",box.x+12,box.y+134,pink,scale);
+}
+
+const char *SDLEventManager::GetReplayKeyName(SDLKey key)
+{
+	if (key == powerMenuKey_) return "p";
+	if (key == selectKey_) return "k";
+	if (key == rShoulderKey_) return "n";
+	switch (key) {
+		case SDLK_a: return "a";
+		case SDLK_b: return "b";
+		case SDLK_l: return "l";
+		case SDLK_r: return "r";
+		case SDLK_u: return "u";
+		case SDLK_d: return "d";
+		case SDLK_m: return "m";
+		case SDLK_n: return "n";
+		case SDLK_s: return "s";
+		case SDLK_k: return "k";
+		case SDLK_p: return "p";
+		case SDLK_x: return "x";
+		case SDLK_y: return "y";
+		default:
+			if (key >= 0 && key < SDLK_LAST && keyname_[key]) {
+				return keyname_[key];
+			}
+			return "unknown";
+	}
+}
+
+void SDLEventManager::LogReplayKey(SDLKey key, bool pressed)
+{
+	unsigned long now = SDL_GetTicks();
+	if (replayLastEventMs_ != 0) {
+		unsigned long delta = now - replayLastEventMs_;
+		if (delta > 0) {
+			Trace::Log("RGNANO_REPLAY", "wait %lu", delta);
+		}
+	}
+	replayLastEventMs_ = now;
+	Trace::Log("RGNANO_REPLAY", "%s %s", pressed ? "down" : "up", GetReplayKeyName(key));
 }
 
 void SDLEventManager::HandlePowerMenuInput(SDLKey key)
