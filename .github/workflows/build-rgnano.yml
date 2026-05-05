@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install host tools
-        run: sudo apt-get update && sudo apt-get install -y make zip
+        run: sudo apt-get update && sudo apt-get install -y make squashfs-tools zip
 
       - name: Install FunKey SDK
         run: |
@@ -45,8 +45,12 @@ jobs:
           cp projects/resources/RGNANO/INSTALL_HOW_TO.txt dist/lgpt-rgnano/
           cp docs/RGNANO_USER_MANUAL.md dist/lgpt-rgnano/
           cp docs/RGNANO_INPUT_MAP.md dist/lgpt-rgnano/
+          mkdir -p dist/opk
+          cp projects/lgpt-rgnano.elf projects/opk_build/
+          mksquashfs projects/opk_build dist/opk/lgpt-rgnano.opk -all-root -noappend -no-exports -no-xattrs
+          cp dist/opk/lgpt-rgnano.opk dist/lgpt-rgnano/
           cd dist
-          zip -9 -r lgpt-rgnano-test-build.zip lgpt-rgnano
+          zip -9 -r lgpt-rgnano-test-build.zip lgpt-rgnano opk
 
       - name: Upload RG Nano artifact
         uses: actions/upload-artifact@v4

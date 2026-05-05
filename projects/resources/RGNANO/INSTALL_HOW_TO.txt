@@ -7,14 +7,17 @@
 
 ## Installation
 
-1. Copy lgpt executable to: `/mnt/sdcard/Apps/` or your firmware's apps directory
+1. Copy `lgpt-rgnano.opk` to the SD card's `Native games` folder for the normal RG Nano launcher.
 
-2. Copy config.xml to the same directory as lgpt executable
+2. For loose ELF testing, copy `lgpt-rgnano.elf`, `config.xml`, `lgpt.funkey-s.desktop`, and `lgpt.png` to `/mnt/Applications/LGPT`.
 
-3. Create a folder for your projects (optional):
-   `/mnt/sdcard/lgpt-projects/`
+3. Create folders for your projects and sample library if they do not already exist:
+   `/mnt/Applications/Tracks`
+   `/mnt/Applications/Samples`
 
-4. First run will create necessary directories
+4. Put `.wav` samples in `/mnt/Applications/Samples`.
+
+5. Launch `LGPT RG Nano` from the RG Nano app menu.
 
 ## Controls
 

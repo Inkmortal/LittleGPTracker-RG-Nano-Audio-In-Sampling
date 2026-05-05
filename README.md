@@ -45,24 +45,24 @@ That folder contains:
 
 To install a build on the RG Nano:
 
-1. Build or download `lgpt-rgnano.elf`.
-2. Copy `lgpt-rgnano.elf` to the RG Nano apps directory, commonly `/mnt/sdcard/Apps/` or the equivalent apps folder for your firmware.
-3. Copy everything from `projects/resources/RGNANO/` into the same app folder.
+1. Build or download `lgpt-rgnano.opk` for the normal FunKey/RG Nano launcher path.
+2. Copy `lgpt-rgnano.opk` to the SD card's `Native games` folder.
+3. For loose ELF testing, copy `lgpt-rgnano.elf` plus everything from `projects/resources/RGNANO/` into `/mnt/Applications/LGPT`.
 4. Create these folders on the SD card if they do not already exist:
 
 ```text
-/mnt/Tracks
-/mnt/Samples
+/mnt/Applications/Tracks
+/mnt/Applications/Samples
 ```
 
-5. Put `.wav` samples in `/mnt/Samples`.
-6. Launch LittleGPTracker from the RG Nano app menu.
+5. Put `.wav` samples in `/mnt/Applications/Samples`.
+6. Launch `LGPT RG Nano` from the RG Nano app menu.
 
 The default RG Nano config uses:
 
 ```xml
-<ROOTFOLDER value="/mnt/Tracks"/>
-<SAMPLELIB value="/mnt/Samples"/>
+<ROOTFOLDER value="/mnt/Applications/Tracks"/>
+<SAMPLELIB value="/mnt/Applications/Samples"/>
 <SCREENMULT value="1"/>
 <CHANNELMODE value="SPLIT"/>
 ```
@@ -138,14 +138,14 @@ The simulator uses the same 240x240 screen contract and RG Nano key names, so it
 
 The RG Nano does not have a built-in microphone. This fork is therefore designed around two paths:
 
-- copy prepared samples to `/mnt/Samples`
+- copy prepared samples to `/mnt/Applications/Samples`
 - experiment with audio input only where the RG Nano firmware/kernel exposes a usable capture device
 
 The practical production workflow today is:
 
 1. Make sounds on another device, such as a PO-33, chord gadget, synth, phone, or computer.
 2. Export or record those sounds as `.wav` files.
-3. Copy the samples into `/mnt/Samples` on the RG Nano SD card.
+3. Copy the samples into `/mnt/Applications/Samples` on the RG Nano SD card.
 4. Arrange, sequence, edit, and finish the track inside LGPT on the RG Nano.
 
 ## About This Fork
