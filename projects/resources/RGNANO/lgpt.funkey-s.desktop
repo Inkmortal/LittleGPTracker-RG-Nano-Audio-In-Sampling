@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
-Name=Little GP Tracker
-Comment=Music tracker for creating chiptune music
+Name=LGPT RG Nano
+Comment=RG Nano tracker workstation
 Exec=lgpt-rgnano.elf
 Icon=lgpt
 Terminal=false
