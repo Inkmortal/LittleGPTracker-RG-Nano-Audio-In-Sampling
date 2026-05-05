@@ -91,6 +91,8 @@ The fork keeps LGPT controls but adds RG Nano screen/layout behavior.
 
 The app shows a small playback-scope label on main views: `STOP`, `PLAY:SONG`, `PLAY:CHAIN`, `PLAY:PHR`, `PLAY:LIVE`, or `AUDITION`. Use it to confirm whether you are hearing the full arrangement or only the current chain/phrase.
 
+Hardware diagnostics are written to `/mnt/Applications/lgpt-rgnano.log`. The log includes input replay lines, screen state, and selected-field state so hardware sessions can be reproduced in the simulator.
+
 To bounce audio, open Project View, set `Render:` to `Stereo` or `Stems`, press `Start` to render/play, then press `Start` again to stop and close the WAV file. Outputs are written into the active project folder.
 
 ## Building For RG Nano

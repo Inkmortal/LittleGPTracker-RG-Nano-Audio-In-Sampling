@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <sys/time.h>
+#include <sys/stat.h>
 #include <malloc.h>
 #include <stdlib.h>
 #include <string.h>
@@ -47,17 +48,22 @@ void GPSDLSystem::Boot(int argc,char **argv) {
     Path::SetAlias("bin", ".");
     Path::SetAlias("root", ".");
 
-    Config::GetInstance() -> ProcessArguments(argc,argv);
-
 #ifdef _DEBUG
     Trace::GetInstance() -> SetLogger(*(new StdOutLogger()));
 #else
-    Path logPath("bin:lgpt.log");
+    mkdir("/mnt/Applications", S_IRWXU);
+    Path logPath("/mnt/Applications/lgpt-rgnano.log");
     FileLogger *fileLogger = new FileLogger(logPath);
     if (fileLogger -> Init().Succeeded()) {
         Trace::GetInstance()->SetLogger(*fileLogger);
+        Trace::Log("RGNANO", "File logger initialized at %s", logPath.GetPath().c_str());
+    } else {
+        Trace::GetInstance() -> SetLogger(*(new StdOutLogger()));
+        Trace::Error("RGNANO failed to initialize file logger at %s", logPath.GetPath().c_str());
     }
 #endif
+
+    Config::GetInstance() -> ProcessArguments(argc,argv);
 
     // Install GUI Factory
     I_GUIWindowFactory::Install(new GUIFactory());

@@ -61,6 +61,10 @@ Edit `config.xml` to customize:
 - Press L + SELECT to toggle display mode
 - In Paged mode, use L + Left/Right to switch banks
 
+### Hardware session log
+- LGPT writes diagnostics to `/mnt/Applications/lgpt-rgnano.log`
+- The log records inputs, selected fields, screen state, playback state, and replay commands
+
 ## Performance Notes
 
 RG Nano specifications:
