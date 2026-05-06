@@ -526,7 +526,7 @@ bool SDLEventManager::AddSimScriptLine(const std::string &line, const char *scri
 		if (command.value<=0) {
 			command.value=80;
 		}
-	} else if (command.op=="down" || command.op=="up" || command.op=="screenshot" || command.op=="screenshot_app" || command.op=="log" || command.op=="expect_file" || command.op=="expect_project_sample" || command.op=="expect_view" || command.op=="expect_player_running" || command.op=="expect_play_mode" || command.op=="sim_set_note_names") {
+	} else if (command.op=="down" || command.op=="up" || command.op=="screenshot" || command.op=="screenshot_app" || command.op=="log" || command.op=="expect_file" || command.op=="expect_project_sample" || command.op=="expect_view" || command.op=="expect_player_running" || command.op=="expect_play_mode" || command.op=="sim_set_note_names" || command.op=="expect_sample_trim_order") {
 		iss >> command.arg;
 	} else if (command.op=="expect_screen_text" || command.op=="expect_selected_text" || command.op=="expect_streaming_sample" || command.op=="dump_state") {
 		std::getline(iss,command.arg);
@@ -563,6 +563,8 @@ bool SDLEventManager::AddSimScriptLine(const std::string &line, const char *scri
 		iss >> command.value >> command.arg;
 	} else if (command.op=="sim_set_sample_trim") {
 		iss >> command.value >> command.value2 >> command.arg;
+	} else if (command.op=="expect_sample_trim") {
+		iss >> command.value >> command.value2 >> command.arg >> command.arg2;
 	} else if (command.op=="sim_set_song_chain") {
 		iss >> command.value >> command.value2 >> command.arg;
 	} else if (command.op=="sim_set_chain_phrase" || command.op=="sim_set_phrase_note") {
@@ -851,6 +853,16 @@ void SDLEventManager::ProcessSimScript(SDLGUIWindowImp *window)
 	} else if (command.op=="expect_instrument_root_suggestion") {
 		if (!ExpectSimInstrumentRootSuggestion(command.value,atoi(command.arg.c_str()))) {
 			FailSimScript("instrument root suggestion assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_sample_trim") {
+		if (!ExpectSimSampleTrim(command.value,command.value2,atoi(command.arg.c_str()),atoi(command.arg2.c_str()))) {
+			FailSimScript("sample trim assertion failed");
+			return;
+		}
+	} else if (command.op=="expect_sample_trim_order") {
+		if (!ExpectSimSampleTrimOrder(command.value)) {
+			FailSimScript("sample trim order assertion failed");
 			return;
 		}
 	} else if (command.op=="sim_set_tempo") {
@@ -1621,6 +1633,48 @@ bool SDLEventManager::ExpectSimInstrumentRootSuggestion(int instrument, int note
 	int actual=sampleInstrument->GetSuggestedRootNote();
 	bool matches=(actual==note);
 	Trace::Log("RGNANO_SIM","expect_instrument_root_suggestion inst=%d actual=%d expected=%d => %s",instrument,actual,note,matches?"match":"mismatch");
+	return matches;
+}
+
+bool SDLEventManager::ExpectSimSampleTrim(int instrument, int start, int loopStart, int end)
+{
+	ViewData *viewData=GetSimViewData();
+	if (!viewData || !viewData->project_ || instrument<0 || instrument>=MAX_SAMPLEINSTRUMENT_COUNT) {
+		Trace::Error("RGNANO_SIM expect_sample_trim invalid instrument=%d",instrument);
+		return false;
+	}
+	InstrumentBank *bank=viewData->project_->GetInstrumentBank();
+	SampleInstrument *sampleInstrument=(SampleInstrument *)bank->GetInstrument(instrument);
+	Variable *startVar=sampleInstrument->FindVariable(SIP_START);
+	Variable *loopVar=sampleInstrument->FindVariable(SIP_LOOPSTART);
+	Variable *endVar=sampleInstrument->FindVariable(SIP_END);
+	int actualStart=startVar?startVar->GetInt():-1;
+	int actualLoop=loopVar?loopVar->GetInt():-1;
+	int actualEnd=endVar?endVar->GetInt():-1;
+	bool matches=(actualStart==start && actualLoop==loopStart && actualEnd==end);
+	Trace::Log("RGNANO_SIM","expect_sample_trim inst=%d actual=%d/%d/%d expected=%d/%d/%d => %s",
+	           instrument,actualStart,actualLoop,actualEnd,start,loopStart,end,matches?"match":"mismatch");
+	return matches;
+}
+
+bool SDLEventManager::ExpectSimSampleTrimOrder(int instrument)
+{
+	ViewData *viewData=GetSimViewData();
+	if (!viewData || !viewData->project_ || instrument<0 || instrument>=MAX_SAMPLEINSTRUMENT_COUNT) {
+		Trace::Error("RGNANO_SIM expect_sample_trim_order invalid instrument=%d",instrument);
+		return false;
+	}
+	InstrumentBank *bank=viewData->project_->GetInstrumentBank();
+	SampleInstrument *sampleInstrument=(SampleInstrument *)bank->GetInstrument(instrument);
+	Variable *startVar=sampleInstrument->FindVariable(SIP_START);
+	Variable *loopVar=sampleInstrument->FindVariable(SIP_LOOPSTART);
+	Variable *endVar=sampleInstrument->FindVariable(SIP_END);
+	int start=startVar?startVar->GetInt():-1;
+	int loopStart=loopVar?loopVar->GetInt():-1;
+	int end=endVar?endVar->GetInt():-1;
+	bool matches=(start>=0 && start<=loopStart && loopStart<=end);
+	Trace::Log("RGNANO_SIM","expect_sample_trim_order inst=%d values=%d/%d/%d => %s",
+	           instrument,start,loopStart,end,matches?"valid":"invalid");
 	return matches;
 }
 

@@ -43,7 +43,7 @@ expect_screen_text MAP
 press d 80
 wait 80
 expect_screen_text COMMANDS
-expect_screen_text R+A L/U/R audition
+expect_screen_text A+LR nudge, RB fast
 down n
 press k 80
 up n

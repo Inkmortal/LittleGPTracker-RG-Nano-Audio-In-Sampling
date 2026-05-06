@@ -46,7 +46,7 @@ Shows the loaded WAV as an actual waveform preview, plus start/loop/end markers 
 
 ![Instrument Lab Marker Edit](assets/instrument-lab-marker-edit.png)
 
-On Source and Loop, use `L + Up/Down` to choose the marker shown as `S`, `L`, or `E`, then use `L + A + Left/Right` to nudge the selected marker on the waveform. `S` is sample start, `L` is loop start, and `E` is sample end.
+On Source and Loop, use `LB + Up/Down` to choose the marker shown as `START`, `LSTART`, or `END`, then use `LB + A + Left/Right` to nudge the selected marker on the waveform. On the Source `sample` row, `A + Up/Down` and `A + Left/Right` do the same thing with less finger travel; add `RB` to the left/right nudge for faster movement. `S` is sample start, `L` is loop start, and `E` is sample end.
 
 ### Shape
 
@@ -91,8 +91,9 @@ Instrument Lab pages:
 - `D-pad`: move focus inside the current page.
 - `A + D-pad`: edit the focused value.
 - `L + Left/Right`: switch Instrument Lab page.
-- `L + Up/Down`: choose the active waveform marker on Source/Loop.
-- `L + A + Left/Right`: nudge the active waveform marker.
+- `LB + Up/Down`: choose the active waveform marker on Source/Loop.
+- `LB + A + Left/Right`: nudge the active waveform marker.
+- `RB + A + Left/Right` on the Source `sample` row: fast nudge the active waveform marker.
 - `R + A + Left/Up/Right`: audition the current sample low/root/high.
 - `R + A + Down`: stop sample audition.
 - `Start`: audition current instrument in phrase context.

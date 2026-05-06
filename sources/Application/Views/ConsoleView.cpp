@@ -22,13 +22,13 @@ void ConsoleView::CustomizeContextOverlay(
 	where="Diagnostic log";
 	edit="Read only";
 	field="Debug console";
-	cmd1="R+Select close";
+	cmd1="RB+Select close";
 	cmd2="Up/Down helper page";
 	cmd3="No song edits here";
 	cmd4="Power app menu";
 	cmd5="Logs are internal";
 	cmd6="Return via app flow";
-	cmd7="R+Select helper";
+	cmd7="RB+Select helper";
 }
 
 void ConsoleView::DrawView() {

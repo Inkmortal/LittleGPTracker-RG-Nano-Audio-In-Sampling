@@ -72,9 +72,9 @@ Page 2 is the command page. It shows:
 - short descriptions for each input
 - playback/context hints
 
-On the Instrument screen, the helper follows the current sample lab page. Source, Shape, Filter, Loop, and Motion each show their own compact controls instead of one generic instrument reminder. Source and Loop explicitly list the trim controls. On the Source sample row, `Select` opens sample import, `A + Up/Down` chooses `S`, `L`, or `E`, and `A + Left/Right` nudges the active marker without changing the assigned sample. The shoulder combo still works too: `L + Up/Down` chooses the marker and `L + A + Left/Right` nudges it. The normal field list below the waveform remains available for exact start, loop-start, and end values.
+On the Instrument screen, the helper follows the current sample lab page. Source, Shape, Filter, Loop, and Motion each show their own compact controls instead of one generic instrument reminder. Source and Loop explicitly list the trim controls. On the Source sample row, `Select` opens sample import, `A + Up/Down` chooses `START`, `LOOP`, or `END`, and `A + Left/Right` nudges the active marker without changing the assigned sample. Add `RB` to that nudge for a faster move. The shoulder combo still works too: `LB + Up/Down` chooses the marker and `LB + A + Left/Right` nudges it. The normal field list below the waveform remains available for exact start, loop-start, and end values.
 
-Press `R + Select` again to close the helper. While the helper is open, normal inputs are blocked so you can read without accidentally changing music, confirming a dialog, or deleting a project.
+Press `RB + Select` again to close the helper. While the helper is open, normal inputs are blocked so you can read without accidentally changing music, confirming a dialog, or deleting a project.
 
 ## Playback Scope
 
@@ -190,7 +190,7 @@ When a sample imports, the app may create a quiet root-note suggestion, but it d
 
 Long samples are different: the first obvious pitch may not be the part you actually want to play. Trim the sample first with the Source or Loop page markers, move focus to the `root` field, then press `Select`. If no suggestion is visible, `Select` analyzes only the current `START` to `END` window and shows `suggest root ###`. Press `Select` again to accept that suggestion, or ignore it and edit the root normally by ear.
 
-The Instrument screen now splits sample design into five compact lab pages. Use `L + Left/Right` to switch pages:
+The Instrument screen now splits sample design into five compact lab pages. Use `LB + Left/Right` to switch pages:
 
 | Page | What it edits |
 | --- | --- |
@@ -200,9 +200,9 @@ The Instrument screen now splits sample design into five compact lab pages. Use 
 | Loop | Loop mode, slices, sample start, loop start, loop end. |
 | Motion | Instrument table automation and feedback movement. |
 
-On the Source and Loop pages, the waveform has three editable markers: `START`, `LSTART`, and `END`. The tiny waveform labels them compactly as `S`, `L`, and `E` so the marker text does not cover the audio shape. On Source, keep focus on the `sample` row and use `A + Up/Down` to choose the active marker, then `A + Left/Right` to nudge it. These shortcuts never change the assigned sample; `Select` is the import action. The original shoulder controls also remain: `L + Up/Down` chooses the active marker and `L + A + Left/Right` nudges it. The normal field list remains available below the visual panel for exact parameter editing. The waveform itself stays magenta; bright white is reserved for the active marker so the trim selection is easier to read on the tiny screen.
+On the Source and Loop pages, the waveform has three editable markers: `START`, `LSTART`, and `END`. The screen now spells out the active edit target as `EDIT START`, `EDIT LSTART`, or `EDIT END`, and shows the three marker positions as `S`, `L`, and `E` values below the waveform. On Source, keep focus on the `sample` row and use `A + Up/Down` to choose the active marker, then `A + Left/Right` to nudge it. Hold `RB` as well for a faster nudge. These shortcuts never change the assigned sample; `Select` is the import action. The original shoulder controls also remain: `LB + Up/Down` chooses the active marker and `LB + A + Left/Right` nudges it. The app keeps the trim order valid, so `START` cannot move past `LSTART`/`END`, and `END` cannot move left of the current loop/start range. The normal field list remains available below the visual panel for exact parameter editing. The waveform itself stays magenta; bright white is reserved for the active marker so the trim selection is easier to read on the tiny screen.
 
-To check whether a sample still feels musical after pitch shifts, hold `R + A` and tap `Left`, `Up`, or `Right` for low, root, or high audition notes. `R + A + Down` stops that audition. This keeps sample design on the Instrument screen instead of forcing a trip back to Phrase every time you tweak root note, loop points, filter, or volume.
+To check whether a sample still feels musical after pitch shifts, hold `RB + A` and tap `Left`, `Up`, or `Right` for low, root, or high audition notes. `RB + A + Down` stops that audition. On the Source `sample` row, `RB + A + Left/Right` is reserved for fast trim movement instead. This keeps sample design on the Instrument screen instead of forcing a trip back to Phrase every time you tweak root note, loop points, filter, or volume.
 
 Press `Start` on a sample Instrument page to preview the current sample at its root note. This preview uses the current trim window, so `START` and `END` decide what part you hear; if the instrument loop mode is set to a loop mode, playback loops through the configured loop region.
 

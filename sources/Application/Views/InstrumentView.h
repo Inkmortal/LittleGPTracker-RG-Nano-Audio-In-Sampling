@@ -42,8 +42,9 @@ protected:
 	void drawSampleWaveform(class SampleInstrument *instrument, int x, int y,
 	                        int width, int height, bool showMarkers) ;
 	void drawMarkerLine(int x, int y, int height, ColorDefinition color) ;
+	void normalizeWaveMarkers(class SampleInstrument *instrument, FourCC changedMarker) ;
 	void cycleWaveMarker(int offset) ;
-	void nudgeWaveMarker(int offset) ;
+	void nudgeWaveMarker(int offset, int multiplier=1) ;
 	void auditionSamplePitch(int offset) ;
 	const char *getWaveMarkerName() ;
 	const char *getWaveMarkerShortName() ;

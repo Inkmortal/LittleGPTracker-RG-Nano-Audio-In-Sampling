@@ -283,7 +283,7 @@ void View::drawContextOverlay() {
 	DrawString(x+boxW-1,y+boxH-1,"+",props);
 
 	const char *name="SONG";
-	const char *where="R+Right Chain";
+	const char *where="RB+Right Chain";
 	const char *edit="A+Dpad edit";
 	const char *field="Rows=time Cols=tracks";
 	const char *cmd1="Dpad move cursor";
@@ -291,51 +291,51 @@ void View::drawContextOverlay() {
 	const char *cmd3="A+Dpad edit value";
 	const char *cmd4="Start play";
 	const char *cmd5="A+R solo  B+R mute";
-	const char *cmd6="R+Dpad change view";
-	const char *cmd7="R+Select helper";
+	const char *cmd6="RB+Dpad change view";
+	const char *cmd7="RB+Select helper";
 	switch(viewType_) {
 		case VT_SONG:
 			name="SONG";
-			where="R+Right Chain R+Down Mix";
+			where="RB+Right Chain RB+Down Mix";
 			edit="A+Dpad chain Start play";
 			field="Rows=time Cols=tracks";
 			cmd1="Dpad move row/track";
 			cmd2="A paste/new chain";
 			cmd3="A+Dpad edit chain";
 			cmd4="Start play song row";
-			cmd5="L+Dpad jump/tempo";
+			cmd5="LB+Dpad jump/tempo";
 			cmd6="A+R solo  B+R mute";
-			cmd7="R+Right Chain";
+			cmd7="RB+Right Chain";
 			break;
 		case VT_CHAIN:
 			name="CHAIN";
-			where="R+Left Song R+Right Phr";
+			where="RB+Left Song RB+Right Phr";
 			edit="A+Dpad phrase/trans";
 			field="Rows=phrase playlist";
 			cmd1="Dpad move row/field";
 			cmd2="A paste/new phrase";
 			cmd3="A+Dpad edit value";
 			cmd4="Start play cur ch";
-			cmd5="R+Start song ctx";
+			cmd5="RB+Start song ctx";
 			cmd6="A+R solo  B+R mute";
-			cmd7="R+Right Phrase";
+			cmd7="RB+Right Phrase";
 			break;
 		case VT_PHRASE:
 			name="PHRASE";
-			where="R+Left Chain R+Right Inst";
+			where="RB+Left Chain RB+Right Inst";
 			edit="A+Dpad notes/cmds";
 			field="Rows=steps Cols=event";
 			cmd1="Dpad move note/cmd";
 			cmd2="A note preview/paste";
 			cmd3="A+Dpad edit value";
-			cmd4="L+Dpad free note";
+			cmd4="LB+Dpad free note";
 			cmd5="Select command picker";
 			cmd6="Start play cur ch";
-			cmd7="R+Start song ctx";
+			cmd7="RB+Start song ctx";
 			break;
 		case VT_PROJECT:
 			name="PROJECT";
-			where="R+Up Song";
+			where="RB+Up Song";
 			edit="Dpad field A+Dpad val";
 			field="Tempo key scale render";
 			cmd1="Dpad choose field";
@@ -344,24 +344,24 @@ void View::drawContextOverlay() {
 			cmd4="B secondary action";
 			cmd5="Set tempo/key/scale";
 			cmd6="Render/save here";
-			cmd7="R+Up Song";
+			cmd7="RB+Up Song";
 			break;
 		case VT_INSTRUMENT:
 			name="INSTR";
-			where="R+Left Phrase A sample";
-			edit="L+LR page L+UD mark";
+			where="RB+Left Phrase Sel sample";
+			edit="LB+LR page LB+UD mark";
 			field="Sample lab + markers";
 			cmd1="Dpad choose field";
 			cmd2="A activate/sample";
 			cmd3="A+Dpad edit value";
-			cmd4="L+A+LR nudge mark";
-			cmd5="R+A arrows audition";
+			cmd4="LB+A+LR nudge mark";
+			cmd5="RB+A arrows audition";
 			cmd6="Sel root detect/accept";
-			cmd7="R+Left Phrase";
+			cmd7="RB+Left Phrase";
 			break;
 		case VT_TABLE:
 			name="TABLE";
-			where="R+Up Phrase";
+			where="RB+Up Phrase";
 			edit="A+Dpad command/value";
 			field="Command mini-sequence";
 			cmd1="Dpad move cmd/param";
@@ -370,11 +370,11 @@ void View::drawContextOverlay() {
 			cmd4="A paste last cmd";
 			cmd5="B+R interpolate";
 			cmd6="Start play cur ch";
-			cmd7="R+Right Inst Table";
+			cmd7="RB+Right Inst Table";
 			break;
 		case VT_TABLE2:
 			name="INST TABLE";
-			where="R+Up Instrument";
+			where="RB+Up Instrument";
 			edit="A+Dpad command/value";
 			field="Instrument motion";
 			cmd1="Dpad move cmd/param";
@@ -383,11 +383,11 @@ void View::drawContextOverlay() {
 			cmd4="A paste last cmd";
 			cmd5="B+R interpolate";
 			cmd6="Start play phrase";
-			cmd7="R+Left Table";
+			cmd7="RB+Left Table";
 			break;
 		case VT_GROOVE:
 			name="GROOVE";
-			where="R+Up Phrase";
+			where="RB+Up Phrase";
 			edit="A+Dpad tick values";
 			field="Timing/swing table";
 			cmd1="Dpad move tick cell";
@@ -396,20 +396,20 @@ void View::drawContextOverlay() {
 			cmd4="Start play cur ch";
 			cmd5="Groove changes feel";
 			cmd6="Use GROV command";
-			cmd7="R+Down Phrase";
+			cmd7="RB+Down Phrase";
 			break;
 		case VT_MIXER:
 			name="MIXER";
-			where="R+Up Song";
+			where="RB+Up Song";
 			edit="Left/Right select ch";
 			field="Meters + master wave";
 			cmd1="Left/Right select ch";
 			cmd2="Start play song";
-			cmd3="R+Start stop";
+			cmd3="RB+Start stop";
 			cmd4="Watch channel meters";
 			cmd5="Master wave below";
 			cmd6="Check level activity";
-			cmd7="R+Up Song";
+			cmd7="RB+Up Song";
 			break;
 		default:
 			break;
@@ -455,7 +455,7 @@ void View::drawContextOverlay() {
 		drawOverlayLine(innerX,y+15,innerW,edit,props);
 	}
 	SetColor(CD_HILITE2);
-	drawOverlayLine(innerX,y+boxH-2,innerW,"Up/Dn page R+Sel close",props);
+	drawOverlayLine(innerX,y+boxH-2,innerW,"Up/Dn page RB+Sel close",props);
 	SetColor(CD_NORMAL);
 }
 

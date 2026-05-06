@@ -81,17 +81,18 @@ The fork keeps LGPT controls but adds RG Nano screen/layout behavior.
 | Confirm / primary action | `A` |
 | Back / secondary action | `B` |
 | Navigation | D-pad |
-| Universal helper/minimap | `R + Select` |
+| Universal helper/minimap | `RB + Select` |
 | Helper page switch | `Up` / `Down` while helper is open |
 | Command picker | `Select` on Phrase/Table command columns |
 | Sample import | `Select` on Instrument Source `sample` |
 | Trim-aware root suggestion | `Select` on Instrument Source `root` |
-| Sample trim marker select | `L + Up/Down` on Instrument Source/Loop |
-| Sample trim marker nudge | `L + A + Left/Right` on Instrument Source/Loop |
+| Sample trim marker select | `LB + Up/Down` on Instrument Source/Loop |
+| Sample trim marker nudge | `LB + A + Left/Right` on Instrument Source/Loop |
 | Source-row quick trim | `A + D-pad` on Instrument Source `sample` row |
+| Source-row fast trim | `RB + A + Left/Right` on Instrument Source `sample` row |
 | Preview current sample trim | `Start` on Instrument sample pages |
 | Play/stop current context | `Start` |
-| Play/stop in song context | `R + Start` on Chain/Phrase-style screens |
+| Play/stop in song context | `RB + Start` on Chain/Phrase-style screens |
 | App exit/debug menu | Menu/Power button |
 
 The app shows a small playback-scope label on main views: `STOP`, `PLAY:SONG`, `PLAY:CHAIN`, `PLAY:PHR`, `PLAY:LIVE`, or `AUDITION`. Use it to confirm whether you are hearing the full arrangement or only the current chain/phrase.

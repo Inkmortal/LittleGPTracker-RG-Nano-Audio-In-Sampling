@@ -220,7 +220,7 @@ void SelectProjectDialog::CustomizeContextOverlay(
 	cmd4="A run action";
 	cmd5="A+B delete project";
 	cmd6="A on folder opens";
-	cmd7="R+Select helper";
+	cmd7="RB+Select helper";
 }
 
 void SelectProjectDialog::ProcessButtonMask(unsigned short mask,bool pressed) {

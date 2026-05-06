@@ -22,13 +22,50 @@ down a
 press d 80
 up a
 wait 120
-expect_screen_text MARK:L
+expect_screen_text EDIT LSTART
 expect_instrument_sample 0 wuxia-guzheng.wav
+expect_sample_trim_order 0
 down a
 press r 80
 up a
 wait 120
-expect_screen_text MARK:L
+expect_screen_text EDIT LSTART
+expect_instrument_sample 0 wuxia-guzheng.wav
+expect_sample_trim_order 0
+
+# RB+A+Left/Right is the fast trim nudge on the Source sample row.
+down a
+press d 80
+up a
+wait 80
+expect_screen_text EDIT END
+down n
+down a
+press l 80
+press l 80
+press l 80
+press l 80
+up a
+up n
+wait 120
+expect_sample_trim_order 0
+expect_instrument_sample 0 wuxia-guzheng.wav
+down a
+press u 80
+press u 80
+up a
+wait 80
+expect_screen_text EDIT START
+down n
+down a
+press r 80
+press r 80
+press r 80
+press r 80
+up a
+up n
+wait 120
+expect_sample_trim_order 0
 expect_instrument_sample 0 wuxia-guzheng.wav
 
 reset_audio_stats

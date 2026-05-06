@@ -21,11 +21,11 @@ void NullView::CustomizeContextOverlay(
 	field="Startup holding screen";
 	cmd1="Project picker is next";
 	cmd2="Power app menu";
-	cmd3="R+Select helper";
+	cmd3="RB+Select helper";
 	cmd4="No song loaded yet";
 	cmd5="Load or create song";
 	cmd6="Then edit tracks";
-	cmd7="R+Select close";
+	cmd7="RB+Select close";
 }
 
 void NullView::DrawView() {

@@ -126,7 +126,7 @@ void NewProjectDialog::CustomizeContextOverlay(
 	cmd4="A Ok creates song";
 	cmd5="B delete in keyboard";
 	cmd6="Start exits keyboard";
-	cmd7="R+Select helper";
+	cmd7="RB+Select helper";
 }
 
 void NewProjectDialog::ProcessButtonMask(unsigned short mask, bool pressed) {

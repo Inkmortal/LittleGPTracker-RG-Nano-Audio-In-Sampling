@@ -1,4 +1,4 @@
-# Verify R+Select helper coverage on every sample workstation lab page.
+# Verify RB+Select helper coverage on every sample workstation lab page.
 route boot.new_project_random
 expect_view song
 press a 80
@@ -30,7 +30,8 @@ wait 80
 expect_screen_text COMMANDS
 expect_screen_text Sel on sample: import
 expect_screen_text Sel on root: suggest/use
-expect_screen_text A+UD sample: S/L/E
+expect_screen_text A+UD sample: Start/Loop/End
+expect_screen_text A+LR nudge, RB fast
 expect_screen_text Start trim preview
 screenshot_app helper-source-commands.bmp
 down n
@@ -110,7 +111,7 @@ screenshot_app helper-motion-map.bmp
 press d 80
 wait 80
 expect_screen_text A on table: make/open
-expect_screen_text R+Down inst table
+expect_screen_text RB+Down inst table
 screenshot_app helper-motion-commands.bmp
 down n
 press k 80

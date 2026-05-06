@@ -299,6 +299,44 @@ const char *InstrumentView::getWaveMarkerName() {
 	return "START";
 }
 
+void InstrumentView::normalizeWaveMarkers(SampleInstrument *instrument, FourCC changedMarker) {
+	if (!instrument) {
+		return;
+	}
+	int sampleSize=instrument->GetSampleSize();
+	if (sampleSize<=0) {
+		return;
+	}
+	Variable *startVar=instrument->FindVariable(SIP_START);
+	Variable *loopVar=instrument->FindVariable(SIP_LOOPSTART);
+	Variable *endVar=instrument->FindVariable(SIP_END);
+	if (!startVar || !loopVar || !endVar) {
+		return;
+	}
+	int start=startVar->GetInt();
+	int loopStart=loopVar->GetInt();
+	int end=endVar->GetInt();
+	if (end<=0 || end>sampleSize) end=sampleSize;
+	if (start<0) start=0;
+	if (loopStart<0) loopStart=0;
+	if (start>sampleSize) start=sampleSize;
+	if (loopStart>sampleSize) loopStart=sampleSize;
+
+	if (start>end) {
+		if (changedMarker==SIP_END) {
+			end=start;
+		} else {
+			start=end;
+		}
+	}
+	if (loopStart<start) loopStart=start;
+	if (loopStart>end) loopStart=end;
+
+	startVar->SetInt(start);
+	loopVar->SetInt(loopStart);
+	endVar->SetInt(end);
+}
+
 const char *InstrumentView::getWaveMarkerShortName() {
 	if (markerFocus_==SIP_LOOPSTART) return "L";
 	if (markerFocus_==SIP_END) return "E";
@@ -326,7 +364,7 @@ void InstrumentView::cycleWaveMarker(int offset) {
 	isDirty_=true;
 }
 
-void InstrumentView::nudgeWaveMarker(int offset) {
+void InstrumentView::nudgeWaveMarker(int offset, int multiplier) {
 	if (!isWaveMarkerPage()) {
 		return;
 	}
@@ -346,6 +384,8 @@ void InstrumentView::nudgeWaveMarker(int offset) {
 	}
 	int step=sampleSize/128;
 	if (step<1) step=1;
+	if (multiplier<1) multiplier=1;
+	step*=multiplier;
 	int value=v->GetInt()+(offset*step);
 	int start=GetVarInt(instrument,SIP_START);
 	int loopStart=GetVarInt(instrument,SIP_LOOPSTART);
@@ -353,7 +393,7 @@ void InstrumentView::nudgeWaveMarker(int offset) {
 	if (end<=0 || end>sampleSize) end=sampleSize;
 	if (markerFocus_==SIP_START) {
 		if (value<0) value=0;
-		if (value>end) value=end;
+		if (value>loopStart) value=loopStart;
 		start=value;
 	} else if (markerFocus_==SIP_LOOPSTART) {
 		if (value<start) value=start;
@@ -365,6 +405,7 @@ void InstrumentView::nudgeWaveMarker(int offset) {
 		end=value;
 	}
 	v->SetInt(value);
+	normalizeWaveMarkers(instrument,markerFocus_);
 	isDirty_=true;
 }
 
@@ -615,6 +656,14 @@ void InstrumentView::drawSampleLabVisuals() {
 #endif
 
 	int sampleSize=instrument->GetSampleSize();
+	UIIntVarField *focused=(UIIntVarField *)GetFocus();
+	FourCC changedMarker=markerFocus_;
+	if (focused && (focused->GetVariableID()==SIP_START ||
+	                focused->GetVariableID()==SIP_LOOPSTART ||
+	                focused->GetVariableID()==SIP_END)) {
+		changedMarker=focused->GetVariableID();
+	}
+	normalizeWaveMarkers(instrument,changedMarker);
 	int start=GetVarInt(instrument,SIP_START);
 	int loopStart=GetVarInt(instrument,SIP_LOOPSTART);
 	int loopEnd=GetVarInt(instrument,SIP_END);
@@ -628,8 +677,10 @@ void InstrumentView::drawSampleLabVisuals() {
 	if (labPage_==0 || labPage_==3) {
 #if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
 		drawSampleWaveform(instrument,10,36,220,52,true);
-		sprintf(line,"MARK:%s  L+UD  L+A+LR",getWaveMarkerShortName());
+		sprintf(line,"EDIT %-5s A+LR RBx8",getWaveMarkerName());
 		drawLabText((40-(int)strlen(line))/2,12,line,props);
+		sprintf(line,"S%05X L%05X E%05X",start,loopStart,loopEnd);
+		drawLabText((40-(int)strlen(line))/2,13,line,props);
 		if (labPage_==0) {
 			const char *sampleName=GetVarString(instrument,SIP_SAMPLE);
 			char name[25];
@@ -641,12 +692,12 @@ void InstrumentView::drawSampleLabVisuals() {
 				sprintf(line,"suggest root %03d Sel",suggestedRoot);
 				drawLabText(2,15,line,props);
 			} else {
-				drawLabText(2,15,"R+A: low root high stop",props);
+				drawLabText(2,15,"RB+A: low root high stop",props);
 			}
 		} else {
 			sprintf(line,"mode %d S%05X L%05X E%05X",GetVarInt(instrument,SIP_LOOPMODE),start,loopStart,loopEnd);
 			drawLabText(2,14,line,props);
-			drawLabText(2,15,"R+A: low root high stop",props);
+			drawLabText(2,15,"RB+A: low root high stop",props);
 		}
 #else
 		char wave[25];
@@ -834,22 +885,22 @@ void InstrumentView::ProcessButtonMask(unsigned short mask,bool pressed) {
 	}
 
 	if (getInstrumentType()==IT_SAMPLE && isWaveMarkerPage() && (mask&EPBM_A) &&
-	    !(mask&(EPBM_B|EPBM_L|EPBM_R|EPBM_START|EPBM_SELECT))) {
+	    !(mask&(EPBM_B|EPBM_L|EPBM_START|EPBM_SELECT))) {
 		UIIntVarField *field=(UIIntVarField *)GetFocus();
 		if (field && field->GetVariableID()==SIP_SAMPLE) {
 			if (mask&EPBM_LEFT) {
-				nudgeWaveMarker(-1);
+				nudgeWaveMarker(-1,(mask&EPBM_R)?8:1);
 				return;
 			}
 			if (mask&EPBM_RIGHT) {
-				nudgeWaveMarker(1);
+				nudgeWaveMarker(1,(mask&EPBM_R)?8:1);
 				return;
 			}
-			if (mask&EPBM_UP) {
+			if (!(mask&EPBM_R) && (mask&EPBM_UP)) {
 				cycleWaveMarker(-1);
 				return;
 			}
-			if (mask&EPBM_DOWN) {
+			if (!(mask&EPBM_R) && (mask&EPBM_DOWN)) {
 				cycleWaveMarker(1);
 				return;
 			}
@@ -1151,57 +1202,57 @@ void InstrumentView::CustomizeContextOverlay(const char *&name, const char *&whe
 	} else {
 		name="INSTR MOTION";
 	}
-	where="R+Left Phrase";
+	where="RB+Left Phrase";
 	cmd1="Dpad choose field";
 	cmd3="A+Dpad edit value";
-	cmd4="L+Left/Right page";
-	cmd5="R+A arrows audition";
-	cmd6="R+Left Phrase";
-	cmd7="R+Select close";
+	cmd4="LB+Left/Right page";
+	cmd5="RB+A arrows audition";
+	cmd6="RB+Left Phrase";
+	cmd7="RB+Select close";
 	if (labPage_==0) {
 		field="Source: sample/root";
 		edit="Sel sample/root";
 		cmd1="Dpad choose sample/root";
 		cmd2="Sel on sample: import";
 		cmd3="Sel on root: suggest/use";
-		cmd4="A+UD sample: S/L/E";
-		cmd5="A+LR sample: nudge";
+		cmd4="A+UD sample: Start/Loop/End";
+		cmd5="A+LR nudge, RB fast";
 		cmd6="Start trim preview";
-		cmd7="R+A Down stop sound";
+		cmd7="RB+A Down stop sound";
 	} else if (labPage_==1) {
 		field="Shape: level/pan/grit";
 		edit="A+Dpad changes values";
 		cmd1="Dpad choose value";
 		cmd2="A+LR coarse/fine edit";
 		cmd3="A+UD larger changes";
-		cmd4="L+Left/Right page";
-		cmd5="R+A L/U/R audition";
+		cmd4="LB+Left/Right page";
+		cmd5="RB+A L/U/R audition";
 	} else if (labPage_==2) {
 		field="Filter: cutoff/reso";
 		edit="Tone shaping";
 		cmd1="Dpad choose filter row";
 		cmd2="A+Dpad edit value";
 		cmd3="Cut/res/type/mode";
-		cmd4="L+Left/Right page";
-		cmd5="R+A L/U/R audition";
+		cmd4="LB+Left/Right page";
+		cmd5="RB+A L/U/R audition";
 	} else if (labPage_==3) {
 		field="Loop: trim window";
 		edit="S=start L=loop E=end";
-		cmd1="L+UD choose S/L/E mark";
-		cmd2="L+A+LR nudge mark";
+		cmd1="LB+UD choose Start/Loop/End";
+		cmd2="LB+A+LR nudge mark";
 		cmd3="Dpad to start/lstart/end";
 		cmd4="A+Dpad exact values";
 		cmd5="Sel root from trim";
 		cmd6="Start trim preview";
-		cmd7="R+A Down stop sound";
+		cmd7="RB+A Down stop sound";
 	} else {
 		field="Motion: table/fb";
 		edit="Automation source";
 		cmd1="Dpad choose value";
 		cmd2="A+Dpad edit value";
 		cmd3="A on table: make/open";
-		cmd4="R+Down inst table";
-		cmd5="L+Left/Right page";
+		cmd4="RB+Down inst table";
+		cmd5="LB+Left/Right page";
 	}
 }
 

@@ -200,5 +200,5 @@ void CommandSelectorModal::CustomizeContextOverlay(
 	cmd4="B cancel";
 	cmd5="Help below grid";
 	cmd6="Then edit params";
-	cmd7="R+Select helper";
+	cmd7="RB+Select helper";
 }

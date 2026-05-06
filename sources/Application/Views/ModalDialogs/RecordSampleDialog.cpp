@@ -137,7 +137,7 @@ void RecordSampleDialog::CustomizeContextOverlay(
 	cmd4="Start rec/stop";
 	cmd5="RG Nano has no mic";
 	cmd6="Use imported WAVs";
-	cmd7="R+Select helper";
+	cmd7="RB+Select helper";
 }
 
 void RecordSampleDialog::startRecording() {

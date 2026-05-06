@@ -75,7 +75,7 @@ void MessageBox::CustomizeContextOverlay(
 	cmd4="Read message first";
 	cmd5="Use No if unsure";
 	cmd6="Delete is final";
-	cmd7="R+Select helper";
+	cmd7="RB+Select helper";
 }
 void MessageBox::ProcessButtonMask(unsigned short mask,bool pressed) {
 	if (mask&EPBM_A) {

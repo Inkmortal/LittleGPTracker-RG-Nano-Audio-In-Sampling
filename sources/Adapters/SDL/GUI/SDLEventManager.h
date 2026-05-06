@@ -114,6 +114,8 @@ private:
 	bool ExpectSimInstrumentSample(int instrument, const std::string &sampleName);
 	bool ExpectSimInstrumentRoot(int instrument, int note);
 	bool ExpectSimInstrumentRootSuggestion(int instrument, int note);
+	bool ExpectSimSampleTrim(int instrument, int start, int loopStart, int end);
+	bool ExpectSimSampleTrimOrder(int instrument);
 	bool ExpectSimRenderMode(int mode);
 	bool SimSetTempo(int bpm);
 	bool SimSetRenderMode(int mode);

@@ -197,7 +197,7 @@ void ImportSampleDialog::CustomizeContextOverlay(
 	cmd4="A listen/import/exit";
 	cmd5="Start+Up/Dn preview";
 	cmd6="Start+Right import";
-	cmd7="R+Select helper";
+	cmd7="RB+Select helper";
 }
 
 void ImportSampleDialog::preview(Path &element) {

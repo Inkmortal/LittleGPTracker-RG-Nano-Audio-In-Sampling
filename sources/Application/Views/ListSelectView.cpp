@@ -31,10 +31,10 @@ void ListSelectView::CustomizeContextOverlay(
 	cmd1="Up/Down choose item";
 	cmd2="A select";
 	cmd3="B cancel if shown";
-	cmd4="R+Select close";
+	cmd4="RB+Select close";
 	cmd5="Use Project screen";
 	cmd6="Power app menu";
-	cmd7="R+Select helper";
+	cmd7="RB+Select helper";
 }
 
 void ListSelectView::SetContent(T_SimpleList<Path> &content)  {
