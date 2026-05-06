@@ -32,7 +32,8 @@ expect_screen_text Sel on sample: import
 expect_screen_text Sel on root: suggest/use
 expect_screen_text A+UD sample: Start/Loop/End
 expect_screen_text A+LR nudge, RB fast
-expect_screen_text Start trim preview
+expect_screen_text Start preview
+expect_screen_text RB+Start once/loop
 screenshot_app helper-source-commands.bmp
 down n
 press k 80
@@ -91,7 +92,8 @@ press d 80
 wait 80
 expect_screen_text Dpad to start/lstart/end
 expect_screen_text Sel root from trim
-expect_screen_text Start trim preview
+expect_screen_text Start preview
+expect_screen_text RB+Start once/loop
 screenshot_app helper-loop-commands.bmp
 down n
 press k 80

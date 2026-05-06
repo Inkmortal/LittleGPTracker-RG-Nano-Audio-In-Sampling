@@ -91,6 +91,7 @@ The fork keeps LGPT controls but adds RG Nano screen/layout behavior.
 | Source-row quick trim | `A + D-pad` on Instrument Source `sample` row |
 | Source-row fast trim | `RB + A + Left/Right` on Instrument Source `sample` row |
 | Preview current sample trim | `Start` on Instrument sample pages |
+| Toggle sample preview mode | `RB + Start` on Instrument Source/Loop |
 | Play/stop current context | `Start` |
 | Play/stop in song context | `RB + Start` on Chain/Phrase-style screens |
 | App exit/debug menu | Menu/Power button |

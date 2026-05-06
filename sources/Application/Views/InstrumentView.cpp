@@ -27,6 +27,7 @@ InstrumentView::InstrumentView(GUIWindow &w,ViewData *data):FieldView(w,data) {
 	current_=0 ;
 	labPage_=0 ;
 	markerFocus_=SIP_START ;
+	previewLoop_=false ;
 	onInstrumentChange() ;
 }
 
@@ -423,7 +424,23 @@ void InstrumentView::auditionSamplePitch(int offset) {
 	int note=root+offset;
 	if (note<0) note=0;
 	if (note>127) note=127;
+	Variable *loopMode=instrument->FindVariable(SIP_LOOPMODE);
+	int originalLoopMode=loopMode?loopMode->GetInt():SILM_ONESHOT;
+	if (loopMode) {
+		loopMode->SetInt(previewLoop_?SILM_LOOP:SILM_ONESHOT);
+	}
 	Player::GetInstance()->AuditionInstrument(i,note);
+	if (loopMode) {
+		loopMode->SetInt(originalLoopMode);
+	}
+	isDirty_=true;
+}
+
+void InstrumentView::toggleSamplePreviewLoop() {
+	if (getInstrumentType()!=IT_SAMPLE || !isWaveMarkerPage()) {
+		return;
+	}
+	previewLoop_=!previewLoop_;
 	isDirty_=true;
 }
 
@@ -693,7 +710,7 @@ void InstrumentView::drawSampleLabVisuals() {
 	if (labPage_==0 || labPage_==3) {
 #if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
 		drawSampleWaveform(instrument,10,36,220,52,true);
-		sprintf(line,"EDIT %-5s A+LR RBx8",getWaveMarkerName());
+		sprintf(line,"EDIT %-5s PREV:%s",getWaveMarkerName(),previewLoop_?"LOOP":"ONCE");
 		drawLabText((40-(int)strlen(line))/2,12,line,props);
 		sprintf(line,"S%05X L%05X E%05X",start,loopStart,loopEnd);
 		drawLabText((40-(int)strlen(line))/2,13,line,props);
@@ -957,6 +974,11 @@ void InstrumentView::ProcessButtonMask(unsigned short mask,bool pressed) {
 			isDirty_=true;
 			return;
 		}
+	}
+
+	if (getInstrumentType()==IT_SAMPLE && mask==(EPBM_R|EPBM_START)) {
+		toggleSamplePreviewLoop();
+		return;
 	}
 
 	if (getInstrumentType()==IT_SAMPLE && mask==EPBM_START) {
@@ -1233,8 +1255,8 @@ void InstrumentView::CustomizeContextOverlay(const char *&name, const char *&whe
 		cmd3="Sel on root: suggest/use";
 		cmd4="A+UD sample: Start/Loop/End";
 		cmd5="A+LR nudge, RB fast";
-		cmd6="Start trim preview";
-		cmd7="RB+A Down stop sound";
+		cmd6="Start preview";
+		cmd7="RB+Start once/loop";
 	} else if (labPage_==1) {
 		field="Shape: level/pan/grit";
 		edit="A+Dpad changes values";
@@ -1259,8 +1281,8 @@ void InstrumentView::CustomizeContextOverlay(const char *&name, const char *&whe
 		cmd3="Dpad to start/lstart/end";
 		cmd4="A+Dpad exact values";
 		cmd5="Sel root from trim";
-		cmd6="Start trim preview";
-		cmd7="RB+A Down stop sound";
+		cmd6="Start preview";
+		cmd7="RB+Start once/loop";
 	} else {
 		field="Motion: table/fb";
 		edit="Automation source";

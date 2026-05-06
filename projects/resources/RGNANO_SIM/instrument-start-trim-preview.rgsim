@@ -16,6 +16,7 @@ sim_import_sample_to_instrument 0 wuxia-guzheng.wav
 sim_set_sample_trim 0 1200 5200
 expect_instrument_sample 0 wuxia-guzheng.wav
 expect_screen_text SOURCE
+expect_screen_text PREV:ONCE
 
 # Source sample row quick-trim aliases must not change the assigned sample.
 down a
@@ -67,6 +68,20 @@ up n
 wait 120
 expect_sample_trim_order 0
 expect_instrument_sample 0 wuxia-guzheng.wav
+
+# RB+Start toggles loop-preview mode without starting playback.
+down n
+press s 80
+up n
+wait 120
+expect_screen_text PREV:LOOP
+expect_player_running no
+down n
+press s 80
+up n
+wait 120
+expect_screen_text PREV:ONCE
+expect_player_running no
 
 reset_audio_stats
 start_audio_capture instrument-start-trim-preview.wav

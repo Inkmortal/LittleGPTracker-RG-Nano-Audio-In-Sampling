@@ -48,6 +48,8 @@ Shows the loaded WAV as an actual waveform preview, plus start/loop/end markers 
 
 On Source and Loop, use `LB + Up/Down` to choose the marker shown as `START`, `LSTART`, or `END`, then use `LB + A + Left/Right` to nudge the selected marker on the waveform. On the Source `sample` row, `A + Up/Down` and `A + Left/Right` do the same thing with less finger travel; add `RB` to the left/right nudge for faster movement. `S` is sample start, `L` is loop start, and `E` is sample end.
 
+`Start` previews the trim once from `START` to `END`. `RB + Start` toggles loop audition mode. In `PREV:LOOP`, preview plays the attack from `START`, then repeats `LSTART` to `END` so sustained instruments can be checked without changing the saved instrument loop mode.
+
 ### Shape
 
 ![Instrument Lab Shape](assets/instrument-lab-shape.png)

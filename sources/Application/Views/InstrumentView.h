@@ -46,6 +46,7 @@ protected:
 	void cycleWaveMarker(int offset) ;
 	void nudgeWaveMarker(int offset, int multiplier=1) ;
 	void auditionSamplePitch(int offset) ;
+	void toggleSamplePreviewLoop() ;
 	const char *getWaveMarkerName() ;
 	const char *getWaveMarkerShortName() ;
 	bool isWaveMarkerPage() ;
@@ -58,5 +59,6 @@ private:
 	I_Instrument *current_ ;
 	int labPage_ ;
 	FourCC markerFocus_ ;
+	bool previewLoop_ ;
 } ;
 #endif

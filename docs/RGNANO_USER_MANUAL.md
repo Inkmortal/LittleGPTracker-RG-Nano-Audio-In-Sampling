@@ -204,7 +204,7 @@ On the Source and Loop pages, the waveform has three editable markers: `START`, 
 
 To check whether a sample still feels musical after pitch shifts, hold `RB + A` and tap `Left`, `Up`, or `Right` for low, root, or high audition notes. `RB + A + Down` stops that audition. On the Source `sample` row, `RB + A + Left/Right` is reserved for fast trim movement instead. This keeps sample design on the Instrument screen instead of forcing a trip back to Phrase every time you tweak root note, loop points, filter, or volume.
 
-Press `Start` on a sample Instrument page to preview the current sample at its root note. This preview uses the current trim window, so `START` and `END` decide what part you hear; if the instrument loop mode is set to a loop mode, playback loops through the configured loop region.
+Press `Start` on a sample Instrument page to preview the current sample at its root note. The default preview is `PREV:ONCE`: it plays from `START` to `END` and stops, regardless of the instrument's saved loop mode. Press `RB + Start` to toggle `PREV:LOOP`; in loop preview, the attack plays from `START`, then playback sustains by repeating `LSTART` to `END`. This preview toggle is for listening while trimming and does not rewrite the instrument's saved loop mode.
 
 This fork aims for M8-like pocket production, but native M8-style synth engines and deep offline sample editing are still future work.
 

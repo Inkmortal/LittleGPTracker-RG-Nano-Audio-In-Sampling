@@ -216,7 +216,8 @@ The sample workflow starts in `InstrumentView` with focus on the `sample:` field
 | `RB + A + Left/Right` on Source `sample` | Fast nudge the active waveform marker without changing sample assignment. |
 | `RB + A + Left/Up/Right` | Audition the current sample low/root/high without leaving the lab page when not focused on the Source `sample` row. |
 | `RB + A + Down` | Stop the current sample audition. |
-| Start | Preview/stop the current sample trim at root pitch. Loop mode loops the configured loop region. |
+| Start | Preview/stop the current sample trim at root pitch. Default preview is one-shot from `START` to `END`. |
+| `RB + Start` | Toggle sample preview between `PREV:ONCE` and `PREV:LOOP`. Loop preview plays the attack from `START`, then loops `LSTART` to `END` for audition only. |
 | `Select` on `sample` | Open sample import. |
 | `Select` on `root` | If `suggest root ###` is already shown, accept it. If no suggestion is shown, analyze the current `START` to `END` trim window and show a new suggestion. |
 | D-pad | Move field focus. |
