@@ -445,7 +445,7 @@ void InstrumentView::drawLabBar(int x, int y, int width, int value, int maxValue
 	SetColor(CD_NORMAL);
 }
 
-void InstrumentView::drawMarkerLine(int x, int y, int height, ColorDefinition color) {
+void InstrumentView::drawMarkerLine(int x, int y, int height, ColorDefinition color, FourCC markerType) {
 #if defined(PLATFORM_RGNANO) || defined(PLATFORM_RGNANO_SIM)
 	SDLGUIWindowImp *imp=(SDLGUIWindowImp *)w_.GetImpWindow();
 	GUIColor markerColor(0xF5,0xEB,0xFF);
@@ -455,14 +455,30 @@ void InstrumentView::drawMarkerLine(int x, int y, int height, ColorDefinition co
 	} else if (color==CD_HILITE2) {
 		markerColor=GUIColor(0x9B,0x2B,0xB8);
 	}
-	GUIRect marker(x,y,x+1,y+height);
+	int markerWidth=active?3:1;
+	GUIRect marker(x-(markerWidth/2),y,x-(markerWidth/2)+markerWidth,y+height);
 	imp->SetColor(markerColor);
 	imp->DrawRect(marker);
 	if (active) {
-		GUIRect top(x-2,y,x+3,y+2);
-		GUIRect bottom(x-2,y+height-2,x+3,y+height);
-		imp->DrawRect(top);
-		imp->DrawRect(bottom);
+		if (markerType==SIP_START) {
+			GUIRect top(x-4,y,x+5,y+3);
+			GUIRect stem(x-2,y+3,x+3,y+6);
+			imp->DrawRect(top);
+			imp->DrawRect(stem);
+		} else if (markerType==SIP_LOOPSTART) {
+			int mid=y+(height/2);
+			GUIRect left(x-5,mid-2,x-2,mid+3);
+			GUIRect centerBox(x-2,mid-4,x+3,mid+5);
+			GUIRect right(x+3,mid-2,x+6,mid+3);
+			imp->DrawRect(left);
+			imp->DrawRect(centerBox);
+			imp->DrawRect(right);
+		} else {
+			GUIRect stem(x-2,y+height-6,x+3,y+height-3);
+			GUIRect bottom(x-4,y+height-3,x+5,y+height);
+			imp->DrawRect(stem);
+			imp->DrawRect(bottom);
+		}
 	}
 	SetColor(CD_NORMAL);
 #endif
@@ -622,9 +638,9 @@ void InstrumentView::drawSampleWaveform(SampleInstrument *instrument, int x, int
 		int sx=x+2+((start*drawableWidth)/sampleSize);
 		int ls=x+2+((loopStart*drawableWidth)/sampleSize);
 		int le=x+2+((loopEnd*drawableWidth)/sampleSize);
-		drawMarkerLine(sx,y+1,height-2,markerFocus_==SIP_START?CD_HILITE1:CD_PLAY);
-		drawMarkerLine(ls,y+1,height-2,markerFocus_==SIP_LOOPSTART?CD_HILITE1:CD_HILITE2);
-		drawMarkerLine(le,y+1,height-2,markerFocus_==SIP_END?CD_HILITE1:CD_HILITE2);
+		drawMarkerLine(sx,y+1,height-2,markerFocus_==SIP_START?CD_HILITE1:CD_PLAY,SIP_START);
+		drawMarkerLine(ls,y+1,height-2,markerFocus_==SIP_LOOPSTART?CD_HILITE1:CD_HILITE2,SIP_LOOPSTART);
+		drawMarkerLine(le,y+1,height-2,markerFocus_==SIP_END?CD_HILITE1:CD_HILITE2,SIP_END);
 	}
 #endif
 }

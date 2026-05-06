@@ -41,7 +41,7 @@ protected:
 	                     bool bipolar=false) ;
 	void drawSampleWaveform(class SampleInstrument *instrument, int x, int y,
 	                        int width, int height, bool showMarkers) ;
-	void drawMarkerLine(int x, int y, int height, ColorDefinition color) ;
+	void drawMarkerLine(int x, int y, int height, ColorDefinition color, FourCC marker) ;
 	void normalizeWaveMarkers(class SampleInstrument *instrument, FourCC changedMarker) ;
 	void cycleWaveMarker(int offset) ;
 	void nudgeWaveMarker(int offset, int multiplier=1) ;
